@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Start_Point
+  - Deadly
+  - Checkpoint
+  - UI_TilePicker_Primary_Display
+  - UI_TilePicker_Secondary_Display
+  - Cursor
+  - Tile_Start
+  - Tile_Goal
+  - Coin
+  - Key
+  - Door
+  - Switch
+  - Teleporter
+  - UI_TilePicker_Pannel
+  - Booster
+  - Clipboard
+  - EditorCanvas
+  - GoalFX
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - Player
+  - Sensor
+  - Checkpoint
+  - Teleporter
+  - Switch
+  - Booster
+  - Collectable
+  - Particles
+  - Deadly
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Bounds
+    uniqueID: 3387684891
+    locked: 0
+  - name: SelectionHighlight
+    uniqueID: 491013293
+    locked: 0
+  - name: Hero
+    uniqueID: 3442733287
+    locked: 0
+  - name: UI
+    uniqueID: 3629116835
+    locked: 0
