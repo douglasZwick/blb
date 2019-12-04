@@ -76,7 +76,7 @@ public class PathMover : MonoBehaviour
 
     if (zerothNode == lastNode)
     {
-
+      // the loop is closed
     }
     else
     {
