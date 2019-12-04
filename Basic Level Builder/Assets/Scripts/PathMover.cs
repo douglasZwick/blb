@@ -80,7 +80,7 @@ public class PathMover : MonoBehaviour
     }
     else
     {
-
+      // the loop is open
     }
   }
 
