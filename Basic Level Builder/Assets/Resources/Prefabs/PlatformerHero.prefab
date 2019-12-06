@@ -937,6 +937,7 @@ GameObject:
   - component: {fileID: -5711930413250478224}
   - component: {fileID: -7393265525788358270}
   - component: {fileID: 6153850837278375075}
+  - component: {fileID: 4774470996534533186}
   m_Layer: 8
   m_Name: PlatformerHero
   m_TagString: Untagged
@@ -1225,6 +1226,7 @@ MonoBehaviour:
     m_Type: 0
     m_TileColor: 0
     m_Direction: 0
+    m_Path: []
 --- !u!114 &-8656358901731430110
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1539,6 +1541,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d634f2d170103c54aa132f11224f36c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Transform: {fileID: 0}
   m_Rigidbody2D: {fileID: 0}
 --- !u!114 &7509281486249841273
 MonoBehaviour:
@@ -1813,6 +1816,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 65aa329859d4efa4b8e87c8b46b00ab6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &4774470996534533186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6481017039112826972}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a9f160aa93756f4e917188853fe1a25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &6481017039477929740

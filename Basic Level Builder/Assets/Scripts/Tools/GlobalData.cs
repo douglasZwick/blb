@@ -36,6 +36,7 @@ public enum TileType
   BG_RIGHT,
   BG_LEFT_INV,
   BG_RIGHT_INV,
+  MOVESTER,
 }
 
 public enum TileColor

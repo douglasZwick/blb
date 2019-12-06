@@ -18,7 +18,7 @@ using UnityEngine.UI; //Image.
 using UnityEngine.EventSystems; //Access to Unity events for the mouse.
 
 [RequireComponent(typeof(Image))]
-public class TilePicker : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+public class TilePicker : MonoBehaviour, IPointerClickHandler
 {
   public static Dictionary<TileType, Image> s_Icons = new Dictionary<TileType, Image>();
 
@@ -65,31 +65,5 @@ public class TilePicker : MonoBehaviour, IPointerClickHandler, IPointerEnterHand
     //Right mouse input handling.
     else if(eventData.button == PointerEventData.InputButton.Right)
       GlobalData.SetSecondarySelectedTile(m_TileType);
-  }
-
-  /**
-  * FUNCTION NAME: OnPointerEnter
-  * DESCRIPTION  : Detects when the mouse starts hovering over a game object.
-  * INPUTS       : eventData - Information regarding the input.
-  * OUTPUTS      : None
-  **/
-  public void OnPointerEnter(PointerEventData eventData)
-  {
-    //Only respond if I was the game object selected.
-    if (eventData.pointerEnter != gameObject)
-      return;
-
-    //TODO: Code to make the tooltip appear.
-  }
-
-  /**
-  * FUNCTION NAME: OnPointerExit
-  * DESCRIPTION  : Detects when the mouse stops hovering over a game object.
-  * INPUTS       : eventData - Information regarding the input.
-  * OUTPUTS      : None
-  **/
-  public void OnPointerExit(PointerEventData eventData)
-  {
-    //TODO: Put code here to make tooltip disapear.
   }
 }

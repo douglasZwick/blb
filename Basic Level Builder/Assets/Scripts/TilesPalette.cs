@@ -43,6 +43,7 @@ public class TilesPalette : MonoBehaviour
       { TileType.BG_RIGHT,        "Prefabs/Tiles/Tile_BG_Right" },
       { TileType.BG_LEFT_INV,     "Prefabs/Tiles/Tile_BG_Left_Inv" },
       { TileType.BG_RIGHT_INV,    "Prefabs/Tiles/Tile_BG_Right_Inv" },
+      { TileType.MOVESTER,        "Prefabs/Tiles/Tile_Movester" },
     };
 
     // loop through the above dictionary
@@ -70,8 +71,7 @@ public class TilesPalette : MonoBehaviour
 
   public GameObject GetPrefabFromType(TileType type)
   {
-    GameObject prefab = null;
-    m_TilePrefabs.TryGetValue(type, out prefab);
+    m_TilePrefabs.TryGetValue(type, out var prefab);
     return prefab;
   }
 }
