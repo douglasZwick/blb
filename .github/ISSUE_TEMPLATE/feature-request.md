@@ -1,7 +1,7 @@
 ---
 name: Feature Request
 about: A feature is missing or could be even cooler
-title: "[fr]"
+title: " [fr]"
 labels: enhancement
 assignees: douglasZwick
 
