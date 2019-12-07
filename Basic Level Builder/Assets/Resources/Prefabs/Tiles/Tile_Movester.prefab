@@ -129,6 +129,7 @@ MonoBehaviour:
   m_SolidUp: 1
   m_SolidLeft: 1
   m_SolidDown: 1
+  m_OutlineIndex: 2
 --- !u!114 &-7507615410615515150
 MonoBehaviour:
   m_ObjectHideFlags: 0
