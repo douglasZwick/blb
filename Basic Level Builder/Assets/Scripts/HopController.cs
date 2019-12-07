@@ -12,10 +12,13 @@ public class HopController : MonoBehaviour
   ActionSequence m_HopSequence;
   float m_PreviousX;
   float m_HopDefaultY;
+  bool m_EnabledInEditor;
 
 
   private void Awake()
   {
+    m_EnabledInEditor = enabled;
+
     m_PreviousX = m_HopNode.position.x;
     m_HopDefaultY = m_HopNode.localPosition.y;
 
@@ -23,9 +26,13 @@ public class HopController : MonoBehaviour
   }
 
 
+  // just to appease the editor
+  private void Start() { }
+
+
   public void OnMovedOnGround(MovementEventData eventData)
   {
-    if (!enabled || m_HopSequence.Active)
+    if (!m_EnabledInEditor || !enabled || m_HopSequence.Active)
       return;
 
     Hop(eventData.m_NormalizedDelta);

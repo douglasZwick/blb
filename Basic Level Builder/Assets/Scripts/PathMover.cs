@@ -5,6 +5,11 @@ using UnityEngine;
 public class PathMover : MonoBehaviour
 {
   public float m_Speed = 1;
+  // Debugging feature
+  // ***
+  public List<Vector2Int> m_TestPath;
+  // ***
+  // Remove when you're done
 
   Transform m_Transform;
   List<Vector3> m_Path;
@@ -21,15 +26,7 @@ public class PathMover : MonoBehaviour
     // For now, for debugging purposes, we will test with
     // this canned, hard-coded path that all movers will use
     // ***
-    var testPath = new List<Vector2Int>()
-    {
-      new Vector2Int(0, 0),
-      new Vector2Int(3, 4),
-      new Vector2Int(-1, 4),
-      new Vector2Int(0, 0),
-    };
-
-    Setup(testPath);
+    Setup(m_TestPath);
     // ***
     // Remove this code when you're done testing!
 

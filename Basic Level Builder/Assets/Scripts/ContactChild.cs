@@ -16,19 +16,18 @@ public class ContactChild : MonoBehaviour
   }
 
 
-  private void OnCollisionEnter2D(Collision2D collision)
+  public void HandleEnter(ContactParent contactParent)
   {
-    var contactParent = collision.gameObject.GetComponent<ContactParent>();
-
-    if (contactParent == null)
-      return;
-
     AttachTo(contactParent);
     contactParent.Add(this);
   }
 
 
-  // put exit here
+  public void HandleExit(ContactParent contactParent)
+  {
+    DetachFrom(contactParent);
+    contactParent.Remove(this);
+  }
 
 
   public void AttachTo(ContactParent contact)

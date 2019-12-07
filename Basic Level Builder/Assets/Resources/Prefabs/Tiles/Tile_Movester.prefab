@@ -142,6 +142,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Speed: 4
+  m_TestPath:
+  - {x: 0, y: 0}
+  - {x: 5, y: 0}
+  - {x: 5, y: 5}
+  - {x: 0, y: 5}
+  - {x: 0, y: 0}
 --- !u!50 &-5810978813776534727
 Rigidbody2D:
   serializedVersion: 4

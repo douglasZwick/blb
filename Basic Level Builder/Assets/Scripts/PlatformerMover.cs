@@ -139,10 +139,9 @@ public class PlatformerMover : MonoBehaviour
       velocity.x = input * m_MovementSpeed;
       m_Rigidbody.velocity = velocity;
 
-      var deltaX = m_Transform.position.x - m_PreviousX;
-
-      if (Mathf.Abs(deltaX) > 0)
+      if (Mathf.Abs(input) > 0)
       {
+        var deltaX = m_Transform.position.x - m_PreviousX;
         var currentSpeed = deltaX / Time.deltaTime;
         var normalizedDelta = currentSpeed / m_MovementSpeed;
 
