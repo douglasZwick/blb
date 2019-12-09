@@ -17,7 +17,6 @@ public class CoinCounter : MonoBehaviour
   {
     GlobalData.PlayModeToggled += OnPlayModeToggled;
     GlobalData.CoinCollected += OnCoinCollected;
-    GlobalData.HeroReturned += OnHeroReturned;
   }
 
 
@@ -38,13 +37,6 @@ public class CoinCounter : MonoBehaviour
   void OnCoinCollected(int value)
   {
     m_CurrentCount += value;
-    SetText();
-  }
-
-
-  void OnHeroReturned()
-  {
-    m_CurrentCount = 0;
     SetText();
   }
 
@@ -70,6 +62,5 @@ public class CoinCounter : MonoBehaviour
   {
     GlobalData.PlayModeToggled -= OnPlayModeToggled;
     GlobalData.CoinCollected -= OnCoinCollected;
-    GlobalData.HeroReturned -= OnHeroReturned;
   }
 }

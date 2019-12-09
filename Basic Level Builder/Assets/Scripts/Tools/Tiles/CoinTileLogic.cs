@@ -12,22 +12,25 @@ Copyright 2018-2019, DigiPen Institute of Technology
 
 using UnityEngine;
 
-[RequireComponent(typeof(SpriteRenderer))]
 public class CoinTileLogic : MonoBehaviour
 {
   /************************************************************************************/
 
-  GameObject m_pCreatedCoin;
+  GameObject m_CreatedCoin;
 
   /************************************************************************************/
 
   //Game object's transform.
-  Transform m_cTransform;
+  Transform m_Transform;
 
   //Game object's sprite renderer.
-  SpriteRenderer m_cSpriteRenderer;
-
+  public SpriteRenderer m_SpriteRenderer;
   public GameObject m_CoinPrefab;
+  public float m_PlayModeAlpha = 0.25f;
+  public float m_PlayModeSize = 0.25f;
+
+  float m_EditModeAlpha;
+  Vector3 m_EditModeScale;
 
   /**
   * FUNCTION NAME: Start
@@ -37,11 +40,12 @@ public class CoinTileLogic : MonoBehaviour
   **/
   void Start()
   {
-    m_cTransform = GetComponent<Transform>();
-    m_cSpriteRenderer = GetComponent<SpriteRenderer>();
+    m_Transform = GetComponent<Transform>();
+
+    m_EditModeAlpha = m_SpriteRenderer.color.a;
+    m_EditModeScale = m_Transform.localScale;
 
     GlobalData.PlayModePreToggle += OnPlayModePreToggle;
-    GlobalData.HeroReturned += OnHeroReturned;
   }
 
 
@@ -55,37 +59,38 @@ public class CoinTileLogic : MonoBehaviour
   {
     if (isInPlayMode)
     {
-      m_cSpriteRenderer.enabled = false;
+      var color = m_SpriteRenderer.color;
+      color.a = m_PlayModeAlpha;
+      m_SpriteRenderer.color = color;
+
+      m_Transform.localScale = Vector3.one * m_PlayModeSize;
 
       CreateCoin();
     }
     else
     {
-      m_cSpriteRenderer.enabled = true;
+      var color = m_SpriteRenderer.color;
+      color.a = m_EditModeAlpha;
+      m_SpriteRenderer.color = color;
+
+      m_Transform.localScale = m_EditModeScale;
 
       CleanUpCoin();
     }
   }
 
 
-  void OnHeroReturned()
-  {
-    if (m_pCreatedCoin == null)
-      CreateCoin();
-  }
-
-
   void CreateCoin()
   {
-    var parent = m_cTransform.parent;
-    m_pCreatedCoin = Instantiate(m_CoinPrefab, m_cTransform.position, Quaternion.identity, parent);
+    var parent = m_Transform.parent;
+    m_CreatedCoin = Instantiate(m_CoinPrefab, m_Transform.position, Quaternion.identity, parent);
   }
 
 
   void CleanUpCoin()
   {
-    if (m_pCreatedCoin)
-      Destroy(m_pCreatedCoin);
+    if (m_CreatedCoin)
+      Destroy(m_CreatedCoin);
   }
 
 
@@ -98,6 +103,5 @@ public class CoinTileLogic : MonoBehaviour
   private void OnDestroy()
   {
     GlobalData.PlayModePreToggle -= OnPlayModePreToggle;
-    GlobalData.HeroReturned -= OnHeroReturned;
   }
 }

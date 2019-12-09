@@ -7249,7 +7249,7 @@ MonoBehaviour:
   m_TileButtonsRoot: {fileID: 1284232164}
   m_FileSystem: {fileID: 128438541}
   m_ParseDebugWebData: 0
-  m_DebugWebData: '{level:monotonous}'
+  m_DebugWebData: '{level:Cave}'
 --- !u!4 &219055777
 Transform:
   m_ObjectHideFlags: 0
