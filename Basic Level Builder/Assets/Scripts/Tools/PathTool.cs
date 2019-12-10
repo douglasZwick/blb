@@ -16,9 +16,9 @@ public class PathTool : BlbTool
 
   Vector2Int m_PointerDownPosition;
   Vector2Int m_PointerDragEndPosition;
-  List<TileGrid.Element> m_SelectedElements = new List<TileGrid.Element>();
+  List<TileGrid.Element> m_SelectedElements;
   Vector2Int m_AnchorPoint;
-  List<Vector2Int> m_PathPoints = new List<Vector2Int>();
+  List<Vector2Int> m_PathPoints;
   State m_State = State.Idle;
 
 
@@ -36,22 +36,35 @@ public class PathTool : BlbTool
   {
     if (Input.GetButtonDown("Cancel") && m_State != State.Idle)
       EnterIdle();
+    if (Input.GetButtonDown("Submit") && m_State == State.PlacingPathPoints)
+    {
+      AssignPathPoints();
+      EnterIdle();
+    }
   }
 
 
   public override void LeftPointerDown(ToolEvent te)
   {
-    if (m_State == State.Idle || m_State == State.Selecting)
+    var gridIndex = te.GridIndex;
+
+    if (m_State == State.Idle)
     {
-      m_PointerDownPosition = te.GridIndex;
-      m_PointerDragEndPosition = te.GridIndex;
+      m_PointerDownPosition = gridIndex;
+      m_PointerDragEndPosition = gridIndex;
 
       Outline();
+      EnterSelecting();
       PrintBoxDimensionsMessage();
+    }
+    else if (m_State == State.Selecting)
+    {
+
     }
     else if (m_State == State.PlacingAnchorPoint)
     {
-
+      m_AnchorPoint = gridIndex;
+      PrintAnchorPointPositionMessage();
     }
     else // m_State == State.PlacingPathPoints
     {
@@ -62,13 +75,28 @@ public class PathTool : BlbTool
 
   public override void LeftDrag(ToolEvent te)
   {
-    if (m_State == State.Idle || m_State == State.Selecting)
+    var gridIndex = te.GridIndex;
+
+    if (m_State == State.Idle)
     {
 
     }
+    else if (m_State == State.Selecting)
+    {
+      var shouldPrint = m_PointerDragEndPosition != gridIndex;
+      m_PointerDragEndPosition = gridIndex;
+
+      Outline();
+
+      if (shouldPrint)
+        PrintBoxDimensionsMessage();
+    }
     else if (m_State == State.PlacingAnchorPoint)
     {
+      if (m_AnchorPoint != gridIndex)
+        PrintAnchorPointPositionMessage();
 
+      m_AnchorPoint = gridIndex;
     }
     else // m_State == State.PlacingPathPoints
     {
@@ -79,16 +107,25 @@ public class PathTool : BlbTool
 
   public override void LeftPointerUp(ToolEvent te)
   {
-    if (m_State == State.Idle || m_State == State.Selecting)
+    var gridIndex = te.GridIndex;
+
+    if (m_State == State.Idle)
     {
-      m_PointerDragEndPosition = te.GridIndex;
+
+    }
+    else if (m_State == State.Selecting)
+    {
+      m_PointerDragEndPosition = gridIndex;
 
       Outline();
-      PrintAnchorPointMessage();
+      GatherSelectedElements();
+      EnterPlacingAnchorPoint();
     }
     else if (m_State == State.PlacingAnchorPoint)
     {
+      m_AnchorPoint = gridIndex;
 
+      EnterPlacingPathPoints();
     }
     else // m_State == State.PlacingPathPoints
     {
@@ -117,12 +154,72 @@ public class PathTool : BlbTool
   void EnterPlacingAnchorPoint()
   {
     m_State = State.PlacingAnchorPoint;
+
+    PrintAnchorPointMessage();
   }
 
 
   void EnterPlacingPathPoints()
   {
     m_State = State.PlacingPathPoints;
+
+    m_PathPoints = new List<Vector2Int>() { Vector2Int.zero };
+    PrintPathPointMessage();
+  }
+
+
+  void GatherSelectedElements()
+  {
+    var min = m_PointerDownPosition;
+    var max = m_PointerDragEndPosition;
+    var delta = max - min;
+
+    if (delta.x < 0)
+    {
+      var temp = min.x;
+      min.x = max.x;
+      max.x = temp;
+    }
+
+    if (delta.y < 0)
+    {
+      var temp = min.y;
+      min.y = max.y;
+      max.y = temp;
+    }
+
+    m_SelectedElements = new List<TileGrid.Element>();
+
+    for (var y = min.y; y <= max.y; ++y)
+    {
+      for (var x = min.x; x <= max.x; ++x)
+      {
+        var index = new Vector2Int(x, y);
+
+        if (!m_TileGrid.Check(index))
+          continue;
+
+        m_SelectedElements.Add(m_TileGrid.Get(index));
+      }
+    }
+  }
+
+
+  void AssignPathPoints()
+  {
+    if (m_PathPoints.Count <= 1)
+      return;
+
+    m_TileGrid.BeginBatch("Assign Path");
+
+    foreach (var element in m_SelectedElements)
+    {
+      var newState = element.ToState();
+      newState.Path = m_PathPoints;
+      m_TileGrid.AddRequest(element.m_GridIndex, newState, recomputeBounds: false);
+    }
+
+    m_TileGrid.EndBatch(createDialogs: false);
   }
 
 
@@ -158,6 +255,9 @@ public class PathTool : BlbTool
 
   public override void Deactivate()
   {
+    if (m_State != State.Idle)
+      EnterIdle();
+
     m_Outliner.Disable();
 
     base.Deactivate();
@@ -180,6 +280,15 @@ public class PathTool : BlbTool
   void PrintAnchorPointMessage()
   {
     StatusBar.Print("Next, <b>left-click</b> to place the path's <b>anchor point</b>.");
+  }
+
+
+  void PrintAnchorPointPositionMessage()
+  {
+    var x = m_AnchorPoint.x;
+    var y = m_AnchorPoint.y;
+    var message = $"Placing anchor point at <color=#FFFF00><b>({x}, {y})</b></color>";
+    StatusBar.Print(message);
   }
 
 

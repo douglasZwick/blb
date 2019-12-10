@@ -5,16 +5,13 @@ using UnityEngine;
 public class PathMover : MonoBehaviour
 {
   public float m_Speed = 1;
-  // Debugging feature
-  // ***
-  //public List<Vector2Int> m_TestPath;
-  // ***
-  // Remove when you're done
 
   Transform m_Transform;
   List<Vector3> m_Path;
-  int m_PathIndex = 1;  // the index starts at 1 because the zeroth node is always the starting point
+  int m_PathIndex = 0;
+  Vector3 m_InitialPosition;
   Vector3 m_CurrentDestination;
+  bool m_Loop = false;
 
 
   private void Awake()
@@ -22,13 +19,6 @@ public class PathMover : MonoBehaviour
     m_Transform = transform;
 
     enabled = false;
-
-    // For now, for debugging purposes, we will test with
-    // this canned, hard-coded path that all movers will use
-    // ***
-    //Setup(m_TestPath);
-    // ***
-    // Remove this code when you're done testing!
 
     GlobalData.PlayModeToggled += OnPlayModeToggled;
     GlobalData.HeroReturned += OnHeroReturned;
@@ -58,22 +48,34 @@ public class PathMover : MonoBehaviour
 
   public void Setup(List<Vector2Int> indexPath)
   {
+    m_Path = null;
+
     if (indexPath == null)
       return;
 
     var count = indexPath.Count;
 
-    if (count <= 1)
+    if (count <= 0)
+      return;
+
+    var allZero = true;
+    foreach (var index in indexPath)
+      if (index != Vector2Int.zero)
+        allZero = false;
+
+    if (allZero)
       return;
 
     m_Path = new List<Vector3>(count);
-    var initialPosition = m_Transform.position;
+    m_InitialPosition = m_Transform.position;
 
     foreach (var index in indexPath)
     {
-      var position = new Vector3(index.x, index.y, 0) + initialPosition;
+      var position = new Vector3(index.x, index.y, 0) + m_InitialPosition;
       m_Path.Add(position);
     }
+
+    m_Loop = indexPath[count - 1] == Vector2Int.zero;
 
     SetDestination();
   }
@@ -81,8 +83,8 @@ public class PathMover : MonoBehaviour
 
   void ResetPath()
   {
-    MoveTo(m_Path[0]);
-    m_PathIndex = 1;
+    MoveTo(m_InitialPosition);
+    m_PathIndex = 0;
     SetDestination();
   }
 
@@ -93,7 +95,7 @@ public class PathMover : MonoBehaviour
 
     if (isInPlayMode)
     {
-      enabled = m_Path != null && m_Path.Count > 1;
+      enabled = m_Path != null;
     }
     else
     {
@@ -115,24 +117,10 @@ public class PathMover : MonoBehaviour
 
     if (m_PathIndex >= m_Path.Count)
     {
-      // The index is reset to 1 instead of 0 because a closed
-      // loop is defined by having identical start and end points,
-      // so it is pointless (PUN VERY MUCH INTENDED) to go to the
-      // start point after reaching the end point, because in a
-      // closed loop, you're already there, and in an open path,
-      // you're done moving anyway
+      m_PathIndex = 0;
 
-      m_PathIndex = 1;
-
-      var zerothNode = m_Path[0];
-      var lastNode = m_Path[m_Path.Count - 1];
-
-      if (zerothNode != lastNode)
+      if (!m_Loop)
       {
-        // If the zeroth and last node are in different places,
-        // then the path is open, and the mover should stop
-        // when it gets to the end
-
         enabled = false;
       }
 

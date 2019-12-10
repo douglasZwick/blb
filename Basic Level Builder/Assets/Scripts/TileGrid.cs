@@ -12,14 +12,7 @@ public class TileGrid : MonoBehaviour
     public Direction m_Direction;
     [System.NonSerialized]
     public GameObject m_GameObject;
-    public List<Vector2Int> m_Path = new List<Vector2Int>()
-    {
-      new Vector2Int(0, 0),
-      new Vector2Int(4, 0),
-      new Vector2Int(4, 4),
-      new Vector2Int(0, 4),
-      new Vector2Int(0, 0),
-    };
+    public List<Vector2Int> m_Path;
 
 
     public Element() { }
@@ -125,6 +118,12 @@ public class TileGrid : MonoBehaviour
     }
 
     return output;
+  }
+
+
+  public bool Check(Vector2Int index)
+  {
+    return m_Grid.ContainsKey(index);
   }
 
 
@@ -480,7 +479,13 @@ public class TileGrid : MonoBehaviour
 
     var pathMover = newTile.GetComponent<PathMover>();
     if (pathMover != null)
-      pathMover.Setup(newGridElement.m_Path);
+      pathMover.Setup(new List<Vector2Int>()
+      {
+        new Vector2Int(4, 0),
+        new Vector2Int(4, 4),
+        new Vector2Int(0, 4),
+        new Vector2Int(0, 0),
+      });
 
     if (!cloning)
       m_MostRecentlyCreatedTile = newTile;
