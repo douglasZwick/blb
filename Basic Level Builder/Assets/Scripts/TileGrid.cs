@@ -12,7 +12,14 @@ public class TileGrid : MonoBehaviour
     public Direction m_Direction;
     [System.NonSerialized]
     public GameObject m_GameObject;
-    public List<Vector2Int> m_Path;
+    public List<Vector2Int> m_Path = new List<Vector2Int>()
+    {
+      new Vector2Int(0, 0),
+      new Vector2Int(4, 0),
+      new Vector2Int(4, 4),
+      new Vector2Int(0, 4),
+      new Vector2Int(0, 0),
+    };
 
 
     public Element() { }
@@ -23,6 +30,7 @@ public class TileGrid : MonoBehaviour
       m_Type = state.Type;
       m_TileColor = state.Color;
       m_Direction = state.Direction;
+      m_Path = state.Path;
       m_GameObject = gameObject;
 
       var colorCode = gameObject.GetComponent<ColorCode>();
@@ -42,6 +50,7 @@ public class TileGrid : MonoBehaviour
         Type = m_Type,
         Color = m_TileColor,
         Direction = m_Direction,
+        Path = m_Path,
       };
     }
   }
@@ -469,6 +478,10 @@ public class TileGrid : MonoBehaviour
     if (solidEdgeOutliner != null)
       solidEdgeOutliner.Setup(gridIndex);
 
+    var pathMover = newTile.GetComponent<PathMover>();
+    if (pathMover != null)
+      pathMover.Setup(newGridElement.m_Path);
+
     if (!cloning)
       m_MostRecentlyCreatedTile = newTile;
 
@@ -553,6 +566,7 @@ public struct TileState
   public TileType Type;
   public TileColor Color;
   public Direction Direction;
+  public List<Vector2Int> Path;
 
   public override bool Equals(object rhsObj)
   {
@@ -560,7 +574,23 @@ public struct TileState
       return false;
 
     var rhs = (TileState)rhsObj;
-    return Type == rhs.Type && Color == rhs.Color && Direction == rhs.Direction;
+
+    if (rhs.Path == null && Path != null || rhs.Path != null && Path == null)
+      return false;
+
+    var matchingData = Type == rhs.Type && Color == rhs.Color && Direction == rhs.Direction;
+
+    if (rhs.Path == null && Path == null)
+      return matchingData;
+
+    if (rhs.Path.Count != Path.Count)
+      return false;
+
+    for (var i = 0; i < Path.Count; ++i)
+      if (rhs.Path[i] != Path[i])
+        return false;
+
+    return matchingData;
   }
 
   public static bool operator ==(TileState lhs, TileState rhs)

@@ -7,6 +7,7 @@ public enum Tools
   EYE_DROPPER,
   BOX,
   HAND,
+  PATH,
 }
 
 public class ToolsPalette : MonoBehaviour

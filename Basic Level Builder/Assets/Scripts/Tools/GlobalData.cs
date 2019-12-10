@@ -65,7 +65,7 @@ public enum Direction
 **/
 public static class GlobalData
 {
-  public static string s_Version = "0.9.25";
+  public static string s_Version = "0.9.30";
 
   /************************************************************************************/
   /************************************************************************************/

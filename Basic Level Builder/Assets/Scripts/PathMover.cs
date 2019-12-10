@@ -7,7 +7,7 @@ public class PathMover : MonoBehaviour
   public float m_Speed = 1;
   // Debugging feature
   // ***
-  public List<Vector2Int> m_TestPath;
+  //public List<Vector2Int> m_TestPath;
   // ***
   // Remove when you're done
 
@@ -26,7 +26,7 @@ public class PathMover : MonoBehaviour
     // For now, for debugging purposes, we will test with
     // this canned, hard-coded path that all movers will use
     // ***
-    Setup(m_TestPath);
+    //Setup(m_TestPath);
     // ***
     // Remove this code when you're done testing!
 

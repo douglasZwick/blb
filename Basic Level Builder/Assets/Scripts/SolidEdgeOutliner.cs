@@ -193,77 +193,105 @@ public class SolidEdgeOutliner : MonoBehaviour
     // Finally, the newest addition to this system adds the m_OutlineIndex
     // property. If a neighboring tile's outliner has a different outline index
     // from this one's, then it is not considered solid toward this tile.
-                                                                                        
-    if (rdO == null || rdO.m_OutlineIndex != m_OutlineIndex ||                          // +----+.....
-      rdO.m_BeingErased || (!rdO.m_SolidLeft || !rdO.m_SolidUp) ||                      // |this| rO .
-      (rO != null &&                                                                    // +----+.....
-        rO.m_OutlineIndex == m_OutlineIndex && rO.m_SolidLeft && !rO.m_SolidDown) ||    // . dO .rdO .
-      (dO != null &&                                                                    // ...........
-        dO.m_OutlineIndex == m_OutlineIndex && dO.m_SolidUp && !dO.m_SolidRight))
+
+    // +----+.....
+    // |this| rO .
+    // +----+.....
+    // . dO .rdO .
+    // ...........
+    if (rdO == null || rdO.m_OutlineIndex != m_OutlineIndex ||
+      rdO.m_BeingErased || (!rdO.m_SolidLeft || !rdO.m_SolidUp) ||
+      (rO != null && rO.m_OutlineIndex == m_OutlineIndex && rO.m_SolidLeft && !rO.m_SolidDown) ||
+      (dO != null && dO.m_OutlineIndex == m_OutlineIndex && dO.m_SolidUp && !dO.m_SolidRight))
       code |= 0b00000001;
     // Set up rdO if appropriate
     else if (rdO != null && setUpNeighbors)
       rdO.SetupHelper(rdI, false);
-    
-    if (ruO == null || ruO.m_OutlineIndex != m_OutlineIndex ||                          // ...........
-      ruO.m_BeingErased || (!ruO.m_SolidLeft || !ruO.m_SolidDown) ||                    // . uO .ruO .
-      (rO != null &&                                                                    // +----+.....
-        rO.m_OutlineIndex == m_OutlineIndex && rO.m_SolidLeft && !rO.m_SolidUp) ||      // |this| rO .
-      (uO != null &&                                                                    // +----+.....
-        uO.m_OutlineIndex == m_OutlineIndex && uO.m_SolidDown && !uO.m_SolidRight))
+
+    // ...........
+    // . uO .ruO .
+    // +----+.....
+    // |this| rO .
+    // +----+.....
+    if (ruO == null || ruO.m_OutlineIndex != m_OutlineIndex ||
+      ruO.m_BeingErased || (!ruO.m_SolidLeft || !ruO.m_SolidDown) ||
+      (rO != null && rO.m_OutlineIndex == m_OutlineIndex && rO.m_SolidLeft && !rO.m_SolidUp) ||
+      (uO != null && uO.m_OutlineIndex == m_OutlineIndex && uO.m_SolidDown && !uO.m_SolidRight))
       code |= 0b00000010;
     // Set up ruO if appropriate
     else if (ruO != null && setUpNeighbors)
       ruO.SetupHelper(ruI, false);
-    
-    if (luO == null || luO.m_OutlineIndex != m_OutlineIndex ||                          // ...........
-      luO.m_BeingErased || (!luO.m_SolidRight || !luO.m_SolidDown) ||                   // .luO . uO .
-      (lO != null &&                                                                    // .....+----+
-        lO.m_OutlineIndex == m_OutlineIndex && lO.m_SolidRight && !lO.m_SolidUp) ||     // . lO |this|
-      (uO != null &&                                                                    // .....+----+
-        uO.m_OutlineIndex == m_OutlineIndex && uO.m_SolidDown && !uO.m_SolidLeft))
+
+    // ...........
+    // .luO . uO .
+    // .....+----+
+    // . lO |this|
+    // .....+----+
+    if (luO == null || luO.m_OutlineIndex != m_OutlineIndex ||
+      luO.m_BeingErased || (!luO.m_SolidRight || !luO.m_SolidDown) ||
+      (lO != null && lO.m_OutlineIndex == m_OutlineIndex && lO.m_SolidRight && !lO.m_SolidUp) ||
+      (uO != null && uO.m_OutlineIndex == m_OutlineIndex && uO.m_SolidDown && !uO.m_SolidLeft))
       code |= 0b00000100;
     // Set up luO if appropriate
     else if (luO != null && setUpNeighbors)
       luO.SetupHelper(luI, false);
-    
-    if (ldO == null || ldO.m_OutlineIndex != m_OutlineIndex ||                          // .....+----+
-      ldO.m_BeingErased || (!ldO.m_SolidRight || !ldO.m_SolidUp) ||                     // . lO |this|
-      (lO != null &&                                                                    // .....+----+
-        lO.m_OutlineIndex == m_OutlineIndex && lO.m_SolidRight && !lO.m_SolidDown) ||   // .ldO . dO .
-      (dO != null &&                                                                    // ...........
-        dO.m_OutlineIndex == m_OutlineIndex && dO.m_SolidUp && !dO.m_SolidLeft))
+
+    // .....+----+
+    // . lO |this|
+    // .....+----+
+    // .ldO . dO .
+    // ...........
+    if (ldO == null || ldO.m_OutlineIndex != m_OutlineIndex ||
+      ldO.m_BeingErased || (!ldO.m_SolidRight || !ldO.m_SolidUp) ||
+      (lO != null && lO.m_OutlineIndex == m_OutlineIndex && lO.m_SolidRight && !lO.m_SolidDown) ||
+      (dO != null && dO.m_OutlineIndex == m_OutlineIndex && dO.m_SolidUp && !dO.m_SolidLeft))
       code |= 0b00001000;
     // Set up ldO if appropriate
     else if (ldO != null && setUpNeighbors)
       ldO.SetupHelper(ldI, false);
-    
-    if (rO == null || rO.m_OutlineIndex != m_OutlineIndex ||                            // 
-      rO.m_BeingErased || !rO.m_SolidLeft)                                              // +----+.....
-      code |= 0b00010011;                                                               // |this| rO .
-    // Set up rO if appropriate                                                         // +----+.....
-    else if (rO != null && setUpNeighbors)                                              // 
+
+    // +----+.....
+    // |this| rO .
+    // +----+.....
+    if (rO == null || rO.m_OutlineIndex != m_OutlineIndex ||
+      rO.m_BeingErased || !rO.m_SolidLeft)
+      code |= 0b00010011;
+    // Set up rO if appropriate
+    else if (rO != null && setUpNeighbors)
       rO.SetupHelper(rI, false);
-    
-    if (uO == null || uO.m_OutlineIndex != m_OutlineIndex ||                            //   ......
-      uO.m_BeingErased || !uO.m_SolidDown)                                              //   . uO .
-      code |= 0b00100110;                                                               //   +----+
-    // Set up uO if appropriate                                                         //   |this|
-    else if (uO != null && setUpNeighbors)                                              //   +----+
+
+    //   ......
+    //   . uO .
+    //   +----+
+    //   |this|
+    //   +----+
+    if (uO == null || uO.m_OutlineIndex != m_OutlineIndex ||
+      uO.m_BeingErased || !uO.m_SolidDown)
+      code |= 0b00100110;
+    // Set up uO if appropriate
+    else if (uO != null && setUpNeighbors)
       uO.SetupHelper(uI, false);
-    
-    if (lO == null || lO.m_OutlineIndex != m_OutlineIndex ||                            // 
-      lO.m_BeingErased || !lO.m_SolidRight)                                             // .....+----+
-      code |= 0b01001100;                                                               // . lO |this|
-    // Set up lO if appropriate                                                         // .....+----+
-    else if (lO != null && setUpNeighbors)                                              // 
+
+    // .....+----+
+    // . lO |this|
+    // .....+----+
+    if (lO == null || lO.m_OutlineIndex != m_OutlineIndex ||
+      lO.m_BeingErased || !lO.m_SolidRight)
+      code |= 0b01001100;
+    // Set up lO if appropriate
+    else if (lO != null && setUpNeighbors)
       lO.SetupHelper(lI, false);
-    
-    if (dO == null || dO.m_OutlineIndex != m_OutlineIndex ||                            //   +----+
-      dO.m_BeingErased || !dO.m_SolidUp)                                                //   |this|
-      code |= 0b10001001;                                                               //   +----+
-    // Set up dO if appropriate                                                         //   . dO .
-    else if (dO != null && setUpNeighbors)                                              //   ......
+
+    //   +----+
+    //   |this|
+    //   +----+
+    //   . dO .
+    //   ......
+    if (dO == null || dO.m_OutlineIndex != m_OutlineIndex ||
+      dO.m_BeingErased || !dO.m_SolidUp)
+      code |= 0b10001001;
+    // Set up dO if appropriate
+    else if (dO != null && setUpNeighbors)
       dO.SetupHelper(dI, false);
 
     // Now we're done with our neighbors, and it's time for more

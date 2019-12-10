@@ -28,7 +28,7 @@ public class CoinCounter : MonoBehaviour
 
       CountCoins();
       SetText();
-      //m_Text.enabled = m_CoinIcon.enabled = m_Total > 0;
+
       gameObject.SetActive(m_Total > 0);
     }
   }

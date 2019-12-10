@@ -12,7 +12,6 @@ Copyright 2018-2019, DigiPen Institute of Technology
 
 using System.Collections.Generic; //Lists.
 using UnityEngine;
-using UnityEngine.UI;
 
 public class SelectorTool : BlbTool
 {
