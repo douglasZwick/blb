@@ -66,6 +66,14 @@ public class SelectorTool : BlbTool
     m_DefaultOutlineColor = m_Outliner.m_InnerOutlineRenderer.color;
     m_BackgroundOpacity = m_Outliner.m_BackgroundRenderer.color.a;
     m_InnerOutlineOpacity = m_Outliner.m_InnerOutlineRenderer.color.a;
+
+    GlobalData.PlayModePreToggle += OnPlayModePreToggle;
+  }
+
+
+  void OnPlayModePreToggle(bool isInPlayMode)
+  {
+    m_Outliner.Disable();
   }
 
 
@@ -298,5 +306,11 @@ public class SelectorTool : BlbTool
     var message = $"Selection size: <b>{width}</b> wide x <b>{height}</b> high, " +
       $"<b>{diagonalString}</b> diagonal";
     StatusBar.Print(message);
+  }
+
+
+  private void OnDestroy()
+  {
+    GlobalData.PlayModePreToggle -= OnPlayModePreToggle;
   }
 }

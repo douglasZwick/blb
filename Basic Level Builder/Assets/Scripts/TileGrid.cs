@@ -477,15 +477,20 @@ public class TileGrid : MonoBehaviour
     if (solidEdgeOutliner != null)
       solidEdgeOutliner.Setup(gridIndex);
 
-    var pathMover = newTile.GetComponent<PathMover>();
-    if (pathMover != null)
-      pathMover.Setup(new List<Vector2Int>()
+    if (state.Path != null)
+    {
+      var pathMover = newTile.AddComponent<PathMover>();
+      pathMover.Setup(state.Path);
+      var rigidbody = newTile.GetComponent<Rigidbody2D>();
+      if (rigidbody == null)
+        rigidbody = newTile.AddComponent<Rigidbody2D>();
+      rigidbody.isKinematic = true;
+      var collider = newTile.GetComponent<Collider2D>();
+      if (collider != null && !collider.isTrigger)
       {
-        new Vector2Int(4, 0),
-        new Vector2Int(4, 4),
-        new Vector2Int(0, 4),
-        new Vector2Int(0, 0),
-      });
+        newTile.AddComponent<ContactParent>();
+      }
+    }
 
     if (!cloning)
       m_MostRecentlyCreatedTile = newTile;
@@ -496,6 +501,11 @@ public class TileGrid : MonoBehaviour
     // checks to see whether it should create dialogs, and create them if necessary. If
     // it does, it can then look at the tiles it's got stored and set their data from
     // what it gets from the dialogs
+    // 
+    // TODO: as per my even more recent discussion with Mr. Ellinger, I think it's even
+    // wiser to prompt the user for the element data right as they are selecting that
+    // tile from the tiles palette. This would remove some of the complication of
+    // setting all that stuff up at the moment that a tile is placed
 
     return newGridElement;
   }

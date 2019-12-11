@@ -44,6 +44,23 @@ public class BoxTool : BlbTool
     m_ToolsPalette = FindObjectOfType<ToolsPalette>();
 
     m_ToolID = Tools.BOX;
+
+    GlobalData.PlayModePreToggle += OnPlayModePreToggle;
+  }
+
+
+  private void OnPlayModePreToggle(bool isInPlayMode)
+  {
+    if (m_LeftBusy)
+    {
+      m_LeftBusy = false;
+      PointerUpHelper(m_EndIndex, GlobalData.GetSelectedPrimaryTile());
+    }
+    else if (m_RightBusy)
+    {
+      m_RightBusy = false;
+      PointerUpHelper(m_EndIndex, GlobalData.GetSelectedSecondaryTile());
+    }
   }
 
 
@@ -110,7 +127,7 @@ public class BoxTool : BlbTool
       return;
 
     m_LeftBusy = false;
-    PointerUpHelper(te, GlobalData.GetSelectedPrimaryTile());
+    PointerUpHelper(te.GridIndex, GlobalData.GetSelectedPrimaryTile());
   }
 
 
@@ -120,18 +137,18 @@ public class BoxTool : BlbTool
       return;
 
     m_RightBusy = false;
-    PointerUpHelper(te, GlobalData.GetSelectedSecondaryTile());
+    PointerUpHelper(te.GridIndex, GlobalData.GetSelectedSecondaryTile());
   }
 
 
-  void PointerUpHelper(ToolEvent te, TileType tileType)
+  void PointerUpHelper(Vector2Int gridIndex, TileType tileType)
   {
     // TODO: this check seems unnecessary
     if (!m_ToolsPalette.IsBoxActive())
       return;
 
-    Vector2Int moveDir = te.GridIndex - m_StartIndex;
-    m_StartIndex = te.GridIndex;
+    Vector2Int moveDir = gridIndex - m_StartIndex;
+    m_StartIndex = gridIndex;
 
     int dirXMultiplier = moveDir.x <= 0 ? 1 : -1;
     int dirYMultiplier = moveDir.y <= 0 ? 1 : -1;
@@ -143,8 +160,8 @@ public class BoxTool : BlbTool
         var xIndex = i * dirXMultiplier;
         var yIndex = j * dirYMultiplier;
         var indexOffset = new Vector2Int(xIndex, yIndex);
-        var gridIndex = m_StartIndex + indexOffset;
-        AddRequest(gridIndex, tileType, cloning: false);
+        var newGridIndex = m_StartIndex + indexOffset;
+        AddRequest(newGridIndex, tileType, cloning: false);
       }
     }
 

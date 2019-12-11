@@ -18,7 +18,7 @@ public class PathTool : BlbTool
   Vector2Int m_PointerDragEndPosition;
   List<TileGrid.Element> m_SelectedElements;
   Vector2Int m_AnchorPoint;
-  List<Vector2Int> m_PathPoints;
+  List<Vector2Int> m_Path;
   State m_State = State.Idle;
 
 
@@ -29,14 +29,25 @@ public class PathTool : BlbTool
     m_ToolsPalette = FindObjectOfType<ToolsPalette>();
 
     m_ToolID = Tools.PATH;
+
+    GlobalData.PlayModePreToggle += OnPlayModePreToggle;
+  }
+
+
+  void OnPlayModePreToggle(bool isInPlayMode)
+  {
+    if (m_State != State.Idle)
+      EnterIdle();
   }
 
 
   private void Update()
   {
     if (Input.GetButtonDown("Cancel") && m_State != State.Idle)
+    {
       EnterIdle();
-    if (Input.GetButtonDown("Submit") && m_State == State.PlacingPathPoints)
+    }
+    else if (Input.GetButtonDown("Submit") && m_State == State.PlacingPathPoints)
     {
       AssignPathPoints();
       EnterIdle();
@@ -59,7 +70,7 @@ public class PathTool : BlbTool
     }
     else if (m_State == State.Selecting)
     {
-
+      // This... cannot be....!!!!!
     }
     else if (m_State == State.PlacingAnchorPoint)
     {
@@ -68,7 +79,8 @@ public class PathTool : BlbTool
     }
     else // m_State == State.PlacingPathPoints
     {
-
+      AddNewPathPoint(gridIndex);
+      PrintPathPointPositionsMessage();
     }
   }
 
@@ -79,7 +91,7 @@ public class PathTool : BlbTool
 
     if (m_State == State.Idle)
     {
-
+      // This... cannot be....!!!!!
     }
     else if (m_State == State.Selecting)
     {
@@ -100,7 +112,11 @@ public class PathTool : BlbTool
     }
     else // m_State == State.PlacingPathPoints
     {
+      var currentPathPoint = m_Path[m_Path.Count - 1] - m_AnchorPoint;
+      UpdateCurrentPathPoint(gridIndex);
 
+      if (currentPathPoint != gridIndex)
+        PrintPathPointPositionsMessage();
     }
   }
 
@@ -111,7 +127,7 @@ public class PathTool : BlbTool
 
     if (m_State == State.Idle)
     {
-
+      // This... cannot be....!!!!!
     }
     else if (m_State == State.Selecting)
     {
@@ -129,7 +145,11 @@ public class PathTool : BlbTool
     }
     else // m_State == State.PlacingPathPoints
     {
+      var currentPathPoint = m_Path[m_Path.Count - 1] - m_AnchorPoint;
+      UpdateCurrentPathPoint(gridIndex);
 
+      if (currentPathPoint != gridIndex)
+        PrintPathPointPositionsMessage();
     }
   }
 
@@ -163,7 +183,7 @@ public class PathTool : BlbTool
   {
     m_State = State.PlacingPathPoints;
 
-    m_PathPoints = new List<Vector2Int>() { Vector2Int.zero };
+    m_Path = new List<Vector2Int>();
     PrintPathPointMessage();
   }
 
@@ -205,9 +225,21 @@ public class PathTool : BlbTool
   }
 
 
+  void AddNewPathPoint(Vector2Int gridIndex)
+  {
+    m_Path.Add(gridIndex - m_AnchorPoint);
+  }
+
+
+  void UpdateCurrentPathPoint(Vector2Int gridIndex)
+  {
+    m_Path[m_Path.Count - 1] = gridIndex - m_AnchorPoint;
+  }
+
+
   void AssignPathPoints()
   {
-    if (m_PathPoints.Count <= 1)
+    if (m_Path.Count <= 1)
       return;
 
     m_TileGrid.BeginBatch("Assign Path");
@@ -215,7 +247,7 @@ public class PathTool : BlbTool
     foreach (var element in m_SelectedElements)
     {
       var newState = element.ToState();
-      newState.Path = m_PathPoints;
+      newState.Path = m_Path;
       m_TileGrid.AddRequest(element.m_GridIndex, newState, recomputeBounds: false);
     }
 
@@ -279,7 +311,7 @@ public class PathTool : BlbTool
 
   void PrintAnchorPointMessage()
   {
-    StatusBar.Print("Next, <b>left-click</b> to place the path's <b>anchor point</b>.");
+    StatusBar.Print("Next, <b>left-click</b> to place the path's <b>anchor point</b>");
   }
 
 
@@ -294,6 +326,54 @@ public class PathTool : BlbTool
 
   void PrintPathPointMessage()
   {
-    StatusBar.Print("Next, <b>left-click</b> to place <b>path points</b>. <b>Right-click</b> to confirm.");
+    StatusBar.Print("Next, <b>left-click</b> to place <b>path points</b> relative to the anchor point. Press <b>Space</b> to finish");
+  }
+
+
+  void PrintPathPointPositionsMessage()
+  {
+    var count = m_Path.Count;
+    var pointWord = count == 1 ? "point" : "points";
+    var message = $"<b>{count}</b> {pointWord}: <color=#FFFF00><b>";
+
+    if (count == 1)
+    {
+      message += $"{m_Path[0].ToString()}</b></color>";
+    }
+    else if (count <= 6)
+    {
+      message += $"{m_Path[0].ToString()}</b></color>";
+
+      for (var i = 1; i < count; ++i)
+      {
+        message += $" > <color=#FFFF00><b>{m_Path[i].ToString()}</b></color>";
+      }
+    }
+    else
+    {
+      var p0Str = m_Path[0].ToString();
+      var p1Str = m_Path[1].ToString();
+      var p2Str = m_Path[2].ToString();
+      var pCountMinus3Str = m_Path[count - 3].ToString();
+      var pCountMinus2Str = m_Path[count - 2].ToString();
+      var pCountMinus1Str = m_Path[count - 1].ToString();
+
+      message += $"{p0Str}</b></color> > " +
+        $"<color=#FFFF00><b>{p1Str}</b></color> > " +
+        $"<color=#FFFF00><b>{p2Str}</b></color> > ... > " +
+        $"<color=#FFFF00><b>{pCountMinus3Str}</b></color> > " +
+        $"<color=#FFFF00><b>{pCountMinus2Str}</b></color> > " +
+        $"<color=#FFFF00><b>{pCountMinus1Str}</b></color>";
+    }
+
+    message += " | Press <b>Space</b> to finish";
+
+    StatusBar.Print(message);
+  }
+
+
+  private void OnDestroy()
+  {
+    GlobalData.PlayModePreToggle -= OnPlayModePreToggle;
   }
 }

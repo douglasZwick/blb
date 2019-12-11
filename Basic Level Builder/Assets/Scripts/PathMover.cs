@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PathMover : MonoBehaviour
 {
-  public float m_Speed = 1;
+  public float m_Speed = 4;
 
   Transform m_Transform;
   List<Vector3> m_Path;
