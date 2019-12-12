@@ -40,7 +40,7 @@ public class CoinTileLogic : MonoBehaviour
   **/
   void Start()
   {
-    m_Transform = GetComponent<Transform>();
+    m_Transform = transform;
 
     m_EditModeAlpha = m_SpriteRenderer.color.a;
     m_EditModeScale = m_Transform.localScale;
@@ -84,6 +84,15 @@ public class CoinTileLogic : MonoBehaviour
   {
     var parent = m_Transform.parent;
     m_CreatedCoin = Instantiate(m_CoinPrefab, m_Transform.position, Quaternion.identity, parent);
+
+    var thisPathMover = GetComponent<PathMover>();
+    if (thisPathMover != null)
+    {
+      var thatPathMover = m_CreatedCoin.AddComponent<PathMover>();
+      thatPathMover.Setup(thisPathMover.m_IndexList);
+      var thatRigidbody2D = m_CreatedCoin.AddComponent<Rigidbody2D>();
+      thatRigidbody2D.isKinematic = true;
+    }
   }
 
 

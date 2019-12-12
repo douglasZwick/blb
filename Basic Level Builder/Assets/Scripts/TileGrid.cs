@@ -477,7 +477,7 @@ public class TileGrid : MonoBehaviour
     if (solidEdgeOutliner != null)
       solidEdgeOutliner.Setup(gridIndex);
 
-    if (state.Path != null)
+    if (state.Path != null && state.Path.Count > 0)
     {
       var pathMover = newTile.AddComponent<PathMover>();
       pathMover.Setup(state.Path);

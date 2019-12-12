@@ -55,6 +55,15 @@ public class KeyTileLogic : MonoBehaviour
       var parent = m_cTransform.parent;
       m_pCreatedKey = Instantiate(m_KeyPrefab, m_cTransform.position, Quaternion.identity, parent);
       m_pCreatedKey.GetComponent<ColorCode>().Set(m_cColorCode.m_TileColor);
+
+      var thisPathMover = GetComponent<PathMover>();
+      if (thisPathMover != null)
+      {
+        var thatPathMover = m_pCreatedKey.AddComponent<PathMover>();
+        thatPathMover.Setup(thisPathMover.m_IndexList);
+        var thatRigidbody2D = m_pCreatedKey.AddComponent<Rigidbody2D>();
+        thatRigidbody2D.isKinematic = true;
+      }
     }
     else
     {

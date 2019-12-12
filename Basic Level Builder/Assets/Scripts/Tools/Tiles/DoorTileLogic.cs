@@ -24,7 +24,6 @@ public class DoorTileLogic : MonoBehaviour
   /************************************************************************************/
 
   Transform m_cTransform;
-  SpriteRenderer m_cSpriteRenderer;
   ColorCode m_cColorCode;
 
   public TextMeshPro m_Text;
@@ -39,7 +38,6 @@ public class DoorTileLogic : MonoBehaviour
   void Start()
   {
     m_cTransform = GetComponent<Transform>();
-    m_cSpriteRenderer = GetComponent<SpriteRenderer>();
     m_cColorCode = GetComponent<ColorCode>();
 
     GlobalData.PlayModePreToggle += OnPlayModePreToggle;
@@ -55,6 +53,16 @@ public class DoorTileLogic : MonoBehaviour
       m_pCreatedDoor = Instantiate(m_DoorPrefab, m_cTransform.position, Quaternion.identity, parent);
       var createdColorCode = m_pCreatedDoor.GetComponent<ColorCode>();
       createdColorCode.Set(m_cColorCode.m_TileColor);
+
+      var thisPathMover = GetComponent<PathMover>();
+      if (thisPathMover != null)
+      {
+        var thatPathMover = m_pCreatedDoor.AddComponent<PathMover>();
+        thatPathMover.Setup(thisPathMover.m_IndexList);
+        var thatRigidbody2D = m_pCreatedDoor.AddComponent<Rigidbody2D>();
+        thatRigidbody2D.isKinematic = true;
+        m_pCreatedDoor.AddComponent<ContactParent>();
+      }
     }
     else
     {

@@ -7,7 +7,8 @@ public class PathMover : MonoBehaviour
   public float m_Speed = 4;
 
   Transform m_Transform;
-  List<Vector3> m_Path;
+  public List<Vector3> m_Path { get; private set; }
+  public List<Vector2Int> m_IndexList { get; private set; }
   int m_PathIndex = 0;
   Vector3 m_InitialPosition;
   Vector3 m_CurrentDestination;
@@ -46,20 +47,21 @@ public class PathMover : MonoBehaviour
   }
 
 
-  public void Setup(List<Vector2Int> indexPath)
+  public void Setup(List<Vector2Int> indexList)
   {
+    m_IndexList = indexList;
     m_Path = null;
 
-    if (indexPath == null)
+    if (indexList == null)
       return;
 
-    var count = indexPath.Count;
+    var count = indexList.Count;
 
     if (count <= 0)
       return;
 
     var allZero = true;
-    foreach (var index in indexPath)
+    foreach (var index in indexList)
       if (index != Vector2Int.zero)
         allZero = false;
 
@@ -69,13 +71,13 @@ public class PathMover : MonoBehaviour
     m_Path = new List<Vector3>(count);
     m_InitialPosition = m_Transform.position;
 
-    foreach (var index in indexPath)
+    foreach (var index in indexList)
     {
       var position = new Vector3(index.x, index.y, 0) + m_InitialPosition;
       m_Path.Add(position);
     }
 
-    m_Loop = indexPath[count - 1] == Vector2Int.zero;
+    m_Loop = indexList[count - 1] == Vector2Int.zero;
 
     SetDestination();
   }
