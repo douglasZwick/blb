@@ -10,7 +10,7 @@ assignees: douglasZwick
 **Is this feature request related to an existing problem? Tell us about it if so**
 Please provide a clear and concise description of what the problem is. *Ex. I'm always frustrated when [...]*
 
-**Tell us the solution you'd like**
+**Tell us the feature you'd like**
 Please provide a clear and concise description of what you want to happen.
 
 **Tell us about the alternatives you've considered**
