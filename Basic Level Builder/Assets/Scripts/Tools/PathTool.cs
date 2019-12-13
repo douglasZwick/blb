@@ -239,7 +239,7 @@ public class PathTool : BlbTool
 
   void AssignPathPoints()
   {
-    if (m_Path.Count <= 1)
+    if (m_Path.Count <= 0)
       return;
 
     m_TileGrid.BeginBatch("Assign Path");
