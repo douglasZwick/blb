@@ -16,12 +16,11 @@ using UnityEngine;
 public class TeleporterTileLogic : MonoBehaviour
 {
   // This object's Transform
-  Transform m_Transform;
+  [HideInInspector] public Transform m_Transform;
   // This object's ColorCode
   [HideInInspector] public ColorCode m_ColorCode;
   // The Transform of the destination teleporter
-  public Transform m_Destination { get; private set; }
-  public TeleporterTileLogic m_DestinationTeleporter { get; private set; }
+  public TeleporterMaster m_Master;
 
   [System.Serializable]
   public class Events
@@ -45,34 +44,40 @@ public class TeleporterTileLogic : MonoBehaviour
   void OnPlayModeToggled(bool isInPlayMode)
   {
     if (isInPlayMode)
-      FindDestination();
+      Register();
   }
 
 
-  void FindDestination()
+  void Register()
   {
+    m_Master.Add(this, m_ColorCode.m_TileColor);
+  }
+
+
+  public TeleporterTileLogic FindNearest()
+  {
+    var thisPosition = m_Transform.position;
     var leastSqDistance = float.PositiveInfinity;
-
-    var allTeleporters = FindObjectsOfType<TeleporterTileLogic>();
-
-    foreach (var otherTeleporter in allTeleporters)
+    var matches = m_Master.m_Teleporters[(int)m_ColorCode.m_TileColor];
+    TeleporterTileLogic nearestTeleporter = null;
+    
+    foreach (var other in matches)
     {
-      if (otherTeleporter == this)
+      if (other == this)
         continue;
 
-      if (otherTeleporter.m_ColorCode.m_TileColor != m_ColorCode.m_TileColor)
-        continue;
-
-      var difference = otherTeleporter.m_Transform.position - m_Transform.position;
-      var sqDistance = Vector3.SqrMagnitude(difference);
+      var otherPosition = other.m_Transform.position;
+      var difference = otherPosition - thisPosition;
+      var sqDistance = difference.sqrMagnitude;
 
       if (sqDistance < leastSqDistance)
       {
         leastSqDistance = sqDistance;
-        m_Destination = otherTeleporter.m_Transform;
-        m_DestinationTeleporter = otherTeleporter;
+        nearestTeleporter = other;
       }
     }
+
+    return nearestTeleporter;
   }
 
 

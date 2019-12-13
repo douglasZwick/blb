@@ -108,7 +108,7 @@ public class PathMover : MonoBehaviour
 
   void OnHeroReturned()
   {
-    if (enabled)
+    if (m_Path != null)
       ResetPath();
   }
 

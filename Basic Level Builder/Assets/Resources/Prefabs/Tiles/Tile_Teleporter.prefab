@@ -64,6 +64,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -110,8 +111,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_text: A
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -260,6 +259,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -347,6 +347,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -408,18 +409,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f922ce108afe1f4685090d88b931ae2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Transform: {fileID: 0}
   m_ColorCode: {fileID: 0}
+  m_Master: {fileID: 11400000, guid: f5ed559b753f50141928c3434de0ab7a, type: 2}
   m_Events:
     TeleportedFrom:
       m_PersistentCalls:
         m_Calls: []
-      m_TypeName: TeleportEvent, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
     TeleportedTo:
       m_PersistentCalls:
         m_Calls: []
-      m_TypeName: TeleportEvent, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
 --- !u!114 &-77753490791294741
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -438,12 +437,11 @@ MonoBehaviour:
     m_Type: 0
     m_TileColor: 0
     m_Direction: 0
+    m_Path: []
   m_Events:
     ColorCodeSet:
       m_PersistentCalls:
         m_Calls: []
-      m_TypeName: ColorCodeEvent, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-        PublicKeyToken=null
 --- !u!114 &3394626790768531171
 MonoBehaviour:
   m_ObjectHideFlags: 0

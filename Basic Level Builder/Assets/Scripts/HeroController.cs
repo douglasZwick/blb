@@ -566,16 +566,7 @@ public class HeroController : MonoBehaviour
       Debug.LogError("Something went wrong with a teleporter.  Contact Chris Onorati!");
       return;
     }
-    
-    if (teleporterTileLogic.m_Destination == null)
-    {
-      // No destination; say something about this
-      return;
-    }
 
-    m_Transform.position = teleporterTileLogic.m_Destination.position;
-    m_PreviousX = m_Transform.position.x;
-    m_LastTeleportDestination = teleporterTileLogic.m_Destination.gameObject;
   }
 
   /**

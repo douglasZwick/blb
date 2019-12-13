@@ -72,30 +72,33 @@ public class TeleportResponder : MonoBehaviour
   }
 
 
-  void AttemptTeleport(TeleporterTileLogic teleporter)
+  void AttemptTeleport(TeleporterTileLogic fromTeleporter)
   {
-    if (teleporter == m_LastTeleportDestination)
+    if (fromTeleporter == m_LastTeleportDestination)
       return;
 
-    if (teleporter.m_DestinationTeleporter == null)
+    var toTeleporter = fromTeleporter.FindNearest();
+
+    if (toTeleporter == null)
     {
-      // No destination; say something about this
+      // feedback re: no destination
+
       return;
     }
 
-    Teleport(teleporter);
+    Teleport(fromTeleporter, toTeleporter);
   }
 
 
-  void Teleport(TeleporterTileLogic teleporter)
+  void Teleport(TeleporterTileLogic fromTeleporter, TeleporterTileLogic toTeleporter)
   {
     var fromPosition = m_Transform.position;
-    var toPosition = teleporter.m_Destination.position;
+    var toPosition = toTeleporter.m_Transform.position;
 
     var eventData = new TeleportEventData()
     {
-      m_FromTeleporter = teleporter,
-      m_ToTeleporter = teleporter.m_DestinationTeleporter,
+      m_FromTeleporter = fromTeleporter,
+      m_ToTeleporter = toTeleporter,
       m_FromPosition = fromPosition,
       m_ToPosition = toPosition,
     };
@@ -107,7 +110,7 @@ public class TeleportResponder : MonoBehaviour
     m_Events.UsedTeleporter.Invoke(eventData);
     eventData.m_ToTeleporter.m_Events.TeleportedTo.Invoke(eventData);
 
-    var teleporterColor = teleporter.m_ColorCode.GetCurrentColor();
+    var teleporterColor = fromTeleporter.m_ColorCode.GetCurrentColor();
     CreateStreak(fromPosition, toPosition, teleporterColor);
   }
 
