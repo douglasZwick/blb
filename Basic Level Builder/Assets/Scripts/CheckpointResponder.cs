@@ -8,8 +8,8 @@ public class CheckpointResponder : MonoBehaviour
   public SpriteRenderer m_ColorReferenceRenderer;
 
   Transform m_Transform;
-  Vector3 m_CheckpointPosition;
   Checkpoint m_LatestCheckpoint;
+  Vector3 m_InitialPosition;
 
   [System.Serializable]
   public class Events
@@ -24,7 +24,7 @@ public class CheckpointResponder : MonoBehaviour
   private void Awake()
   {
     m_Transform = transform;
-    m_CheckpointPosition = m_Transform.position;
+    m_InitialPosition = m_Transform.position;
   }
 
 
@@ -50,8 +50,6 @@ public class CheckpointResponder : MonoBehaviour
 
   void UpdateCheckpoint(Checkpoint checkpoint)
   {
-    m_CheckpointPosition = checkpoint.transform.position;
-
     if (m_LatestCheckpoint != null)
       m_LatestCheckpoint.AttemptDeactivate();
 
@@ -77,12 +75,16 @@ public class CheckpointResponder : MonoBehaviour
   {
     enabled = true;
 
-    m_Transform.position = m_CheckpointPosition;
+    var returnPosition = m_InitialPosition;
+    if (m_LatestCheckpoint != null)
+      returnPosition = m_LatestCheckpoint.m_Transform.position;
+
+    m_Transform.position = returnPosition;
 
     var checkpointEventData = new CheckpointEventData()
     {
       m_Checkpoint = m_LatestCheckpoint,
-      m_NewPosition = m_CheckpointPosition,
+      m_NewPosition = returnPosition,
     };
 
     m_Events.ReturnedToCheckpoint.Invoke(checkpointEventData);

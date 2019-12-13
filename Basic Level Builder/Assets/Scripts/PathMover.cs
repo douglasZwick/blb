@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class PathMover : MonoBehaviour
 {
-  public float m_Speed = 4;
+  static Vector3 s_IconLocalPosition = Vector3.zero;
+
+  public float m_Speed = 5.5f;
 
   Transform m_Transform;
   public List<Vector3> m_Path { get; private set; }
@@ -19,10 +21,16 @@ public class PathMover : MonoBehaviour
   {
     m_Transform = transform;
 
+    if (!GlobalData.IsTransitioning())
+    {
+      var icon = Instantiate(PathTool.s_PathIconPrefab, m_Transform);
+      icon.transform.localPosition = s_IconLocalPosition;
+    }
+
     enabled = false;
 
     GlobalData.PlayModeToggled += OnPlayModeToggled;
-    GlobalData.HeroReturned += OnHeroReturned;
+    GlobalData.PreHeroReturn += OnPreHeroReturn;
   }
 
 
@@ -106,7 +114,7 @@ public class PathMover : MonoBehaviour
   }
 
 
-  void OnHeroReturned()
+  void OnPreHeroReturn()
   {
     if (m_Path != null)
       ResetPath();
@@ -154,6 +162,6 @@ public class PathMover : MonoBehaviour
   private void OnDestroy()
   {
     GlobalData.PlayModeToggled -= OnPlayModeToggled;
-    GlobalData.HeroReturned -= OnHeroReturned;
+    GlobalData.PreHeroReturn -= OnPreHeroReturn;
   }
 }

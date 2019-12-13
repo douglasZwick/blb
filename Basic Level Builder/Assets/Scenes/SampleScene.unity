@@ -30301,6 +30301,8 @@ MonoBehaviour:
     to box a selection'
   m_KeyboardShortcut: Select Path Tool
   m_Outliner: {fileID: 118196993}
+  m_PathIconPrefab: {fileID: 7363954748419810677, guid: 0a4ed484ecabfb841b7032771b040ba7,
+    type: 3}
 --- !u!114 &1044690608
 MonoBehaviour:
   m_ObjectHideFlags: 0

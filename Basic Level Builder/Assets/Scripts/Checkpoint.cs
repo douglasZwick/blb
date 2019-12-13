@@ -5,6 +5,8 @@ using UnityEngine.Events;
 
 public class Checkpoint : MonoBehaviour
 {
+  [HideInInspector]
+  public Transform m_Transform;
   public SpriteRenderer m_Flag;
   public UnityEvent WasActivated;
 
@@ -14,6 +16,7 @@ public class Checkpoint : MonoBehaviour
 
   private void Awake()
   {
+    m_Transform = transform;
     m_DefaultColor = m_Flag.color;
 
     GlobalData.PlayModeToggled += OnPlayModeToggled;

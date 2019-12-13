@@ -74,7 +74,8 @@ public static class GlobalData
   /************************************************************************************/
 
   //Get the play mode status.
-  static bool s_IsInPlayMode;
+  static bool s_IsInPlayMode = false;
+  static bool s_Transitioning = false;
   static bool s_EffectsUnderway = false;
 
   //Event to register playmode switching.
@@ -85,6 +86,7 @@ public static class GlobalData
   public delegate void PlayModeEvent(PlayModeEventData eventData);
 
   public static event ParameterlessEvent HeroDied;
+  public static event ParameterlessEvent PreHeroReturn;
   public static event ParameterlessEvent HeroReturned;
   public static event ParameterlessEvent GhostModeEnabled;
   public static event ParameterlessEvent GhostModeDisabled;
@@ -115,6 +117,12 @@ public static class GlobalData
   public static bool IsInPlayMode()
   {
     return s_IsInPlayMode;
+  }
+
+
+  public static bool IsTransitioning()
+  {
+    return s_Transitioning;
   }
 
 
@@ -194,11 +202,16 @@ public static class GlobalData
   **/
   public static bool EnablePlayMode()
   {
+    s_Transitioning = true;
+
     //Call the event if anything is attached.
     PlayModePreToggle?.Invoke(true);
     PlayModeToggled?.Invoke(true);
 
     s_IsInPlayMode = true;
+
+    s_Transitioning = false;
+
     return true;
   }
 
@@ -210,17 +223,27 @@ public static class GlobalData
   **/
   public static bool DisablePlayMode()
   {
+    s_Transitioning = true;
+
     //Call the event if anything is attached.
     PlayModePreToggle?.Invoke(false);
     PlayModeToggled?.Invoke(false);
 
     s_IsInPlayMode = false;
+
+    s_Transitioning = false;
+
     return false;
   }
 
   public static void DispatchHeroDied()
   {
     HeroDied?.Invoke();
+  }
+
+  public static void DispatchPreHeroReturn()
+  {
+    PreHeroReturn?.Invoke();
   }
 
   public static void DispatchHeroReturned()

@@ -13,6 +13,9 @@ public class PathTool : BlbTool
   }
 
   public Outliner m_Outliner;
+  public GameObject m_PathIconPrefab;
+
+  public static GameObject s_PathIconPrefab;
 
   Vector2Int m_PointerDownPosition;
   Vector2Int m_PointerDragEndPosition;
@@ -29,6 +32,8 @@ public class PathTool : BlbTool
     m_ToolsPalette = FindObjectOfType<ToolsPalette>();
 
     m_ToolID = Tools.PATH;
+
+    s_PathIconPrefab = m_PathIconPrefab;
 
     GlobalData.PlayModePreToggle += OnPlayModePreToggle;
   }

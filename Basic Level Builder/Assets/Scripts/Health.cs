@@ -49,6 +49,8 @@ public class Health : MonoBehaviour
 
   void Return()
   {
+    GlobalData.DispatchPreHeroReturn();
+
     m_Events.Returned.Invoke(new HealthEventData());
 
     GlobalData.DispatchHeroReturned();
