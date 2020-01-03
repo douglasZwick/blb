@@ -46,6 +46,15 @@ public class TileGrid : MonoBehaviour
         Path = m_Path,
       };
     }
+
+
+    public T GetComponent<T>() where T : Component
+    {
+      if (m_GameObject == null)
+        return null;
+
+      return m_GameObject.GetComponent<T>();
+    }
   }
 
 
@@ -473,10 +482,6 @@ public class TileGrid : MonoBehaviour
     if (tileDirection != null)
       tileDirection.Set(state.Direction);
 
-    var solidEdgeOutliner = newTile.GetComponent<SolidEdgeOutliner>();
-    if (solidEdgeOutliner != null)
-      solidEdgeOutliner.Setup(gridIndex);
-
     if (state.Path != null && state.Path.Count > 0)
     {
       var pathMover = newTile.AddComponent<PathMover>();
@@ -491,6 +496,10 @@ public class TileGrid : MonoBehaviour
         newTile.AddComponent<ContactParent>();
       }
     }
+
+    var solidEdgeOutliner = newTile.GetComponent<SolidEdgeOutliner>();
+    if (solidEdgeOutliner != null)
+      solidEdgeOutliner.Setup(gridIndex);
 
     if (!cloning)
       m_MostRecentlyCreatedTile = newTile;

@@ -162,19 +162,28 @@ public class SolidEdgeOutliner : MonoBehaviour
     var l = s_TileGrid.Get(lI);
     var d = s_TileGrid.Get(dI);
 
-    // Then we grab all the SolidEdgeOutliners of those elements, if any.
-    // TileGrid.Get returns an empty element, not null, if there's nothing
-    // at the specified index, so it's safe to check its m_GameObject field,
-    // but of course you wanna use the ?. to check it, because if it's an
-    // empty element, then m_GameObject will be null, and then you're hosed
-    var rdO = rd.m_GameObject?.GetComponent<SolidEdgeOutliner>();
-    var ruO = ru.m_GameObject?.GetComponent<SolidEdgeOutliner>();
-    var luO = lu.m_GameObject?.GetComponent<SolidEdgeOutliner>();
-    var ldO = ld.m_GameObject?.GetComponent<SolidEdgeOutliner>();
-    var rO = r.m_GameObject?.GetComponent<SolidEdgeOutliner>();
-    var uO = u.m_GameObject?.GetComponent<SolidEdgeOutliner>();
-    var lO = l.m_GameObject?.GetComponent<SolidEdgeOutliner>();
-    var dO = d.m_GameObject?.GetComponent<SolidEdgeOutliner>();
+    // Then we grab all the SolidEdgeOutliners of those elements, if any
+    var rdO = rd.GetComponent<SolidEdgeOutliner>();
+    var ruO = ru.GetComponent<SolidEdgeOutliner>();
+    var luO = lu.GetComponent<SolidEdgeOutliner>();
+    var ldO = ld.GetComponent<SolidEdgeOutliner>();
+    var rO = r.GetComponent<SolidEdgeOutliner>();
+    var uO = u.GetComponent<SolidEdgeOutliner>();
+    var lO = l.GetComponent<SolidEdgeOutliner>();
+    var dO = d.GetComponent<SolidEdgeOutliner>();
+
+    // Now we get references to the PathMover components of each element, if any.
+    // Outliners will treat objects with different paths as if they have
+    // different outliner indices
+    var pm = GetComponent<PathMover>();
+    var rdP = rd.GetComponent<PathMover>();
+    var ruP = ru.GetComponent<PathMover>();
+    var luP = lu.GetComponent<PathMover>();
+    var ldP = ld.GetComponent<PathMover>();
+    var rP = r.GetComponent<PathMover>();
+    var uP = u.GetComponent<PathMover>();
+    var lP = l.GetComponent<PathMover>();
+    var dP = d.GetComponent<PathMover>();
 
     // Now that we have each neighboring outliner, we can proceed. The
     // overall idea here is that a bit should be set if the neighbor in the
@@ -190,16 +199,20 @@ public class SolidEdgeOutliner : MonoBehaviour
     // with its own setUpNeighbors flag false, so that we don't set this tile up
     // again and then set up the neighbor again and so on infinitely.
     // 
-    // Finally, the newest addition to this system adds the m_OutlineIndex
-    // property. If a neighboring tile's outliner has a different outline index
-    // from this one's, then it is not considered solid toward this tile.
+    // A recent addition to this system adds the m_OutlineIndex property. If a
+    // neighboring tile's outliner has a different outline index from this one's,
+    // then it is not considered solid toward this tile.
+    // 
+    // Finally, the newest change is that the outliner also takes the PathMover
+    // component into account when deciding how to outline areas. If two objects
+    // do not have the same path, then they are not outlined together
 
     // +----+.....
     // |this| rO .
     // +----+.....
     // . dO .rdO .
     // ...........
-    if (rdO == null || rdO.m_OutlineIndex != m_OutlineIndex ||
+    if (rdO == null || rdO.m_OutlineIndex != m_OutlineIndex || !PathMover.SamePath(pm, rdP) ||
       rdO.m_BeingErased || (!rdO.m_SolidLeft || !rdO.m_SolidUp) ||
       (rO != null && rO.m_OutlineIndex == m_OutlineIndex && rO.m_SolidLeft && !rO.m_SolidDown) ||
       (dO != null && dO.m_OutlineIndex == m_OutlineIndex && dO.m_SolidUp && !dO.m_SolidRight))
@@ -213,7 +226,7 @@ public class SolidEdgeOutliner : MonoBehaviour
     // +----+.....
     // |this| rO .
     // +----+.....
-    if (ruO == null || ruO.m_OutlineIndex != m_OutlineIndex ||
+    if (ruO == null || ruO.m_OutlineIndex != m_OutlineIndex || !PathMover.SamePath(pm, ruP) ||
       ruO.m_BeingErased || (!ruO.m_SolidLeft || !ruO.m_SolidDown) ||
       (rO != null && rO.m_OutlineIndex == m_OutlineIndex && rO.m_SolidLeft && !rO.m_SolidUp) ||
       (uO != null && uO.m_OutlineIndex == m_OutlineIndex && uO.m_SolidDown && !uO.m_SolidRight))
@@ -227,7 +240,7 @@ public class SolidEdgeOutliner : MonoBehaviour
     // .....+----+
     // . lO |this|
     // .....+----+
-    if (luO == null || luO.m_OutlineIndex != m_OutlineIndex ||
+    if (luO == null || luO.m_OutlineIndex != m_OutlineIndex || !PathMover.SamePath(pm, luP) ||
       luO.m_BeingErased || (!luO.m_SolidRight || !luO.m_SolidDown) ||
       (lO != null && lO.m_OutlineIndex == m_OutlineIndex && lO.m_SolidRight && !lO.m_SolidUp) ||
       (uO != null && uO.m_OutlineIndex == m_OutlineIndex && uO.m_SolidDown && !uO.m_SolidLeft))
@@ -241,7 +254,7 @@ public class SolidEdgeOutliner : MonoBehaviour
     // .....+----+
     // .ldO . dO .
     // ...........
-    if (ldO == null || ldO.m_OutlineIndex != m_OutlineIndex ||
+    if (ldO == null || ldO.m_OutlineIndex != m_OutlineIndex || !PathMover.SamePath(pm, ldP) ||
       ldO.m_BeingErased || (!ldO.m_SolidRight || !ldO.m_SolidUp) ||
       (lO != null && lO.m_OutlineIndex == m_OutlineIndex && lO.m_SolidRight && !lO.m_SolidDown) ||
       (dO != null && dO.m_OutlineIndex == m_OutlineIndex && dO.m_SolidUp && !dO.m_SolidLeft))
@@ -253,7 +266,7 @@ public class SolidEdgeOutliner : MonoBehaviour
     // +----+.....
     // |this| rO .
     // +----+.....
-    if (rO == null || rO.m_OutlineIndex != m_OutlineIndex ||
+    if (rO == null || rO.m_OutlineIndex != m_OutlineIndex || !PathMover.SamePath(pm, rP) ||
       rO.m_BeingErased || !rO.m_SolidLeft)
       code |= 0b00010011;
     // Set up rO if appropriate
@@ -265,7 +278,7 @@ public class SolidEdgeOutliner : MonoBehaviour
     //   +----+
     //   |this|
     //   +----+
-    if (uO == null || uO.m_OutlineIndex != m_OutlineIndex ||
+    if (uO == null || uO.m_OutlineIndex != m_OutlineIndex || !PathMover.SamePath(pm, uP) ||
       uO.m_BeingErased || !uO.m_SolidDown)
       code |= 0b00100110;
     // Set up uO if appropriate
@@ -275,7 +288,7 @@ public class SolidEdgeOutliner : MonoBehaviour
     // .....+----+
     // . lO |this|
     // .....+----+
-    if (lO == null || lO.m_OutlineIndex != m_OutlineIndex ||
+    if (lO == null || lO.m_OutlineIndex != m_OutlineIndex || !PathMover.SamePath(pm, lP) ||
       lO.m_BeingErased || !lO.m_SolidRight)
       code |= 0b01001100;
     // Set up lO if appropriate
@@ -287,7 +300,7 @@ public class SolidEdgeOutliner : MonoBehaviour
     //   +----+
     //   . dO .
     //   ......
-    if (dO == null || dO.m_OutlineIndex != m_OutlineIndex ||
+    if (dO == null || dO.m_OutlineIndex != m_OutlineIndex || !PathMover.SamePath(pm, dP) ||
       dO.m_BeingErased || !dO.m_SolidUp)
       code |= 0b10001001;
     // Set up dO if appropriate

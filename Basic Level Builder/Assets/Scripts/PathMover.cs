@@ -164,4 +164,32 @@ public class PathMover : MonoBehaviour
     GlobalData.PlayModeToggled -= OnPlayModeToggled;
     GlobalData.PreHeroReturn -= OnPreHeroReturn;
   }
+
+
+  static public bool SamePath(PathMover a, PathMover b)
+  {
+    if (a == null)
+      return b == null;
+    if (b == null)
+      return a == null;
+
+    var listA = a.m_IndexList;
+    var listB = b.m_IndexList;
+
+    if (listA == null)
+      return listB == null;
+    if (listB == null)
+      return listA == null;
+
+    if (listA.Count != listB.Count)
+      return false;
+
+    for (var i = 0; i < listA.Count; ++i)
+    {
+      if (listA[i] != listB[i])
+        return false;
+    }
+
+    return true;
+  }
 }
