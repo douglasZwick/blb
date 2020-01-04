@@ -14,8 +14,10 @@ public class PathTool : BlbTool
 
   public Outliner m_Outliner;
   public GameObject m_PathIconPrefab;
+  public GameObject m_AnchorIconPrefab;
 
   public static GameObject s_PathIconPrefab;
+  public static GameObject s_AnchorIconPrefab;
 
   Vector2Int m_PointerDownPosition;
   Vector2Int m_PointerDragEndPosition;
@@ -23,6 +25,7 @@ public class PathTool : BlbTool
   Vector2Int m_AnchorPoint;
   List<Vector2Int> m_Path;
   State m_State = State.Idle;
+  Transform m_AnchorIconTransform;
 
 
   void Start()
@@ -34,6 +37,7 @@ public class PathTool : BlbTool
     m_ToolID = Tools.PATH;
 
     s_PathIconPrefab = m_PathIconPrefab;
+    s_AnchorIconPrefab = m_AnchorIconPrefab;
 
     GlobalData.PlayModePreToggle += OnPlayModePreToggle;
   }
@@ -80,6 +84,8 @@ public class PathTool : BlbTool
     else if (m_State == State.PlacingAnchorPoint)
     {
       m_AnchorPoint = gridIndex;
+      var anchorIcon = Instantiate(s_AnchorIconPrefab, te.TileWorldPosition, Quaternion.identity);
+      m_AnchorIconTransform = anchorIcon.transform;
       PrintAnchorPointPositionMessage();
     }
     else // m_State == State.PlacingPathPoints
@@ -113,6 +119,7 @@ public class PathTool : BlbTool
       if (m_AnchorPoint != gridIndex)
         PrintAnchorPointPositionMessage();
 
+      m_AnchorIconTransform.position = te.TileWorldPosition;
       m_AnchorPoint = gridIndex;
     }
     else // m_State == State.PlacingPathPoints
@@ -163,6 +170,9 @@ public class PathTool : BlbTool
   {
     m_State = State.Idle;
     m_SelectedElements = new List<TileGrid.Element>();
+
+    if (m_AnchorIconTransform != null)
+      Destroy(m_AnchorIconTransform.gameObject);
 
     m_Outliner.Disable();
 
