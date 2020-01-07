@@ -15,9 +15,11 @@ public class PathTool : BlbTool
   public Outliner m_Outliner;
   public GameObject m_PathIconPrefab;
   public GameObject m_AnchorIconPrefab;
+  public PathNodeIcon m_NodeIconPrefab;
 
   public static GameObject s_PathIconPrefab;
   public static GameObject s_AnchorIconPrefab;
+  public static PathNodeIcon s_NodeIconPrefab;
 
   Vector2Int m_PointerDownPosition;
   Vector2Int m_PointerDragEndPosition;
@@ -26,6 +28,7 @@ public class PathTool : BlbTool
   List<Vector2Int> m_Path;
   State m_State = State.Idle;
   Transform m_AnchorIconTransform;
+  List<PathNodeIcon> m_NodeIcons;
 
 
   void Start()
@@ -38,6 +41,7 @@ public class PathTool : BlbTool
 
     s_PathIconPrefab = m_PathIconPrefab;
     s_AnchorIconPrefab = m_AnchorIconPrefab;
+    s_NodeIconPrefab = m_NodeIconPrefab;
 
     GlobalData.PlayModePreToggle += OnPlayModePreToggle;
   }
@@ -173,6 +177,8 @@ public class PathTool : BlbTool
 
     if (m_AnchorIconTransform != null)
       Destroy(m_AnchorIconTransform.gameObject);
+    if (m_NodeIcons != null)
+      ClearIcons();
 
     m_Outliner.Disable();
 
@@ -199,6 +205,7 @@ public class PathTool : BlbTool
     m_State = State.PlacingPathPoints;
 
     m_Path = new List<Vector2Int>();
+    m_NodeIcons = new List<PathNodeIcon>();
     PrintPathPointMessage();
   }
 
@@ -243,12 +250,66 @@ public class PathTool : BlbTool
   void AddNewPathPoint(Vector2Int gridIndex)
   {
     m_Path.Add(gridIndex - m_AnchorPoint);
+
+    var icon = Instantiate(s_NodeIconPrefab);
+    icon.MoveTo(gridIndex);
+    m_NodeIcons.Add(icon);
+
+    UpdateIcons();
   }
 
 
   void UpdateCurrentPathPoint(Vector2Int gridIndex)
   {
-    m_Path[m_Path.Count - 1] = gridIndex - m_AnchorPoint;
+    var currentNodeIndex = m_Path.Count - 1;
+    m_Path[currentNodeIndex] = gridIndex - m_AnchorPoint;
+    m_NodeIcons[currentNodeIndex].MoveTo(gridIndex);
+
+    UpdateIcons();
+  }
+
+
+  void UpdateIcons()
+  {
+    var iconCount = m_NodeIcons.Count;
+
+    for (var i = 0; i < iconCount; ++i)
+    {
+      m_NodeIcons[i].Initialize(i);
+    }
+
+    for (var i = 0; i < iconCount; ++i)
+    {
+      var earlierIcon = m_NodeIcons[i];
+      var duplicate = false;
+
+      for (var j = i + 1; j < iconCount; ++j)
+      {
+        var laterIcon = m_NodeIcons[j];
+
+        if (earlierIcon.m_GridIndex == laterIcon.m_GridIndex)
+        {
+          duplicate = true;
+          laterIcon.Merge(earlierIcon);
+
+          break;
+        }
+      }
+
+      if (duplicate)
+        earlierIcon.Hide();
+      else
+        earlierIcon.Show();
+    }
+  }
+
+
+  void ClearIcons()
+  {
+    foreach (var icon in m_NodeIcons)
+      Destroy(icon.gameObject);
+
+    m_NodeIcons.Clear();
   }
 
 

@@ -30303,6 +30303,10 @@ MonoBehaviour:
   m_Outliner: {fileID: 118196993}
   m_PathIconPrefab: {fileID: 7363954748419810677, guid: 0a4ed484ecabfb841b7032771b040ba7,
     type: 3}
+  m_AnchorIconPrefab: {fileID: 5074919233749669320, guid: 026f15a5564860845aedbb945b932f4f,
+    type: 3}
+  m_NodeIconPrefab: {fileID: 1253725308611503129, guid: 7acaafc18c368794b8d3f4b8a87a5ccf,
+    type: 3}
 --- !u!114 &1044690608
 MonoBehaviour:
   m_ObjectHideFlags: 0
