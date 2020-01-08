@@ -7,12 +7,16 @@ public class PathTool : BlbTool
   enum State
   {
     Idle,
-    Selecting,
+    SelectingForCreation,
     PlacingAnchorPoint,
     PlacingPathPoints,
+    SelectingForModification,
+    ReadyToModify,
+    ModifyingPathPoint,
   }
 
-  public Outliner m_Outliner;
+  public Outliner m_CreationOutliner;
+  public Outliner m_ModificationOutliner;
   public GameObject m_PathIconPrefab;
   public GameObject m_AnchorIconPrefab;
   public PathNodeIcon m_NodeIconPrefab;
@@ -65,6 +69,11 @@ public class PathTool : BlbTool
       AssignPathPoints();
       EnterIdle();
     }
+    else if (Input.GetButtonDown("Delete") && m_State == State.PlacingAnchorPoint)
+    {
+      DeletePath();
+      EnterIdle();
+    }
   }
 
 
@@ -77,11 +86,11 @@ public class PathTool : BlbTool
       m_PointerDownPosition = gridIndex;
       m_PointerDragEndPosition = gridIndex;
 
-      Outline();
-      EnterSelecting();
+      Outline(m_CreationOutliner);
+      EnterSelectingForCreation();
       PrintBoxDimensionsMessage();
     }
-    else if (m_State == State.Selecting)
+    else if (m_State == State.SelectingForCreation)
     {
       // This... cannot be....!!!!!
     }
@@ -92,10 +101,26 @@ public class PathTool : BlbTool
       m_AnchorIconTransform = anchorIcon.transform;
       PrintAnchorPointPositionMessage();
     }
-    else // m_State == State.PlacingPathPoints
+    else if (m_State == State.PlacingPathPoints)
     {
       AddNewPathPoint(gridIndex);
       PrintPathPointPositionsMessage();
+    }
+  }
+
+
+  public override void RightPointerDown(ToolEvent te)
+  {
+    var gridIndex = te.GridIndex;
+
+    if (m_State == State.Idle)
+    {
+      m_PointerDownPosition = gridIndex;
+      m_PointerDragEndPosition = gridIndex;
+
+      Outline(m_ModificationOutliner);
+      EnterSelectingForModification();
+      PrintBoxDimensionsMessage();
     }
   }
 
@@ -108,12 +133,12 @@ public class PathTool : BlbTool
     {
       // This... cannot be....!!!!!
     }
-    else if (m_State == State.Selecting)
+    else if (m_State == State.SelectingForCreation)
     {
       var shouldPrint = m_PointerDragEndPosition != gridIndex;
       m_PointerDragEndPosition = gridIndex;
 
-      Outline();
+      Outline(m_CreationOutliner);
 
       if (shouldPrint)
         PrintBoxDimensionsMessage();
@@ -126,13 +151,34 @@ public class PathTool : BlbTool
       m_AnchorIconTransform.position = te.TileWorldPosition;
       m_AnchorPoint = gridIndex;
     }
-    else // m_State == State.PlacingPathPoints
+    else if (m_State == State.PlacingPathPoints)
     {
       var currentPathPoint = m_Path[m_Path.Count - 1] - m_AnchorPoint;
       UpdateCurrentPathPoint(gridIndex);
 
       if (currentPathPoint != gridIndex)
         PrintPathPointPositionsMessage();
+    }
+  }
+
+
+  public override void RightDrag(ToolEvent te)
+  {
+    var gridIndex = te.GridIndex;
+
+    if (m_State == State.Idle)
+    {
+      // This... cannot be....!!!!!
+    }
+    else if (m_State == State.SelectingForModification)
+    {
+      var shouldPrint = m_PointerDragEndPosition != gridIndex;
+      m_PointerDragEndPosition = gridIndex;
+
+      Outline(m_ModificationOutliner);
+
+      if (shouldPrint)
+        PrintBoxDimensionsMessage();
     }
   }
 
@@ -145,11 +191,11 @@ public class PathTool : BlbTool
     {
       // This... cannot be....!!!!!
     }
-    else if (m_State == State.Selecting)
+    else if (m_State == State.SelectingForCreation)
     {
       m_PointerDragEndPosition = gridIndex;
 
-      Outline();
+      Outline(m_CreationOutliner);
       GatherSelectedElements();
       EnterPlacingAnchorPoint();
     }
@@ -159,13 +205,48 @@ public class PathTool : BlbTool
 
       EnterPlacingPathPoints();
     }
-    else // m_State == State.PlacingPathPoints
+    else if (m_State == State.PlacingPathPoints)
     {
       var currentPathPoint = m_Path[m_Path.Count - 1] - m_AnchorPoint;
       UpdateCurrentPathPoint(gridIndex);
 
       if (currentPathPoint != gridIndex)
         PrintPathPointPositionsMessage();
+    }
+  }
+
+
+  public override void RightPointerUp(ToolEvent te)
+  {
+    if (m_State == State.SelectingForModification)
+    {
+      m_PointerDragEndPosition = te.GridIndex;
+
+      Outline(m_ModificationOutliner);
+      GatherSelectedElements();
+
+      if (AllSelectedPathsMatch())
+      {
+        if (m_SelectedElements.Count == 0 || m_SelectedElements[0].GetComponent<PathMover>() == null)
+        {
+          EnterIdle();
+
+          var message = "No path is selected, so there is nothing to modify";
+          StatusBar.Print(message);
+        }
+        else
+        {
+
+        }
+      }
+      else
+      {
+        EnterIdle();
+
+        var message = "Not all the selected elements have matching paths, " +
+          "so there is no single path to modify";
+        StatusBar.Print(message);
+      }
     }
   }
 
@@ -180,15 +261,16 @@ public class PathTool : BlbTool
     if (m_NodeIcons != null)
       ClearIcons();
 
-    m_Outliner.Disable();
+    m_CreationOutliner.Disable();
+    m_ModificationOutliner.Disable();
 
     StatusBar.Print(m_SelectedStatus);
   }
 
 
-  void EnterSelecting()
+  void EnterSelectingForCreation()
   {
-    m_State = State.Selecting;
+    m_State = State.SelectingForCreation;
   }
 
 
@@ -207,6 +289,12 @@ public class PathTool : BlbTool
     m_Path = new List<Vector2Int>();
     m_NodeIcons = new List<PathNodeIcon>();
     PrintPathPointMessage();
+  }
+
+
+  void EnterSelectingForModification()
+  {
+    m_State = State.SelectingForModification;
   }
 
 
@@ -244,6 +332,26 @@ public class PathTool : BlbTool
         m_SelectedElements.Add(m_TileGrid.Get(index));
       }
     }
+  }
+
+
+  bool AllSelectedPathsMatch()
+  {
+    if (m_SelectedElements.Count == 0)
+      return true;
+
+    var firstElement = m_SelectedElements[0];
+    var firstPathMover = firstElement.GetComponent<PathMover>();
+
+    foreach (var element in m_SelectedElements)
+    {
+      var pathMover = element.GetComponent<PathMover>();
+
+      if (!PathMover.SamePath(firstPathMover, pathMover))
+        return false;
+    }
+
+    return true;
   }
 
 
@@ -331,7 +439,25 @@ public class PathTool : BlbTool
   }
 
 
-  void Outline()
+  void DeletePath()
+  {
+    if (m_Path.Count <= 0)
+      return;
+
+    m_TileGrid.BeginBatch("Delete Path");
+
+    foreach (var element in m_SelectedElements)
+    {
+      var newState = element.ToState();
+      newState.Path = null;
+      m_TileGrid.AddRequest(element.m_GridIndex, newState, recomputeBounds: false);
+    }
+
+    m_TileGrid.EndBatch(createDialogs: false);
+  }
+
+
+  void Outline(Outliner outliner)
   {
     var min = m_PointerDownPosition;
     var max = m_PointerDragEndPosition;
@@ -355,9 +481,9 @@ public class PathTool : BlbTool
     var maxBounds = new Vector3(max.x, max.y);
 
     if (min == max)
-      m_Outliner.OutlineSinglePosition(minBounds);
+      outliner.OutlineSinglePosition(minBounds);
     else
-      m_Outliner.OutlineWithBounds(minBounds, maxBounds);
+      outliner.OutlineWithBounds(minBounds, maxBounds);
   }
 
 
@@ -366,7 +492,8 @@ public class PathTool : BlbTool
     if (m_State != State.Idle)
       EnterIdle();
 
-    m_Outliner.Disable();
+    m_CreationOutliner.Disable();
+    m_ModificationOutliner.Disable();
 
     base.Deactivate();
   }
@@ -387,7 +514,7 @@ public class PathTool : BlbTool
 
   void PrintAnchorPointMessage()
   {
-    StatusBar.Print("Next, <b>left-click</b> to place the path's <b>anchor point</b>");
+    StatusBar.Print("Next, <b>left-click</b> to place the path's <b>anchor point</b>, or press <b>Delete</b> to delete the selected path");
   }
 
 
