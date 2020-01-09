@@ -28,7 +28,7 @@ public class PathTool : BlbTool
   Vector2Int m_PointerDownPosition;
   Vector2Int m_PointerDragEndPosition;
   List<TileGrid.Element> m_SelectedElements;
-  Vector2Int m_AnchorPoint;
+  Vector2Int m_AnchorIndex;
   List<Vector2Int> m_Path;
   State m_State = State.Idle;
   Transform m_AnchorIconTransform;
@@ -96,10 +96,7 @@ public class PathTool : BlbTool
     }
     else if (m_State == State.PlacingAnchorPoint)
     {
-      m_AnchorPoint = gridIndex;
-      var anchorIcon = Instantiate(s_AnchorIconPrefab, te.TileWorldPosition, Quaternion.identity);
-      m_AnchorIconTransform = anchorIcon.transform;
-      PrintAnchorPointPositionMessage();
+      CreateAnchorIcon(gridIndex);
     }
     else if (m_State == State.PlacingPathPoints)
     {
@@ -145,15 +142,11 @@ public class PathTool : BlbTool
     }
     else if (m_State == State.PlacingAnchorPoint)
     {
-      if (m_AnchorPoint != gridIndex)
-        PrintAnchorPointPositionMessage();
-
-      m_AnchorIconTransform.position = te.TileWorldPosition;
-      m_AnchorPoint = gridIndex;
+      MoveAnchorIcon(gridIndex);
     }
     else if (m_State == State.PlacingPathPoints)
     {
-      var currentPathPoint = m_Path[m_Path.Count - 1] - m_AnchorPoint;
+      var currentPathPoint = m_Path[m_Path.Count - 1] - m_AnchorIndex;
       UpdateCurrentPathPoint(gridIndex);
 
       if (currentPathPoint != gridIndex)
@@ -201,13 +194,13 @@ public class PathTool : BlbTool
     }
     else if (m_State == State.PlacingAnchorPoint)
     {
-      m_AnchorPoint = gridIndex;
+      m_AnchorIndex = gridIndex;
 
       EnterPlacingPathPoints();
     }
     else if (m_State == State.PlacingPathPoints)
     {
-      var currentPathPoint = m_Path[m_Path.Count - 1] - m_AnchorPoint;
+      var currentPathPoint = m_Path[m_Path.Count - 1] - m_AnchorIndex;
       UpdateCurrentPathPoint(gridIndex);
 
       if (currentPathPoint != gridIndex)
@@ -236,7 +229,7 @@ public class PathTool : BlbTool
         }
         else
         {
-
+          EnterReadyToModify();
         }
       }
       else
@@ -298,6 +291,23 @@ public class PathTool : BlbTool
   }
 
 
+  void EnterReadyToModify()
+  {
+    m_State = State.ReadyToModify;
+
+    m_Path = new List<Vector2Int>();
+    m_NodeIcons = new List<PathNodeIcon>();
+
+    var anchorIndex = m_SelectedElements[0].m_GridIndex;
+    CreateAnchorIcon(anchorIndex);
+    PreparePathForModification();
+
+    var message = "Move path points with the <b>left mouse button</b>," +
+      " or move the anchor point with the <b>right mouse button</b>";
+    StatusBar.Print(message);
+  }
+
+
   void GatherSelectedElements()
   {
     var min = m_PointerDownPosition;
@@ -335,6 +345,27 @@ public class PathTool : BlbTool
   }
 
 
+  void CreateAnchorIcon(Vector2Int gridIndex)
+  {
+    m_AnchorIndex = gridIndex;
+    var anchorPosition = new Vector3(gridIndex.x, gridIndex.y, 0);
+    var anchorIcon = Instantiate(s_AnchorIconPrefab, anchorPosition, Quaternion.identity);
+    m_AnchorIconTransform = anchorIcon.transform;
+    PrintAnchorPointPositionMessage();
+  }
+
+
+  void MoveAnchorIcon(Vector2Int gridIndex)
+  {
+    if (m_AnchorIndex != gridIndex)
+      PrintAnchorPointPositionMessage();
+
+    var anchorPosition = new Vector3(gridIndex.x, gridIndex.y, 0);
+    m_AnchorIconTransform.position = anchorPosition;
+    m_AnchorIndex = gridIndex;
+  }
+
+
   bool AllSelectedPathsMatch()
   {
     if (m_SelectedElements.Count == 0)
@@ -357,8 +388,13 @@ public class PathTool : BlbTool
 
   void AddNewPathPoint(Vector2Int gridIndex)
   {
-    m_Path.Add(gridIndex - m_AnchorPoint);
+    m_Path.Add(gridIndex - m_AnchorIndex);
+    AddNewNodeIcon(gridIndex);
+  }
 
+
+  void AddNewNodeIcon(Vector2Int gridIndex)
+  {
     var icon = Instantiate(s_NodeIconPrefab);
     icon.MoveTo(gridIndex);
     m_NodeIcons.Add(icon);
@@ -370,7 +406,7 @@ public class PathTool : BlbTool
   void UpdateCurrentPathPoint(Vector2Int gridIndex)
   {
     var currentNodeIndex = m_Path.Count - 1;
-    m_Path[currentNodeIndex] = gridIndex - m_AnchorPoint;
+    m_Path[currentNodeIndex] = gridIndex - m_AnchorIndex;
     m_NodeIcons[currentNodeIndex].MoveTo(gridIndex);
 
     UpdateIcons();
@@ -457,6 +493,17 @@ public class PathTool : BlbTool
   }
 
 
+  void PreparePathForModification()
+  {
+    m_Path = m_SelectedElements[0].m_Path;
+
+    foreach (var gridIndex in m_Path)
+    {
+      AddNewNodeIcon(gridIndex + m_AnchorIndex);
+    }
+  }
+
+
   void Outline(Outliner outliner)
   {
     var min = m_PointerDownPosition;
@@ -520,8 +567,8 @@ public class PathTool : BlbTool
 
   void PrintAnchorPointPositionMessage()
   {
-    var x = m_AnchorPoint.x;
-    var y = m_AnchorPoint.y;
+    var x = m_AnchorIndex.x;
+    var y = m_AnchorIndex.y;
     var message = $"Placing anchor point at <color=#FFFF00><b>({x}, {y})</b></color>";
     StatusBar.Print(message);
   }
