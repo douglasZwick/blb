@@ -9,12 +9,15 @@ public class PathMover : MonoBehaviour
   public float m_Speed = 5.5f;
 
   Transform m_Transform;
-  public List<Vector3> m_Path { get; private set; }
   public List<Vector2Int> m_IndexList { get; private set; }
   int m_PathIndex = 0;
   Vector3 m_InitialPosition;
-  Vector3 m_CurrentDestination;
+  Vector3 m_Start;
+  Vector3 m_End;
+  Vector3 m_Difference;
   bool m_Loop = false;
+  float m_Duration;
+  float m_Timer = 0;
 
 
   private void Awake()
@@ -36,29 +39,23 @@ public class PathMover : MonoBehaviour
 
   void Update()
   {
-    var currentPosition = m_Transform.position;
-    var difference = m_CurrentDestination - currentPosition;
-    var direction = difference.normalized;
-    var distance = difference.magnitude;
-    var dPosMagnitude = m_Speed * Time.deltaTime;
+    m_Timer += Time.deltaTime;
 
-    if (dPosMagnitude >= distance)
+    if (m_Timer >= m_Duration)
     {
-      MoveTo(m_CurrentDestination);
+      m_Timer -= m_Duration;
       GetNewDestination();
     }
-    else
-    {
-      var dPos = direction * dPosMagnitude;
-      MoveBy(dPos);
-    }
+
+    var interpolant = m_Timer / m_Duration;
+    var newPosition = m_Start + m_Difference * interpolant;
+    MoveTo(newPosition);
   }
 
 
   public void Setup(List<Vector2Int> indexList)
   {
-    m_IndexList = indexList;
-    m_Path = null;
+    m_IndexList = null;
 
     if (indexList == null)
       return;
@@ -76,14 +73,9 @@ public class PathMover : MonoBehaviour
     if (allZero)
       return;
 
-    m_Path = new List<Vector3>(count);
+    m_IndexList = indexList;
     m_InitialPosition = m_Transform.position;
-
-    foreach (var index in indexList)
-    {
-      var position = new Vector3(index.x, index.y, 0) + m_InitialPosition;
-      m_Path.Add(position);
-    }
+    m_End = m_InitialPosition;
 
     m_Loop = indexList[count - 1] == Vector2Int.zero;
 
@@ -94,47 +86,68 @@ public class PathMover : MonoBehaviour
   void ResetPath()
   {
     MoveTo(m_InitialPosition);
+    m_Timer = 0;
     m_PathIndex = 0;
+    m_End = m_InitialPosition;
     SetDestination();
   }
 
 
   void OnPlayModeToggled(bool isInPlayMode)
   {
-    ResetPath();
-
     if (isInPlayMode)
     {
-      enabled = m_Path != null;
+      enabled = m_IndexList != null;
+
+      if (enabled)
+        ResetPath();
     }
     else
     {
       enabled = false;
+
+      ResetPath();
     }
   }
 
 
   void OnPreHeroReturn()
   {
-    if (m_Path != null)
+    if (m_IndexList != null)
       ResetPath();
   }
 
 
   void GetNewDestination()
   {
-    ++m_PathIndex;
+    var pathLength = m_IndexList.Count;
 
-    if (m_PathIndex >= m_Path.Count)
+    for (var checkCounter = 0; checkCounter < pathLength; ++checkCounter)
     {
-      m_PathIndex = 0;
+      ++m_PathIndex;
 
-      if (!m_Loop)
+      if (m_PathIndex >= pathLength)
       {
-        enabled = false;
+        m_PathIndex = 0;
+
+        if (!m_Loop)
+        {
+          enabled = false;
+        }
+
+        // Otherwise, the path is a closed loop
       }
 
-      // Otherwise, the path is a closed loop
+      var currentNode = m_IndexList[m_PathIndex];
+      var nextIndex = m_PathIndex + 1;
+
+      if (nextIndex >= pathLength)
+        nextIndex = 0;
+
+      var nextNode = m_IndexList[nextIndex];
+
+      if (currentNode != nextNode)
+        break;
     }
 
     SetDestination();
@@ -143,19 +156,19 @@ public class PathMover : MonoBehaviour
 
   void SetDestination()
   {
-    m_CurrentDestination = m_Path[m_PathIndex];
+    var currentNode = m_IndexList[m_PathIndex];
+
+    m_Start = m_End;
+    m_End = new Vector3(currentNode.x, currentNode.y, 0) + m_InitialPosition;
+    m_Difference = m_End - m_Start;
+    var distance = m_Difference.magnitude;
+    m_Duration = distance / m_Speed;
   }
 
 
   void MoveTo(Vector3 position)
   {
     m_Transform.position = position;
-  }
-
-
-  void MoveBy(Vector3 offset)
-  {
-    m_Transform.position += offset;
   }
 
 

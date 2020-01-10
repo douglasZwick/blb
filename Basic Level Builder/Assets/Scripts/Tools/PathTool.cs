@@ -190,7 +190,11 @@ public class PathTool : BlbTool
 
       Outline(m_CreationOutliner);
       GatherSelectedElements();
-      EnterPlacingAnchorPoint();
+
+      if (m_SelectedElements.Count == 0)
+        EnterIdle();
+      else
+        EnterPlacingAnchorPoint();
     }
     else if (m_State == State.PlacingAnchorPoint)
     {
