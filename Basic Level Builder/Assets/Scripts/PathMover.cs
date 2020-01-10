@@ -39,6 +39,10 @@ public class PathMover : MonoBehaviour
 
   void Update()
   {
+    var interpolant = m_Timer / m_Duration;
+    var newPosition = m_Start + m_Difference * interpolant;
+    MoveTo(newPosition);
+
     m_Timer += Time.deltaTime;
 
     if (m_Timer >= m_Duration)
@@ -46,10 +50,6 @@ public class PathMover : MonoBehaviour
       m_Timer -= m_Duration;
       GetNewDestination();
     }
-
-    var interpolant = m_Timer / m_Duration;
-    var newPosition = m_Start + m_Difference * interpolant;
-    MoveTo(newPosition);
   }
 
 
