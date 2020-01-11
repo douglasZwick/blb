@@ -39,6 +39,13 @@ public class PathNodeIcon : MonoBehaviour
   }
 
 
+  public void MoveBy(Vector2Int delta)
+  {
+    m_GridIndex += delta;
+    m_Transform.position = new Vector3(m_GridIndex.x, m_GridIndex.y, 0);
+  }
+
+
   public void Show()
   {
     m_IconSprite.enabled = true;

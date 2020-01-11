@@ -29,10 +29,12 @@ public class PathTool : BlbTool
   Vector2Int m_PointerDragEndPosition;
   List<TileGrid.Element> m_SelectedElements;
   Vector2Int m_AnchorIndex;
+  Vector2Int m_AnchorStartingIndex; // used for moving the anchor
   List<Vector2Int> m_Path;
   State m_State = State.Idle;
   Transform m_AnchorIconTransform;
   List<PathNodeIcon> m_NodeIcons;
+  int m_IndexBeingModified;
 
 
   void Start()
@@ -64,7 +66,8 @@ public class PathTool : BlbTool
     {
       EnterIdle();
     }
-    else if (Input.GetButtonDown("Submit") && m_State == State.PlacingPathPoints)
+    else if (Input.GetButtonDown("Submit") &&
+      (m_State == State.PlacingPathPoints || m_State == State.ReadyToModify))
     {
       AssignPathPoints();
       EnterIdle();
@@ -96,12 +99,22 @@ public class PathTool : BlbTool
     }
     else if (m_State == State.PlacingAnchorPoint)
     {
-      CreateAnchorIcon(gridIndex);
+      SetAnchor(gridIndex);
     }
     else if (m_State == State.PlacingPathPoints)
     {
       AddNewPathPoint(gridIndex);
       PrintPathPointPositionsMessage();
+    }
+    else if (m_State == State.ReadyToModify)
+    {
+      var index = GetPathIndexAtGridIndex(gridIndex);
+
+      if (index != null)
+      {
+        m_IndexBeingModified = index.Value;
+        EnterModifyingPathPoint();
+      }
     }
   }
 
@@ -118,6 +131,14 @@ public class PathTool : BlbTool
       Outline(m_ModificationOutliner);
       EnterSelectingForModification();
       PrintBoxDimensionsMessage();
+    }
+    else if (m_State == State.ReadyToModify)
+    {
+      m_PointerDownPosition = gridIndex;
+      m_PointerDragEndPosition = gridIndex;
+      m_AnchorStartingIndex = m_AnchorIndex;
+
+      PrintAnchorPointPositionMessage();
     }
   }
 
@@ -142,7 +163,7 @@ public class PathTool : BlbTool
     }
     else if (m_State == State.PlacingAnchorPoint)
     {
-      MoveAnchorIcon(gridIndex);
+      MoveAnchor(gridIndex);
     }
     else if (m_State == State.PlacingPathPoints)
     {
@@ -151,6 +172,10 @@ public class PathTool : BlbTool
 
       if (currentPathPoint != gridIndex)
         PrintPathPointPositionsMessage();
+    }
+    else if (m_State == State.ModifyingPathPoint)
+    {
+      MovePathPoint(gridIndex);
     }
   }
 
@@ -172,6 +197,13 @@ public class PathTool : BlbTool
 
       if (shouldPrint)
         PrintBoxDimensionsMessage();
+    }
+    else if (m_State == State.ReadyToModify)
+    {
+      m_PointerDragEndPosition = gridIndex;
+
+      var difference = m_PointerDragEndPosition - m_PointerDownPosition;
+      MoveAnchor(m_AnchorStartingIndex + difference);
     }
   }
 
@@ -209,6 +241,11 @@ public class PathTool : BlbTool
 
       if (currentPathPoint != gridIndex)
         PrintPathPointPositionsMessage();
+    }
+    else if (m_State == State.ModifyingPathPoint)
+    {
+      MovePathPoint(gridIndex);
+      EnterReadyToModify();
     }
   }
 
@@ -303,12 +340,21 @@ public class PathTool : BlbTool
     m_NodeIcons = new List<PathNodeIcon>();
 
     var anchorIndex = m_SelectedElements[0].m_GridIndex;
-    CreateAnchorIcon(anchorIndex);
+    SetAnchor(anchorIndex);
     PreparePathForModification();
 
-    var message = "Move path points with the <b>left mouse button</b>," +
-      " or move the anchor point with the <b>right mouse button</b>";
+    var message = "Move path points with the <b>left mouse button</b>, " +
+      "or move the anchor point with the <b>right mouse button</b>. " +
+      "Press <b>Space</b> to finish.";
     StatusBar.Print(message);
+  }
+
+  
+  void EnterModifyingPathPoint()
+  {
+    m_State = State.ModifyingPathPoint;
+
+    PrintPathPointModificationMessage();
   }
 
 
@@ -349,7 +395,7 @@ public class PathTool : BlbTool
   }
 
 
-  void CreateAnchorIcon(Vector2Int gridIndex)
+  void SetAnchor(Vector2Int gridIndex)
   {
     m_AnchorIndex = gridIndex;
     var anchorPosition = new Vector3(gridIndex.x, gridIndex.y, 0);
@@ -359,14 +405,22 @@ public class PathTool : BlbTool
   }
 
 
-  void MoveAnchorIcon(Vector2Int gridIndex)
+  void MoveAnchor(Vector2Int gridIndex)
   {
-    if (m_AnchorIndex != gridIndex)
+    var oldAnchorIndex = m_AnchorIndex;
+    m_AnchorIndex = gridIndex;
+
+    if (m_AnchorIndex != oldAnchorIndex)
       PrintAnchorPointPositionMessage();
 
     var anchorPosition = new Vector3(gridIndex.x, gridIndex.y, 0);
     m_AnchorIconTransform.position = anchorPosition;
     m_AnchorIndex = gridIndex;
+
+    var delta = m_AnchorIndex - oldAnchorIndex;
+
+    foreach (var nodeIcon in m_NodeIcons)
+      nodeIcon.MoveBy(delta);
   }
 
 
@@ -407,6 +461,17 @@ public class PathTool : BlbTool
   }
 
 
+  void MovePathPoint(Vector2Int gridIndex)
+  {
+    m_Path[m_IndexBeingModified] = gridIndex - m_AnchorIndex;
+    m_NodeIcons[m_IndexBeingModified].MoveTo(gridIndex);
+
+    UpdateIcons();
+
+    PrintPathPointModificationMessage();
+  }
+
+
   void UpdateCurrentPathPoint(Vector2Int gridIndex)
   {
     var currentNodeIndex = m_Path.Count - 1;
@@ -414,6 +479,23 @@ public class PathTool : BlbTool
     m_NodeIcons[currentNodeIndex].MoveTo(gridIndex);
 
     UpdateIcons();
+  }
+
+
+  int? GetPathIndexAtGridIndex(Vector2Int gridIndex)
+  {
+    var adjustedIndex = gridIndex - m_AnchorIndex;
+    var pathLength = m_Path.Count;
+
+    for (var i = pathLength - 1; i >= 0; --i)
+    {
+      var node = m_Path[i];
+
+      if (node == adjustedIndex)
+        return i;
+    }
+
+    return null;
   }
 
 
@@ -502,9 +584,7 @@ public class PathTool : BlbTool
     m_Path = m_SelectedElements[0].m_Path;
 
     foreach (var gridIndex in m_Path)
-    {
       AddNewNodeIcon(gridIndex + m_AnchorIndex);
-    }
   }
 
 
@@ -573,7 +653,7 @@ public class PathTool : BlbTool
   {
     var x = m_AnchorIndex.x;
     var y = m_AnchorIndex.y;
-    var message = $"Placing anchor point at <color=#FFFF00><b>({x}, {y})</b></color>";
+    var message = $"Anchor point at <color=#FFFF00><b>({x}, {y})</b></color>";
     StatusBar.Print(message);
   }
 
@@ -622,6 +702,16 @@ public class PathTool : BlbTool
 
     message += " | Press <b>Space</b> to finish";
 
+    StatusBar.Print(message);
+  }
+
+
+  void PrintPathPointModificationMessage()
+  {
+    var index = m_IndexBeingModified;
+    var node = m_Path[index];
+    var message = $"Path point <color=#FFFF00><b>{index}</b></color> " +
+      $"is now at <color=#FFFF00><b>{node}</b></color>";
     StatusBar.Print(message);
   }
 
