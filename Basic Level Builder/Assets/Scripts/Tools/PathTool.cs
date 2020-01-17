@@ -121,6 +121,10 @@ public class PathTool : BlbTool
 
   public override void RightPointerDown(ToolEvent te)
   {
+    // TODO: gotta fix this as ASAP as possible
+    // but for now, it's borken, so I gotta get outta here
+    return;
+
     var gridIndex = te.GridIndex;
 
     if (m_State == State.Idle)
@@ -244,7 +248,10 @@ public class PathTool : BlbTool
     }
     else if (m_State == State.ModifyingPathPoint)
     {
-      MovePathPoint(gridIndex);
+      // TODO: this is a terrible hack but I gotta go with it for now
+      foreach (var icon in m_NodeIcons)
+        Destroy(icon);
+
       EnterReadyToModify();
     }
   }
@@ -334,14 +341,15 @@ public class PathTool : BlbTool
 
   void EnterReadyToModify()
   {
-    m_State = State.ReadyToModify;
-
     m_Path = new List<Vector2Int>();
     m_NodeIcons = new List<PathNodeIcon>();
 
     var anchorIndex = m_SelectedElements[0].m_GridIndex;
     SetAnchor(anchorIndex);
+
     PreparePathForModification();
+
+    m_State = State.ReadyToModify;
 
     var message = "Move path points with the <b>left mouse button</b>, " +
       "or move the anchor point with the <b>right mouse button</b>. " +
