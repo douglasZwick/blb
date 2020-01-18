@@ -29,12 +29,12 @@ public class PathTool : BlbTool
   Vector2Int m_PointerDragEndPosition;
   List<TileGrid.Element> m_SelectedElements;
   Vector2Int m_AnchorIndex;
-  Vector2Int m_AnchorStartingIndex; // used for moving the anchor
+  //Vector2Int m_AnchorStartingIndex; // used for moving the anchor
   List<Vector2Int> m_Path;
   State m_State = State.Idle;
   Transform m_AnchorIconTransform;
   List<PathNodeIcon> m_NodeIcons;
-  int m_IndexBeingModified;
+  //int m_IndexBeingModified;
 
 
   void Start()
@@ -106,45 +106,45 @@ public class PathTool : BlbTool
       AddNewPathPoint(gridIndex);
       PrintPathPointPositionsMessage();
     }
-    else if (m_State == State.ReadyToModify)
-    {
-      var index = GetPathIndexAtGridIndex(gridIndex);
+    //else if (m_State == State.ReadyToModify)
+    //{
+    //  var index = GetPathIndexAtGridIndex(gridIndex);
 
-      if (index != null)
-      {
-        m_IndexBeingModified = index.Value;
-        EnterModifyingPathPoint();
-      }
-    }
+    //  if (index != null)
+    //  {
+    //    m_IndexBeingModified = index.Value;
+    //    EnterModifyingPathPoint();
+    //  }
+    //}
   }
 
 
-  public override void RightPointerDown(ToolEvent te)
-  {
-    // TODO: gotta fix this as ASAP as possible
-    // but for now, it's borken, so I gotta get outta here
-    return;
+  // TODO: gotta fix this as ASAP as possible
+  // but for now, it's borken, so I gotta comment
+  // everything out
 
-    var gridIndex = te.GridIndex;
+  //public override void RightPointerDown(ToolEvent te)
+  //{
+  //  var gridIndex = te.GridIndex;
 
-    if (m_State == State.Idle)
-    {
-      m_PointerDownPosition = gridIndex;
-      m_PointerDragEndPosition = gridIndex;
+  //  if (m_State == State.Idle)
+  //  {
+  //    m_PointerDownPosition = gridIndex;
+  //    m_PointerDragEndPosition = gridIndex;
 
-      Outline(m_ModificationOutliner);
-      EnterSelectingForModification();
-      PrintBoxDimensionsMessage();
-    }
-    else if (m_State == State.ReadyToModify)
-    {
-      m_PointerDownPosition = gridIndex;
-      m_PointerDragEndPosition = gridIndex;
-      m_AnchorStartingIndex = m_AnchorIndex;
+  //    Outline(m_ModificationOutliner);
+  //    EnterSelectingForModification();
+  //    PrintBoxDimensionsMessage();
+  //  }
+  //  else if (m_State == State.ReadyToModify)
+  //  {
+  //    m_PointerDownPosition = gridIndex;
+  //    m_PointerDragEndPosition = gridIndex;
+  //    m_AnchorStartingIndex = m_AnchorIndex;
 
-      PrintAnchorPointPositionMessage();
-    }
-  }
+  //    PrintAnchorPointPositionMessage();
+  //  }
+  //}
 
 
   public override void LeftDrag(ToolEvent te)
@@ -177,39 +177,39 @@ public class PathTool : BlbTool
       if (currentPathPoint != gridIndex)
         PrintPathPointPositionsMessage();
     }
-    else if (m_State == State.ModifyingPathPoint)
-    {
-      MovePathPoint(gridIndex);
-    }
+    //else if (m_State == State.ModifyingPathPoint)
+    //{
+    //  MovePathPoint(gridIndex);
+    //}
   }
 
 
-  public override void RightDrag(ToolEvent te)
-  {
-    var gridIndex = te.GridIndex;
+  //public override void RightDrag(ToolEvent te)
+  //{
+  //  var gridIndex = te.GridIndex;
 
-    if (m_State == State.Idle)
-    {
-      // This... cannot be....!!!!!
-    }
-    else if (m_State == State.SelectingForModification)
-    {
-      var shouldPrint = m_PointerDragEndPosition != gridIndex;
-      m_PointerDragEndPosition = gridIndex;
+  //  if (m_State == State.Idle)
+  //  {
+  //    // This... cannot be....!!!!!
+  //  }
+  //  else if (m_State == State.SelectingForModification)
+  //  {
+  //    var shouldPrint = m_PointerDragEndPosition != gridIndex;
+  //    m_PointerDragEndPosition = gridIndex;
 
-      Outline(m_ModificationOutliner);
+  //    Outline(m_ModificationOutliner);
 
-      if (shouldPrint)
-        PrintBoxDimensionsMessage();
-    }
-    else if (m_State == State.ReadyToModify)
-    {
-      m_PointerDragEndPosition = gridIndex;
+  //    if (shouldPrint)
+  //      PrintBoxDimensionsMessage();
+  //  }
+  //  else if (m_State == State.ReadyToModify)
+  //  {
+  //    m_PointerDragEndPosition = gridIndex;
 
-      var difference = m_PointerDragEndPosition - m_PointerDownPosition;
-      MoveAnchor(m_AnchorStartingIndex + difference);
-    }
-  }
+  //    var difference = m_PointerDragEndPosition - m_PointerDownPosition;
+  //    MoveAnchor(m_AnchorStartingIndex + difference);
+  //  }
+  //}
 
 
   public override void LeftPointerUp(ToolEvent te)
@@ -246,50 +246,50 @@ public class PathTool : BlbTool
       if (currentPathPoint != gridIndex)
         PrintPathPointPositionsMessage();
     }
-    else if (m_State == State.ModifyingPathPoint)
-    {
-      // TODO: this is a terrible hack but I gotta go with it for now
-      foreach (var icon in m_NodeIcons)
-        Destroy(icon);
+    //else if (m_State == State.ModifyingPathPoint)
+    //{
+    //  // TODO: this is a terrible hack but I gotta go with it for now
+    //  foreach (var icon in m_NodeIcons)
+    //    Destroy(icon);
 
-      EnterReadyToModify();
-    }
+    //  EnterReadyToModify();
+    //}
   }
 
 
-  public override void RightPointerUp(ToolEvent te)
-  {
-    if (m_State == State.SelectingForModification)
-    {
-      m_PointerDragEndPosition = te.GridIndex;
+  //public override void RightPointerUp(ToolEvent te)
+  //{
+  //  if (m_State == State.SelectingForModification)
+  //  {
+  //    m_PointerDragEndPosition = te.GridIndex;
 
-      Outline(m_ModificationOutliner);
-      GatherSelectedElements();
+  //    Outline(m_ModificationOutliner);
+  //    GatherSelectedElements();
 
-      if (AllSelectedPathsMatch())
-      {
-        if (m_SelectedElements.Count == 0 || m_SelectedElements[0].GetComponent<PathMover>() == null)
-        {
-          EnterIdle();
+  //    if (AllSelectedPathsMatch())
+  //    {
+  //      if (m_SelectedElements.Count == 0 || m_SelectedElements[0].GetComponent<PathMover>() == null)
+  //      {
+  //        EnterIdle();
 
-          var message = "No path is selected, so there is nothing to modify";
-          StatusBar.Print(message);
-        }
-        else
-        {
-          EnterReadyToModify();
-        }
-      }
-      else
-      {
-        EnterIdle();
+  //        var message = "No path is selected, so there is nothing to modify";
+  //        StatusBar.Print(message);
+  //      }
+  //      else
+  //      {
+  //        EnterReadyToModify();
+  //      }
+  //    }
+  //    else
+  //    {
+  //      EnterIdle();
 
-        var message = "Not all the selected elements have matching paths, " +
-          "so there is no single path to modify";
-        StatusBar.Print(message);
-      }
-    }
-  }
+  //      var message = "Not all the selected elements have matching paths, " +
+  //        "so there is no single path to modify";
+  //      StatusBar.Print(message);
+  //    }
+  //  }
+  //}
 
 
   void EnterIdle()
@@ -358,12 +358,12 @@ public class PathTool : BlbTool
   }
 
   
-  void EnterModifyingPathPoint()
-  {
-    m_State = State.ModifyingPathPoint;
+  //void EnterModifyingPathPoint()
+  //{
+  //  m_State = State.ModifyingPathPoint;
 
-    PrintPathPointModificationMessage();
-  }
+  //  PrintPathPointModificationMessage();
+  //}
 
 
   void GatherSelectedElements()
@@ -427,8 +427,9 @@ public class PathTool : BlbTool
 
     var delta = m_AnchorIndex - oldAnchorIndex;
 
-    foreach (var nodeIcon in m_NodeIcons)
-      nodeIcon.MoveBy(delta);
+    if (m_NodeIcons != null)
+      foreach (var nodeIcon in m_NodeIcons)
+        nodeIcon.MoveBy(delta);
   }
 
 
@@ -469,15 +470,15 @@ public class PathTool : BlbTool
   }
 
 
-  void MovePathPoint(Vector2Int gridIndex)
-  {
-    m_Path[m_IndexBeingModified] = gridIndex - m_AnchorIndex;
-    m_NodeIcons[m_IndexBeingModified].MoveTo(gridIndex);
+  //void MovePathPoint(Vector2Int gridIndex)
+  //{
+  //  m_Path[m_IndexBeingModified] = gridIndex - m_AnchorIndex;
+  //  m_NodeIcons[m_IndexBeingModified].MoveTo(gridIndex);
 
-    UpdateIcons();
+  //  UpdateIcons();
 
-    PrintPathPointModificationMessage();
-  }
+  //  PrintPathPointModificationMessage();
+  //}
 
 
   void UpdateCurrentPathPoint(Vector2Int gridIndex)
@@ -714,14 +715,14 @@ public class PathTool : BlbTool
   }
 
 
-  void PrintPathPointModificationMessage()
-  {
-    var index = m_IndexBeingModified;
-    var node = m_Path[index];
-    var message = $"Path point <color=#FFFF00><b>{index}</b></color> " +
-      $"is now at <color=#FFFF00><b>{node}</b></color>";
-    StatusBar.Print(message);
-  }
+  //void PrintPathPointModificationMessage()
+  //{
+  //  var index = m_IndexBeingModified;
+  //  var node = m_Path[index];
+  //  var message = $"Path point <color=#FFFF00><b>{index}</b></color> " +
+  //    $"is now at <color=#FFFF00><b>{node}</b></color>";
+  //  StatusBar.Print(message);
+  //}
 
 
   private void OnDestroy()
@@ -729,3 +730,7 @@ public class PathTool : BlbTool
     GlobalData.PlayModePreToggle -= OnPlayModePreToggle;
   }
 }
+
+
+// <b><color=#FFA0CB>Path Tool</color></b> : <b>Left-drag</b> to box a selection
+// for <b>path creation</b>, or <b>right-drag</b> to box a selection for <b>path modification</b>

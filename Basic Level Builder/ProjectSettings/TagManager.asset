@@ -65,7 +65,7 @@ TagManager:
   - name: SelectionHighlight
     uniqueID: 491013293
     locked: 0
-  - name: Hero
+  - name: Character
     uniqueID: 3442733287
     locked: 0
   - name: UI

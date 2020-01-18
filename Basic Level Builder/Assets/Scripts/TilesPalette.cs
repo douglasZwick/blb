@@ -44,6 +44,7 @@ public class TilesPalette : MonoBehaviour
       { TileType.BG_LEFT_INV,     "Prefabs/Tiles/Tile_BG_Left_Inv" },
       { TileType.BG_RIGHT_INV,    "Prefabs/Tiles/Tile_BG_Right_Inv" },
       { TileType.MOVESTER,        "Prefabs/Tiles/Tile_Movester" },
+      { TileType.GOON,            "Prefabs/Tiles/Tile_Goon" },
     };
 
     // loop through the above dictionary

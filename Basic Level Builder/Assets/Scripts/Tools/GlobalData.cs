@@ -37,6 +37,7 @@ public enum TileType
   BG_LEFT_INV,
   BG_RIGHT_INV,
   MOVESTER,
+  GOON,
 }
 
 public enum TileColor
@@ -65,7 +66,7 @@ public enum Direction
 **/
 public static class GlobalData
 {
-  public static string s_Version = "0.9.30";
+  public static string s_Version = "0.9.40";
 
   /************************************************************************************/
   /************************************************************************************/
