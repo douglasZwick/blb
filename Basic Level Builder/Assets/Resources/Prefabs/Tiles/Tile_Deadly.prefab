@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 25712228652587004}
   - component: {fileID: 943375513558150438}
   - component: {fileID: 6748563365592518047}
-  - component: {fileID: -5801386293874173298}
   m_Layer: 16
   m_Name: Tile_Deadly
   m_TagString: Deadly
@@ -58,6 +57,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -107,15 +107,3 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.8, y: 0.8}
   m_EdgeRadius: 0
---- !u!114 &-5801386293874173298
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6624018820151266697}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25da19e2f4d8387409cba362ad2a5f32, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

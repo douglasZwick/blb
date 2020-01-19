@@ -112,9 +112,6 @@ public class EyesController : MonoBehaviour
     m_LookSequence = ActionMaster.Actions.Sequence();
     m_BlinkSequence = ActionMaster.Actions.Sequence();
     BlinkDelay();
-
-    GlobalData.HeroDied += OnHeroDied;
-    GlobalData.HeroReturned += OnHeroReturned;
   }
 
 
@@ -208,7 +205,7 @@ public class EyesController : MonoBehaviour
   }
 
 
-  void OnHeroDied()
+  public void OnDied(HealthEventData eventData)
   {
     m_LeftEyeSprite.enabled = false;
     m_RightEyeSprite.enabled = false;
@@ -219,7 +216,7 @@ public class EyesController : MonoBehaviour
   }
 
 
-  void OnHeroReturned()
+  public void OnReturned(HealthEventData eventData)
   {
     m_LeftEyeSprite.enabled = true;
     m_RightEyeSprite.enabled = true;
@@ -256,12 +253,5 @@ public class EyesController : MonoBehaviour
         // eventually something may go here
         break;
     }
-  }
-
-
-  private void OnDestroy()
-  {
-    GlobalData.HeroDied -= OnHeroDied;
-    GlobalData.HeroReturned -= OnHeroReturned;
   }
 }

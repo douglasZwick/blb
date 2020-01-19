@@ -1070,6 +1070,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_MovementSpeed: 11
   m_JumpSpeed: 30
+  m_StompBounceSpeed: 25
   m_TerminalVelocity: 15
   m_FeetCollider: {fileID: 6481017040171128904}
   m_Events:
@@ -1239,6 +1240,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb280ed21675da343b0070dbb38a8eec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_IsTheHero: 1
+  m_KilledByDeadly: 1
+  m_KilledByEnemy: 1
+  m_Stomper: 1
+  m_StomperRB: {fileID: 6481017039112826945}
   m_Events:
     Died:
       m_PersistentCalls:
@@ -1321,6 +1327,17 @@ MonoBehaviour:
             m_BoolArgument: 0
           m_CallState: 2
         - m_Target: {fileID: 7272017177933610804}
+          m_MethodName: OnDied
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: 1874105162937672662}
           m_MethodName: OnDied
           m_Mode: 0
           m_Arguments:
@@ -1422,6 +1439,31 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+        - m_Target: {fileID: 1874105162937672662}
+          m_MethodName: OnReturned
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+    StompedEnemy:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 4855754432161948426}
+          m_MethodName: OnStompedEnemy
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!114 &7059984292627058281
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1468,6 +1510,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d35db0952f8473e4bb43c5a5a32c59fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_IsTheHero: 1
   m_DeathSpeed: 30
   m_DeathAngularVelocity: 360
   m_DeathDuration: 0.5

@@ -51494,7 +51494,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2031376951}
   - component: {fileID: 2031376952}
-  - component: {fileID: 2031376953}
   - component: {fileID: 2031376954}
   - component: {fileID: 2031376955}
   m_Layer: 0
@@ -51543,22 +51542,6 @@ MonoBehaviour:
   m_WorldExtentsOutliner: {fileID: 318728523}
   m_MinBounds: {x: 3.4028235e+38, y: 3.4028235e+38, z: 0}
   m_MaxBounds: {x: -3.4028235e+38, y: -3.4028235e+38, z: 0}
---- !u!114 &2031376953
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2031376950}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a857e08fcac773e43a554d5819acedab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Color0: {r: 0.65, g: 0.0662745, b: 0.16313724, a: 1}
-  m_Color1: {r: 1, g: 0.100000024, b: 0.2500003, a: 1}
-  m_Period: 2
-  m_Exponent: 2.5
 --- !u!114 &2031376954
 MonoBehaviour:
   m_ObjectHideFlags: 0

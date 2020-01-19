@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlatformerHeroDeathEffects : MonoBehaviour
+public class PlatformerCharacterDeathEffects : MonoBehaviour
 {
-  public float m_DeathSpeed = 50;
-  public float m_DeathAngularVelocity = 180;
+  public bool m_IsTheHero = false;
+  public float m_DeathSpeed = 30;
+  public float m_DeathAngularVelocity = 360;
   public float m_DeathDuration = 0.5f;
   public SpriteRenderer m_BodySpriteRenderer;
 
@@ -39,7 +40,8 @@ public class PlatformerHeroDeathEffects : MonoBehaviour
 
     enabled = false;
 
-    GlobalData.DispatchHeroDied();
+    if (m_IsTheHero)
+      GlobalData.DispatchHeroDied();
 
     m_Rigidbody.freezeRotation = false;
     var velocity = m_Rigidbody.velocity;

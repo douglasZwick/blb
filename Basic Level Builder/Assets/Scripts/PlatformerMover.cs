@@ -8,6 +8,7 @@ public class PlatformerMover : MonoBehaviour
 {
   public float m_MovementSpeed = 8;
   public float m_JumpSpeed = 20;
+  public float m_StompBounceSpeed = 10;
   public float m_TerminalVelocity = 15;
   public Collider2D m_FeetCollider;
 
@@ -50,7 +51,7 @@ public class PlatformerMover : MonoBehaviour
   }
 
 
-  void OnModeStarted(bool isInPlayMode)
+  public void OnModeStarted(bool isInPlayMode)
   {
     enabled = true;
     m_Rigidbody.isKinematic = false;
@@ -192,6 +193,14 @@ public class PlatformerMover : MonoBehaviour
   void LeaveGround()
   {
     m_Events.LeftGround.Invoke();
+  }
+
+
+  public void OnStompedEnemy(HealthEventData eventData)
+  {
+    var velocity = m_Rigidbody.velocity;
+    velocity.y = m_StompBounceSpeed;
+    m_Rigidbody.velocity = velocity;
   }
 
 

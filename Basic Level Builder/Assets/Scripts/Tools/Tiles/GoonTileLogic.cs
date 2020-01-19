@@ -10,6 +10,7 @@ public class GoonTileLogic : MonoBehaviour
   Transform m_Transform;
   TileDirection m_TileDirection;
   GameObject m_Goon;
+  bool m_HeroHasReturned = false;
 
 
   private void Awake()
@@ -19,31 +20,58 @@ public class GoonTileLogic : MonoBehaviour
 
     GlobalData.PlayModePreToggle += OnPlayModePreToggle;
     GlobalData.PlayModeToggled += OnPlayModeToggled;
+    GlobalData.HeroReturned += OnHeroReturned;
   }
 
 
   void OnPlayModePreToggle(bool isInPlayMode)
   {
-    if (isInPlayMode)
-    {
-      m_Goon = Instantiate(m_GoonPrefab, m_Transform.position, Quaternion.identity);
+    m_HeroHasReturned = false;
 
-      // set direction stuff here
-      var tileDirection = m_Goon.GetComponent<TileDirection>();
-      if (tileDirection != null)
-        tileDirection.Initialize(m_TileDirection.m_Direction);
-    }
+    if (isInPlayMode)
+      CreateGoon();
   }
 
 
   void OnPlayModeToggled(bool isInPlayMode)
   {
     foreach (var spriteRenderer in m_SpriteRenderers)
-    {
       spriteRenderer.enabled = !isInPlayMode;
-    }
 
-    if (!isInPlayMode && m_Goon != null)
+    if (!isInPlayMode)
+      AttemptDestroyGoon();
+  }
+
+
+  void OnHeroReturned()
+  {
+    m_HeroHasReturned = true;
+
+    AttemptDestroyGoon();
+    CreateGoon();
+  }
+
+
+  void CreateGoon()
+  {
+    m_Goon = Instantiate(m_GoonPrefab, m_Transform.position, Quaternion.identity);
+
+    // set direction stuff here
+    var tileDirection = m_Goon.GetComponent<TileDirection>();
+    if (tileDirection != null)
+      tileDirection.Initialize(m_TileDirection.m_Direction);
+
+    if (m_HeroHasReturned)
+    {
+      var platformerMover = m_Goon.GetComponent<PlatformerMover>();
+      platformerMover.OnModeStarted(true);
+    }
+  }
+
+
+  void AttemptDestroyGoon()
+  {
+    if (m_Goon != null)
       Destroy(m_Goon);
   }
 
@@ -52,5 +80,6 @@ public class GoonTileLogic : MonoBehaviour
   {
     GlobalData.PlayModePreToggle -= OnPlayModePreToggle;
     GlobalData.PlayModeToggled -= OnPlayModeToggled;
+    GlobalData.HeroReturned -= OnHeroReturned;
   }
 }

@@ -30,46 +30,7 @@ public class GoonController : MonoBehaviour
   Direction m_FacingDirection = Direction.RIGHT;
   State m_State = State.Moving;
   float m_Timer;
-  bool m_CanMove = true;
-  List<Collider2D> m_FootContacts = new List<Collider2D>();
-  List<Collider2D> m_FrontFacingContacts = new List<Collider2D>();
-  List<Collider2D> m_BackFacingContacts = new List<Collider2D>();
-
-
-  public void OnFootColliderEnter(Collider2D collider)
-  {
-    m_FootContacts.Add(collider);
-  }
-
-
-  public void OnFootColliderExit(Collider2D collider)
-  {
-    m_FootContacts.Remove(collider);
-  }
-
-
-  public void OnFrontFacingColliderEnter(Collider2D collider)
-  {
-    m_FrontFacingContacts.Add(collider);
-  }
-
-
-  public void OnFrontFacingColliderExit(Collider2D collider)
-  {
-    m_FrontFacingContacts.Remove(collider);
-  }
-
-
-  public void OnBackFacingColliderEnter(Collider2D collider)
-  {
-    m_BackFacingContacts.Add(collider);
-  }
-
-
-  public void OnBackFacingColliderExit(Collider2D collider)
-  {
-    m_BackFacingContacts.Remove(collider);
-  }
+  bool m_ShouldTurnAround = false;
 
 
   private void Awake()
@@ -108,6 +69,27 @@ public class GoonController : MonoBehaviour
         HandleMovement();
         break;
     }
+
+    m_ShouldTurnAround = false;
+  }
+
+
+  private void OnCollisionEnter2D(Collision2D collision)
+  {
+    var contacts = new List<ContactPoint2D>();
+    collision.GetContacts(contacts);
+
+    foreach (var contact in contacts)
+    {
+      var normal = contact.normal;
+
+      if (normal.y > 0)
+        continue;
+
+      if (m_FacingDirection == Direction.RIGHT && normal.x <= 0 ||
+          m_FacingDirection == Direction.LEFT && normal.x >= 0)
+        m_ShouldTurnAround = true;
+    }
   }
 
 
@@ -126,30 +108,14 @@ public class GoonController : MonoBehaviour
 
   void HandleMovement()
   {
-    if (!m_CanMove)
-      return;
-
     m_Mover.Move(m_InputAxis);
   }
 
 
   void CheckContacts()
   {
-    var contacts = m_FrontFacingContacts;
-    if (m_FacingDirection == Direction.LEFT)
-      contacts = m_BackFacingContacts;
-
-    if (contacts.Count == 0 || m_FootContacts.Count == 0)
-      return;
-
-    foreach (var contact in contacts)
-    {
-      if (!m_FootContacts.Contains(contact))
-      {
-        BeginWaiting();
-        break;
-      }
-    }
+    if (m_ShouldTurnAround)
+      BeginWaiting();
   }
 
 
@@ -234,5 +200,11 @@ public class GoonController : MonoBehaviour
   public void OnDirectionInitialized(TileDirectionEventData eventData)
   {
     m_FacingDirection = eventData.m_Direction;
+  }
+
+
+  public void OnDied(HealthEventData eventData)
+  {
+    enabled = false;
   }
 }

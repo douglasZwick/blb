@@ -10,22 +10,67 @@ public class Health : MonoBehaviour
   {
     public HealthEvent Died;
     public HealthEvent Returned;
+    public HealthEvent StompedEnemy;  // TODO: this feels weeeeeird
   }
 
+  public bool m_IsTheHero = false;
+  public bool m_KilledByDeadly = false;
+  public bool m_KilledByEnemy = false;
+  public bool m_Stomper = false;  // TODO: come up with a less hacky solution
+  public Rigidbody2D m_StomperRB;
   public Events m_Events;
+
+  float m_StompVelocityThreshold = -0.8f;
 
 
   private void OnCollisionEnter2D(Collision2D collision)
   {
-    if (collision.collider.CompareTag("Deadly"))
-      Die();
+    OnCollision(collision.collider, collision.relativeVelocity);
   }
 
 
-  private void OnTriggerEnter2D(Collider2D collision)
+  private void OnTriggerEnter2D(Collider2D collider)
   {
-    if (collision.CompareTag("Deadly"))
+    var relativeVelocity = m_Stomper ? -m_StomperRB.velocity : Vector2.zero;
+
+    OnCollision(collider, relativeVelocity);
+  }
+
+
+  void OnCollision(Collider2D collider, Vector2 relativeVelocity)
+  {
+    if (m_KilledByDeadly && collider.CompareTag("Deadly"))
+    {
       Die();
+      return;
+    }
+
+    var enemy = collider.GetComponent<Enemy>();
+    if (enemy != null)
+      EnemyCollision(enemy, relativeVelocity);
+  }
+
+
+  void EnemyCollision(Enemy enemy, Vector2 relativeVelocity)
+  {
+    if (m_KilledByEnemy && !(m_Stomper && enemy.m_Stompable))
+    {
+      Die();
+      return;
+    }
+
+    if (m_Stomper && enemy.m_Stompable)
+    {
+      if (-relativeVelocity.y < m_StompVelocityThreshold)
+      {
+        enemy.GetStomped();
+        m_Events.StompedEnemy.Invoke(new HealthEventData());
+      }
+      else if (m_KilledByEnemy)
+      {
+        Die();
+      }
+    }
   }
 
 
@@ -41,7 +86,7 @@ public class Health : MonoBehaviour
   }
 
 
-  void Die()
+  public void Die()
   {
     m_Events.Died.Invoke(new HealthEventData());
   }
@@ -49,11 +94,13 @@ public class Health : MonoBehaviour
 
   void Return()
   {
-    GlobalData.DispatchPreHeroReturn();
+    if (m_IsTheHero)
+      GlobalData.DispatchPreHeroReturn();
 
     m_Events.Returned.Invoke(new HealthEventData());
 
-    GlobalData.DispatchHeroReturned();
+    if (m_IsTheHero)
+      GlobalData.DispatchHeroReturned();
   }
 }
 
