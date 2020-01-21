@@ -61,6 +61,10 @@ public class GoonTileLogic : MonoBehaviour
     if (tileDirection != null)
       tileDirection.Initialize(m_TileDirection.m_Direction);
 
+    var ghostMaker = m_Goon.GetComponent<GhostMaker>();
+    if (ghostMaker != null)
+      ghostMaker.enabled = GhostToggler.s_IsInGhostMode;
+
     if (m_HeroHasReturned)
     {
       var platformerMover = m_Goon.GetComponent<PlatformerMover>();
