@@ -85,6 +85,9 @@ public class PathMover : MonoBehaviour
 
   void ResetPath()
   {
+    if (m_IndexList == null || m_IndexList.Count == 0)
+      return;
+
     MoveTo(m_InitialPosition);
     m_Timer = 0;
     m_PathIndex = 0;
