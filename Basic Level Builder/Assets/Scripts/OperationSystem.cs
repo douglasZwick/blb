@@ -7,9 +7,11 @@ public class OperationSystem : MonoBehaviour
   static OperationSystem Instance;
   static bool s_UseAutosaving;
   static int s_AutosaveInterval;
+  static int s_FPSCap = 0; // Current FPS cap | 0 = OFF | 1 = 60 | 2 = 144
   static int s_OperationCounter = 0;
   static List<Operation> s_Operations = new List<Operation>();
   static int s_StackIndex = 0;  // distance from the right side of the stack
+
   public static Operation s_CurrentOperation;
   public static bool s_Frozen { get; private set; } = false;
   public static Operation s_MostRecentlyPerformedOperation
@@ -40,6 +42,9 @@ public class OperationSystem : MonoBehaviour
     s_Operations.Capacity = Instance.m_UndoDepth;
     s_UseAutosaving = m_UseAutosaving;
     s_AutosaveInterval = m_AutosaveInterval;
+
+    // Ensure vsync is off to use frame rate caps
+    QualitySettings.vSyncCount = 0;
   }
 
 
@@ -154,6 +159,39 @@ public class OperationSystem : MonoBehaviour
     s_Frozen = false;
   }
 
+  /*
+   * Toggles between different FPS caps
+   * 0 = OFF | 1 = 60 | 2 = 144
+   * I could've made an enum but I didn't wanna overcomplicate it
+   */
+  static public int SwitchFPS()
+  {
+    switch (s_FPSCap)
+    {
+      case 0:
+        // Set to 60 cap
+        s_FPSCap = 1;
+        Application.targetFrameRate = 60;
+        break;
+
+      case 1:
+        // Set to 144 cap
+        s_FPSCap = 2;
+        Application.targetFrameRate = 144;
+        break;
+
+      case 2:
+        // Set to OFF and return targetFrameRate to it's default
+        s_FPSCap = 0;
+        Application.targetFrameRate = 300;
+        break;
+
+      default:
+        break;
+    }
+
+    return s_FPSCap;
+  }
 
   static public void AttemptUndo()
   {
