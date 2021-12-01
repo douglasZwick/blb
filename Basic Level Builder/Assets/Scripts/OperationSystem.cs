@@ -45,6 +45,7 @@ public class OperationSystem : MonoBehaviour
 
     // Ensure vsync is off to use frame rate caps
     QualitySettings.vSyncCount = 0;
+    Application.targetFrameRate = 300;
   }
 
 
