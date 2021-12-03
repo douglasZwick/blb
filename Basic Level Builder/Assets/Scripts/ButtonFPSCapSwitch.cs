@@ -7,7 +7,6 @@ public class ButtonFPSCapSwitch : MonoBehaviour
 {
   public TextMeshProUGUI m_FPSIndicatorText;
   static int s_FPSCap = 0; // Current FPS cap | 0 = OFF | 1 = 60 | 2 = 144
-   float m_timer;
 
   private void Awake()
   {
@@ -67,7 +66,7 @@ public class ButtonFPSCapSwitch : MonoBehaviour
   /*
   * FPS Counter, unimplemented since I don't wanna mess 
   * with the UI too much right now
-  * */
+  float m_timer;
   private void Update()
   {
     if (Time.unscaledTime > m_timer)
@@ -77,7 +76,7 @@ public class ButtonFPSCapSwitch : MonoBehaviour
       m_timer = Time.unscaledTime + 1;
     }
   }
-  
+  */
 
 
 }
