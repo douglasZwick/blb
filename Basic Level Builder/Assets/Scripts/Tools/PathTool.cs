@@ -104,7 +104,6 @@ public class PathTool : BlbTool
     else if (m_State == State.PlacingPathPoints)
     {
       AddNewPathPoint(gridIndex);
-      PrintPathPointPositionsMessage();
     }
     //else if (m_State == State.ReadyToModify)
     //{
@@ -240,6 +239,7 @@ public class PathTool : BlbTool
     }
     else if (m_State == State.PlacingPathPoints)
     {
+      if (m_Path.Count == 0) return;
       var currentPathPoint = m_Path[m_Path.Count - 1] - m_AnchorIndex;
       UpdateCurrentPathPoint(gridIndex);
 
@@ -455,8 +455,16 @@ public class PathTool : BlbTool
 
   void AddNewPathPoint(Vector2Int gridIndex)
   {
+    if(m_Path.Count == 0 && m_AnchorIndex == gridIndex)
+    {
+      StatusBar.Print("You cannot make the first point of a path the same as the Anchor point.");
+      return;
+    }
+
     m_Path.Add(gridIndex - m_AnchorIndex);
     AddNewNodeIcon(gridIndex);
+
+    PrintPathPointPositionsMessage();
   }
 
 

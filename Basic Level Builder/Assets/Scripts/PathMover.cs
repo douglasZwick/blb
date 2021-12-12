@@ -160,7 +160,6 @@ public class PathMover : MonoBehaviour
   void SetDestination()
   {
     var currentNode = m_IndexList[m_PathIndex];
-
     m_Start = m_End;
     m_End = new Vector3(currentNode.x, currentNode.y, 0) + m_InitialPosition;
     m_Difference = m_End - m_Start;

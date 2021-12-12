@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-public class ButtonFPSCapSwitch : MonoBehaviour
+public class ButtonFpsCapSwitch : MonoBehaviour
 {
-  public TextMeshProUGUI m_FPSIndicatorText;
-  static int s_FPSCap = 0; // Current FPS cap | 0 = OFF | 1 = 60 | 2 = 144
+  public TextMeshProUGUI m_FpsIndicatorText;
+  static int s_FpsCap = 0; // Current FPS cap | 0 = OFF | 1 = 60 | 2 = 144
 
   private void Awake()
   {
-    GlobalData.FPSCapSwitched += SwitchFPS;
+    GlobalData.OnFpsSwitched += SwitchFps;
 
     // Ensure vsync is off to use frame rate caps
     QualitySettings.vSyncCount = 0;
@@ -20,37 +20,37 @@ public class ButtonFPSCapSwitch : MonoBehaviour
   // Called by Unity UI Button
   public void SwitchFPSButton()
   {
-    GlobalData.DispatchFPSCapSwitched();
+    GlobalData.DispatchFpsCapSwitched();
   }
 
   /*
   * Toggles between different FPS caps
   * 0 = OFF | 1 = 60 | 2 = 144
   */
-  private void SwitchFPS()
+  private void SwitchFps()
   {
-    switch (s_FPSCap)
+    switch (s_FpsCap)
     {
       case 0:
         // Set to 60 cap
-        s_FPSCap = 1;
+        s_FpsCap = 1;
         Application.targetFrameRate = 60;
-        m_FPSIndicatorText.text = "OFF";
-        m_FPSIndicatorText.text = "60";
+        m_FpsIndicatorText.text = "OFF";
+        m_FpsIndicatorText.text = "60";
         break;
 
       case 1:
         // Set to 144 cap
-        s_FPSCap = 2;
+        s_FpsCap = 2;
         Application.targetFrameRate = 144;
-        m_FPSIndicatorText.text = "144";
+        m_FpsIndicatorText.text = "144";
         break;
 
       case 2:
         // Set to OFF and return targetFrameRate to it's default
-        s_FPSCap = 0;
+        s_FpsCap = 0;
         Application.targetFrameRate = 300;
-        m_FPSIndicatorText.text = "OFF";
+        m_FpsIndicatorText.text = "OFF";
         break;
 
       default:
@@ -60,7 +60,7 @@ public class ButtonFPSCapSwitch : MonoBehaviour
 
   private void OnDestroy()
   {
-    GlobalData.FPSCapSwitched -= SwitchFPS;
+    GlobalData.OnFpsSwitched -= SwitchFps;
   }
 
   /*
