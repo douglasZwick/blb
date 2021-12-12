@@ -69,6 +69,8 @@ public class Outliner : MonoBehaviour
 
   public void OutlineSinglePosition(Vector3 position)
   {
+    enabled = true;
+
     m_DisplayMinBounds = m_DisplayMaxBounds = position;
 
     Outline();

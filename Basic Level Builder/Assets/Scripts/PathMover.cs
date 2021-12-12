@@ -39,7 +39,7 @@ public class PathMover : MonoBehaviour
 
   void Update()
   {
-    var interpolant = m_Timer / m_Duration;
+    var interpolant = m_Duration == 0 ? 1 : m_Timer / m_Duration;
     var newPosition = m_Start + m_Difference * interpolant;
     MoveTo(newPosition);
 
@@ -85,6 +85,9 @@ public class PathMover : MonoBehaviour
 
   void ResetPath()
   {
+    if (m_IndexList == null || m_IndexList.Count == 0)
+      return;
+
     MoveTo(m_InitialPosition);
     m_Timer = 0;
     m_PathIndex = 0;
@@ -157,7 +160,6 @@ public class PathMover : MonoBehaviour
   void SetDestination()
   {
     var currentNode = m_IndexList[m_PathIndex];
-
     m_Start = m_End;
     m_End = new Vector3(currentNode.x, currentNode.y, 0) + m_InitialPosition;
     m_Difference = m_End - m_Start;

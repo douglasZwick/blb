@@ -10,6 +10,7 @@ public class OperationSystem : MonoBehaviour
   static int s_OperationCounter = 0;
   static List<Operation> s_Operations = new List<Operation>();
   static int s_StackIndex = 0;  // distance from the right side of the stack
+
   public static Operation s_CurrentOperation;
   public static bool s_Frozen { get; private set; } = false;
   public static Operation s_MostRecentlyPerformedOperation
@@ -153,7 +154,6 @@ public class OperationSystem : MonoBehaviour
     s_CurrentOperation = null;
     s_Frozen = false;
   }
-
 
   static public void AttemptUndo()
   {
