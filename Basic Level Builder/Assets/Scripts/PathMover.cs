@@ -39,7 +39,7 @@ public class PathMover : MonoBehaviour
 
   void Update()
   {
-    var interpolant = m_Timer / m_Duration;
+    var interpolant = m_Duration == 0 ? 1 : m_Timer / m_Duration;
     var newPosition = m_Start + m_Difference * interpolant;
     MoveTo(newPosition);
 
