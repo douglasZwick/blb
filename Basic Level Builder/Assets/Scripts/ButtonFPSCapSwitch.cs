@@ -10,7 +10,7 @@ public class ButtonFpsCapSwitch : MonoBehaviour
 
   private void Awake()
   {
-    GlobalData.OnFpsSwitched += SwitchFps;
+    GlobalData.FpsCapSwitched += OnFpsCapSwitched;
 
     // Ensure vsync is off to use frame rate caps
     QualitySettings.vSyncCount = 0;
@@ -27,7 +27,7 @@ public class ButtonFpsCapSwitch : MonoBehaviour
   * Toggles between different FPS caps
   * 0 = OFF | 1 = 60 | 2 = 144
   */
-  private void SwitchFps()
+  private void OnFpsCapSwitched()
   {
     switch (s_FpsCap)
     {
@@ -60,7 +60,7 @@ public class ButtonFpsCapSwitch : MonoBehaviour
 
   private void OnDestroy()
   {
-    GlobalData.OnFpsSwitched -= SwitchFps;
+    GlobalData.FpsCapSwitched -= OnFpsCapSwitched;
   }
 
   /*

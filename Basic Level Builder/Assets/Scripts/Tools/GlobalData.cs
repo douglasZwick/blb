@@ -94,7 +94,7 @@ public static class GlobalData
   public static event ParameterlessEvent GhostCleanup;
   public static event ParameterlessEvent ColorblindModeEnabled;
   public static event ParameterlessEvent ColorblindModeDisabled;
-  public static event ParameterlessEvent OnFpsSwitched;
+  public static event ParameterlessEvent FpsCapSwitched;
   public static event ParameterlessEvent EditingEnabled;
   public static event ParameterlessEvent EditingDisabled;
 
@@ -285,7 +285,7 @@ public static class GlobalData
 
   public static void DispatchFpsCapSwitched()
   {
-    OnFpsSwitched?.Invoke();
+    FpsCapSwitched?.Invoke();
   }
 
   public static void DispatchEditingEnabled()
