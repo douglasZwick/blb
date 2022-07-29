@@ -32,7 +32,7 @@ public class OperationSystem : MonoBehaviour
       var thisGameObjectName = gameObject.name;
       var instanceGameObjectName = Instance.gameObject.name;
       var messageString = $"An OperationSystem is being created on {thisGameObjectName}" +
-        " when one is already present on {instanceGameObjectName}";
+        $" when one is already present on {instanceGameObjectName}";
       throw new SingletonInstanceAlreadyExistsException(messageString);
     }
 
