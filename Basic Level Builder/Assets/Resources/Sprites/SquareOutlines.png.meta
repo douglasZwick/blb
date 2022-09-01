@@ -141,7 +141,7 @@ TextureImporter:
       213: 7846597133489419251
     second: SolidEdges_45
   externalObjects: {}
-  serializedVersion: 10
+  serializedVersion: 11
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -161,6 +161,8 @@ TextureImporter:
   isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -169,9 +171,9 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: -1
-    aniso: -1
-    mipBias: -100
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
     wrapU: 1
     wrapV: 1
     wrapW: 1
@@ -192,11 +194,15 @@ TextureImporter:
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 1
   platformSettings:
-  - serializedVersion: 2
+  - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -207,7 +213,8 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
-  - serializedVersion: 2
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
     buildTarget: Standalone
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -218,7 +225,8 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
-  - serializedVersion: 2
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
     buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -229,6 +237,7 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 1
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -1208,6 +1217,53 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      SolidEdges_15: -3294831359377697584
+      SolidEdges_0: -8829259572894912926
+      SolidEdges_22: -8306960767516942267
+      SolidEdges_36: 4080096073344595663
+      SolidEdges_34: -6755942354555680613
+      SolidEdges_14: -990412188458326171
+      SolidEdges_8: 8896945982536828763
+      SolidEdges_44: -5791329523496333243
+      SolidEdges_24: 1281625849706195091
+      SolidEdges_23: 7259126281198193074
+      SolidEdges_19: -4364166640933944740
+      SolidEdges_33: -1321333675816593815
+      SolidEdges_35: -7262690338684429892
+      SolidEdges_12: 4210434196122558440
+      SolidEdges_6: -7925486945381389096
+      SolidEdges_18: -3215421566260320827
+      SolidEdges_39: -1334462038326154529
+      SolidEdges_20: -2951472404760438064
+      SolidEdges_13: 8406759741215630733
+      SolidEdges_16: -1715788710089041556
+      SolidEdges_21: -4030192284903722891
+      SolidEdges_26: -4645885576697572636
+      SolidEdges_28: 5771460823316305266
+      SolidEdges_30: -8711568766868889623
+      SolidEdges_38: 8320601760773320309
+      SolidEdges_11: -69272534532074505
+      SolidEdges_2: 8159066790645665983
+      SolidEdges_40: 1832720681189412993
+      SolidEdges_25: 5156624358829707638
+      SolidEdges_42: 3242322631354301185
+      SolidEdges_45: 7846597133489419251
+      SolidEdges_27: -4153922109623659310
+      SolidEdges_7: 521986058296993940
+      SolidEdges_3: 6168884441894773884
+      SolidEdges_29: 2163836127483806783
+      SolidEdges_1: 7274042091528391710
+      SolidEdges_41: 4232535220255850285
+      SolidEdges_17: 6965682459573190223
+      SolidEdges_10: 5524558607771279719
+      SolidEdges_4: 4233607658862658203
+      SolidEdges_5: 5094753981895618931
+      SolidEdges_32: -7408103953052275466
+      SolidEdges_43: 6487931450916298200
+      SolidEdges_37: 2228365436255149661
+      SolidEdges_31: -274672688077404825
+      SolidEdges_9: 9013436619001293237
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
