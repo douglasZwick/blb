@@ -66,7 +66,8 @@ public enum Direction
 **/
 public static class GlobalData
 {
-  public static string s_Version = "0.9.40";
+  // This is an abomination and it should never have existed
+  //public static string s_Version = "0.9.40";
 
   /************************************************************************************/
   /************************************************************************************/

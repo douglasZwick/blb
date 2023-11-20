@@ -154,6 +154,8 @@ public class FileSystem : MonoBehaviour
 
   void WriteHelper(string fullPath, bool autosave, string fileName, bool overwriting)
   {
+    var startTime = DateTime.Now;
+
     var jsonString = m_TileGrid.ToJsonString();
 
     try
@@ -167,13 +169,28 @@ public class FileSystem : MonoBehaviour
       else
         AddHistoryItemForFile(listToAddTo, fullPath);
 
-      StatusBar.Print($"Saved {fileName}");
-
       if (autosave)
         ++m_CurrentAutosaveCount;
 
       if (Application.platform == RuntimePlatform.WebGLPlayer)
         SyncFiles();
+
+      var duration = DateTime.Now - startTime;
+      var h = duration.Hours; // If this is greater than 0, we got beeg problems
+      var m = duration.Minutes;
+      var s = Math.Round(duration.TotalSeconds % 60.0, 2);
+
+      var durationStr = "";
+      if (h > 0)
+        durationStr += $"{h}h ";
+      if (m > 0)
+        durationStr += $"{m}m ";
+      durationStr += $"{s}s";
+
+      var mainColor = "#ffffff99";
+      var fileColor = autosave ? "white" : "yellow";
+      var timeColor = "#ffffff66";
+      StatusBar.Print($"<color={mainColor}>Saved</color> <color={fileColor}>{fileName}</color> <color={timeColor}>in {durationStr}</color>");
     }
     catch (Exception e)
     {
@@ -335,7 +352,6 @@ public class FileSystem : MonoBehaviour
       return;
 
     Application.OpenURL($"file://{m_CurrentDirectoryPath}");
-    StatusBar.Print("I opened the current directory for you because you pressed <b>Shift + F</b>. You're welcome.");
   }
 
 

@@ -38,7 +38,7 @@ public class Greeter : MonoBehaviour
 
   void PrintOrdinaryGreeting()
   {
-    var ordinaryGreeting = m_Message + " v" + GlobalData.s_Version;
+    var ordinaryGreeting = m_Message + " v" + Application.version;
     StatusBar.Print(ordinaryGreeting);
   }
 

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 public class TileGrid : MonoBehaviour
@@ -197,17 +199,19 @@ public class TileGrid : MonoBehaviour
 
   public string ToJsonString()
   {
-    var gridString = "";
+    var gridStringBuilder = new StringBuilder();
 
     foreach (var element in m_Grid.Values)
-      gridString += (JsonUtility.ToJson(element) + System.Environment.NewLine);
+      gridStringBuilder.AppendLine(JsonUtility.ToJson(element));
 
-    return gridString;
+    return gridStringBuilder.ToString();
   }
 
 
   public void LoadFromJsonStrings(string[] jsonStrings)
   {
+    var startTime = DateTime.Now;
+
     BeginBatch("Load Level", incrementOperationCounter: false);
 
     ClearGrid(false, false);
@@ -250,7 +254,21 @@ public class TileGrid : MonoBehaviour
         additionalString = $" (and {failString} we didn't recognize...)";
       }
 
-      StatusBar.Print($"Level loaded with {successString}{additionalString}.");
+      var duration = DateTime.Now - startTime;
+      var h = duration.Hours; // If this is greater than 0, we got beeg problems
+      var m = duration.Minutes;
+      var s = Math.Round(duration.TotalSeconds % 60.0, 2);
+
+      var durationStr = "";
+      if (h > 0)
+        durationStr += $"{h}h ";
+      if (m > 0)
+        durationStr += $"{m}m ";
+      durationStr += $"{s}s";
+
+      var c = "#ffffff66";
+
+      StatusBar.Print($"Level loaded with {successString}{additionalString} <color={c}>in {durationStr}</color>");
     }
     else
     {
