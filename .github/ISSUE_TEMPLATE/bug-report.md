@@ -2,7 +2,7 @@
 name: Bug Report
 about: Something doesn't work the way you think it's supposed to work
 title: " [bug]"
-labels: bug
+labels: bug, Needs Triage
 assignees: douglasZwick
 
 ---
