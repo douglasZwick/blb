@@ -3,7 +3,7 @@ name: Feature Request
 about: A feature is missing or could be even cooler
 title: " [fr]"
 labels: enhancement, Needs Triage
-assignees: douglasZwick
+assignees: ''
 
 ---
 
