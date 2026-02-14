@@ -126,6 +126,6 @@ public class UiSaveFileItem : MonoBehaviour, IPointerEnterHandler, IPointerExitH
       return;
     }
 
-    m_FileThumbnail.sprite = FileVersioning.GetThumbnailSprite(levelData);
+    m_FileThumbnail.sprite = LevelVersioning.GetThumbnailSprite(levelData);
   }
 }

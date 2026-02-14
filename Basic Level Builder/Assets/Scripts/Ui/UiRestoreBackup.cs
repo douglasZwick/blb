@@ -17,7 +17,7 @@ public class UiRestoreBackup : ModalDialog
   [SerializeField]
   private Image m_FileThumbnail;
   private string m_fullFilePath;
-  private FileVersioning.FileVersion m_VersionToLoad = new(0,0);
+  private LevelVersioning.LevelVersion m_VersionToLoad = new(0,0);
 
   public override void StringsSetup(string[] strings = null)
   {
@@ -33,9 +33,9 @@ public class UiRestoreBackup : ModalDialog
     string timestamp = File.GetLastWriteTime(m_fullFilePath).ToString("M/d/yy h:mm:sstt").ToLower();
     m_FilePreviewText.text = $"<b>{fileName}</b>{Environment.NewLine}<color=#C6C6C6>{timestamp}</color>";
 
-    m_VersionToLoad.m_AutoVersion = FileVersioning.GetLastAutoSaveVersion(fileInfo.m_FileData, 0);
-    FileVersioning.GetVersionLevelData(fileInfo.m_FileData, m_VersionToLoad, out FileSystemInternal.LevelData levelData);
-    m_FileThumbnail.sprite = FileVersioning.GetThumbnailSprite(levelData);
+    m_VersionToLoad.m_AutoVersion = LevelVersioning.GetLastAutoSaveVersion(fileInfo.m_FileData, 0);
+    LevelVersioning.GetVersionLevelData(fileInfo.m_FileData, m_VersionToLoad, out FileSystemInternal.LevelData levelData);
+    m_FileThumbnail.sprite = LevelVersioning.GetThumbnailSprite(levelData);
   }
 
   public override void Open()

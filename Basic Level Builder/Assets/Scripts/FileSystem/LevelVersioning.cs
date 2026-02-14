@@ -4,7 +4,7 @@ Last Updated:   7/09/2025
 
 Description:
   Contains functionality for modifying and comparing
-  file versions
+  save versions
 
 Copyright 2018-2025, DigiPen Institute of Technology
 ***************************************************/
@@ -15,12 +15,12 @@ using System.Linq;
 using UnityEngine;
 using static FileSystemInternal;
 
-public static class FileVersioning
+public static class LevelVersioning
 {
   [Serializable]
-  public struct FileVersion
+  public struct LevelVersion
   {
-    public FileVersion(int manual, int Auto)
+    public LevelVersion(int manual, int Auto)
     {
       m_ManualVersion = manual;
       m_AutoVersion = Auto;
@@ -36,24 +36,24 @@ public static class FileVersioning
       return $"Save version: Manual {m_ManualVersion}, Auto {m_AutoVersion}"; // Using string interpolation for a readable output
     }
 
-    public readonly bool Equals(FileVersion rhs)
+    public readonly bool Equals(LevelVersion rhs)
     {
       return m_ManualVersion == rhs.m_ManualVersion && m_AutoVersion == rhs.m_AutoVersion;
     }
 
-    public static bool operator ==(FileVersion left, FileVersion right)
+    public static bool operator ==(LevelVersion left, LevelVersion right)
     {
       return left.Equals(right); // Delegate to Equals method
     }
 
-    public static bool operator !=(FileVersion left, FileVersion right)
+    public static bool operator !=(LevelVersion left, LevelVersion right)
     {
       return !(left == right);
     }
 
     public override bool Equals(object obj)
     {
-      return obj is FileVersion other && Equals(other);
+      return obj is LevelVersion other && Equals(other);
     }
 
     // Override GetHashCode
@@ -62,7 +62,7 @@ public static class FileVersioning
       return m_ManualVersion.GetHashCode() + m_AutoVersion.GetHashCode();
     }
 
-    public readonly int CompareTo(FileVersion other)
+    public readonly int CompareTo(LevelVersion other)
     {
       // Sorts Largest to Smallest/Top to Bottom
       // -# = This goes up
@@ -93,7 +93,7 @@ public static class FileVersioning
     public int m_AutoVersion;
   }
 
-  public static bool IsCameraDifferent(FileData fileData, FileVersion version)
+  public static bool IsCameraDifferent(FileData fileData, LevelVersion version)
   {
     // If this is the first manual save the camera has to be "different"
     if (version.m_ManualVersion <= 1 && version.m_AutoVersion == 0)
@@ -117,20 +117,20 @@ public static class FileVersioning
       v = version.m_ManualVersion;
     }
     
-    GetVersionLevelData(fileData, new FileVersion(v, 0), out LevelData previousData);
+    GetVersionLevelData(fileData, new LevelVersion(v, 0), out LevelData previousData);
 
     return targetData.m_CameraPos != previousData.m_CameraPos;
   }
 
   // Make sure m_TileGrid.CopyGridBuffer is called before hand
-  public static bool GetDifferences(out LevelData differences, FileInfo fileInfo, TileGrid tileGrid, FileVersion? version = null)
+  public static bool GetDifferences(out LevelData differences, FileInfo fileInfo, TileGrid tileGrid, LevelVersion? version = null)
   {
     Dictionary<Vector2Int, TileGrid.Element> oldGrid = GetGridDictionaryFromFileData(fileInfo, version);
 
     return GetDifferencesEx(out differences, oldGrid, tileGrid.GetGridBuffer());
   }
 
-  public static bool GetVersionDifferences(out LevelData differences, FileInfo fileInfo, FileVersion from, FileVersion to)
+  public static bool GetVersionDifferences(out LevelData differences, FileInfo fileInfo, LevelVersion from, LevelVersion to)
   {
     Dictionary<Vector2Int, TileGrid.Element> oldGrid = GetGridDictionaryFromFileData(fileInfo, from);
     Dictionary<Vector2Int, TileGrid.Element> newGrid = GetGridDictionaryFromFileData(fileInfo, to);
@@ -175,10 +175,10 @@ public static class FileVersioning
 
   // Will convert the level data to a Dictionary of elements up to the passed in version
   // If no version is passed in, we will flatten to the latest version
-  public static Dictionary<Vector2Int, TileGrid.Element> GetGridDictionaryFromFileData(FileInfo fileInfo, FileVersion? tempVersion = null)
+  public static Dictionary<Vector2Int, TileGrid.Element> GetGridDictionaryFromFileData(FileInfo fileInfo, LevelVersion? tempVersion = null)
   {
     // Sets the default value if no version is specified
-    FileVersion version = tempVersion ?? new(int.MaxValue, 0);
+    LevelVersion version = tempVersion ?? new(int.MaxValue, 0);
 
     Dictionary<Vector2Int, TileGrid.Element> tiles = new();
 
@@ -253,7 +253,7 @@ public static class FileVersioning
   }
 
   // Promotes selected auto versions and removes all non selected manual/auto version from the data
-  public static void ExtractSelectedVersions(ref FileData fileData, List<FileVersion> versions)
+  public static void ExtractSelectedVersions(ref FileData fileData, List<LevelVersion> versions)
   {
     // Promote all selected autos to manuals
     // This function will ignore passed in manual versions so we don't need to remove them from the list
@@ -281,7 +281,7 @@ public static class FileVersioning
       // Update tiles just in case the detas got flattened
       fileData.m_ManualSaves[i].m_AddedTiles = flattenedLevelAdd.Values.ToList();
       fileData.m_ManualSaves[i].m_RemovedTiles = flattenedLevelRemove.ToList();
-      fileData.m_ManualSaves[i].m_Version = new FileVersion(version++, 0);
+      fileData.m_ManualSaves[i].m_Version = new LevelVersion(version++, 0);
       fileData.m_ManualSaves[i].m_Id = ++fileData.m_LastId;
 
       flattenedLevelAdd.Clear();
@@ -291,7 +291,7 @@ public static class FileVersioning
 
   // Promotes multiple autosaves to be a manual save, leaf to branch.
   // NOTE: Does not save file
-  public static void PromoteMultipleAutoSavesEx(ref FileData fileData, List<FileVersion> versions, bool updateVersions = true)
+  public static void PromoteMultipleAutoSavesEx(ref FileData fileData, List<LevelVersion> versions, bool updateVersions = true)
   {
     foreach (LevelData level in fileData.m_AutoSaves.AsEnumerable().Reverse())
     {
@@ -309,7 +309,7 @@ public static class FileVersioning
   {
     Dictionary<Vector2Int, TileGrid.Element> autosGrid = new();
 
-    FileVersion autoSaveVersion = level.m_Version;
+    LevelVersion autoSaveVersion = level.m_Version;
 
     for (int i = 0; i < fileData.m_ManualSaves.Count; ++i)
     {
@@ -395,7 +395,7 @@ public static class FileVersioning
     }
   }
 
-  public static void DeleteVersionEx(FileInfo fileInfo, FileVersion version)
+  public static void DeleteVersionEx(FileInfo fileInfo, LevelVersion version)
   {
     if (!FileDataExists(fileInfo.m_FileData))
       throw new Exception("No file data exists to delete version");
@@ -457,7 +457,7 @@ public static class FileVersioning
     }
   }
 
-  public static FileInfo SetVersionNameEx(string fullFilePath, FileVersion version, string name)
+  public static FileInfo SetVersionNameEx(string fullFilePath, LevelVersion version, string name)
   {
     FileSystem.Instance.GetFileInfoFromFullFilePath(fullFilePath, out FileInfo fileInfo);
     List<LevelData> levelList = version.IsManual() ? fileInfo.m_FileData.m_ManualSaves : fileInfo.m_FileData.m_AutoSaves;
@@ -472,7 +472,7 @@ public static class FileVersioning
     throw new InvalidOperationException($"{version} not found");
   }
 
-  public static void GetVersionLevelData(FileData fileData, FileVersion version, out LevelData levelData)
+  public static void GetVersionLevelData(FileData fileData, LevelVersion version, out LevelData levelData)
   {
     if (fileData == null)
       throw new InvalidOperationException("File data is null");

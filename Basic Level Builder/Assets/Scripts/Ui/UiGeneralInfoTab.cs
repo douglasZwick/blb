@@ -89,7 +89,7 @@ public class UiGeneralInfoTab : UiTab
       return;
     }
 
-    m_FileThumbnail.sprite = FileVersioning.GetThumbnailSprite(levelData);
+    m_FileThumbnail.sprite = LevelVersioning.GetThumbnailSprite(levelData);
 
     // Set text for the latest manial saves timestamp (to show where/when the thumbnail comes from)
     string latestVersionName = levelData.m_Name;

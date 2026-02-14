@@ -8,7 +8,7 @@ Copyright 2018-2025, DigiPen Institute of Technology
 using System;
 using UnityEngine;
 using UnityEngine.UI;
-using static FileVersioning;
+using static LevelVersioning;
 
 public class UiHistoryItem : MonoBehaviour
 {
@@ -112,7 +112,7 @@ public class UiHistoryItem : MonoBehaviour
     return m_LevelData.m_Version.IsManual();
   }
 
-  public FileVersion GetVersion()
+  public LevelVersion GetVersion()
   {
     return m_LevelData.m_Version;
   }

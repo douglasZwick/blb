@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using static FileVersioning;
+using static LevelVersioning;
 
 public class FileSystem : FileSystemInternal
 {
@@ -75,7 +75,7 @@ public class FileSystem : FileSystemInternal
     Save(false, name, false, shouldPrintElapsedTime);
   }
 
-  public void ExportMultipleVersions(string sourcePath, List<FileVersion> versions)
+  public void ExportMultipleVersions(string sourcePath, List<LevelVersion> versions)
   {
     // Gather the level data to export
     GetFileInfoFromFullFilePath(sourcePath, out FileInfo sourceFileInfo);
@@ -87,7 +87,7 @@ public class FileSystem : FileSystemInternal
     m_ExportAsDialogAdder.RequestDialogsAtCenterWithStrings();
   }
 
-  public void ExportVersion(string sourcePath, FileVersion version)
+  public void ExportVersion(string sourcePath, LevelVersion version)
   {
     // Gather the level data to export
     GetFileInfoFromFullFilePath(sourcePath, out FileInfo sourceFileInfo);
@@ -104,7 +104,7 @@ public class FileSystem : FileSystemInternal
     m_ExportAsDialogAdder.RequestDialogsAtCenterWithStrings();
   }
 
-  public void SetVersionName(string fullFilePath, FileVersion version, string name)
+  public void SetVersionName(string fullFilePath, LevelVersion version, string name)
   {
     FileInfo fileInfo = SetVersionNameEx(fullFilePath, version, name);
     WriteDataToFile(fullFilePath, fileInfo);
@@ -127,7 +127,7 @@ public class FileSystem : FileSystemInternal
     GetFileInfoFromFullFilePathEx(fullFilePath, out fileInfo);
   }
 
-  public void LoadFromFullFilePath(string fullFilePath, FileVersion? version = null)
+  public void LoadFromFullFilePath(string fullFilePath, LevelVersion? version = null)
   {
     LoadFromFullFilePathEx(fullFilePath, version);
 
@@ -147,7 +147,7 @@ public class FileSystem : FileSystemInternal
   /// <param name="fileInfo">The file info containing the save.</param>
   /// <param name="versions">A list of versions to delete.</param>
   /// <exception cref="Exception">Thrown when an error occurs.</exception>
-  public void DeleteMultipleVersions(FileInfo fileInfo, List<FileVersion> versions)
+  public void DeleteMultipleVersions(FileInfo fileInfo, List<LevelVersion> versions)
   {
     foreach (var version in versions)
     {
@@ -166,7 +166,7 @@ public class FileSystem : FileSystemInternal
   /// <param name="version">The version of the save to delete.</param>
   /// <exception cref="Exception">Thrown when an error occurs.</exception>
   /// 
-  public void DeleteVersion(FileInfo fileInfo, FileVersion version)
+  public void DeleteVersion(FileInfo fileInfo, LevelVersion version)
   {
     DeleteVersionEx(fileInfo, version);
     SaveAfterDeletion(fileInfo, version.ToString());
@@ -178,7 +178,7 @@ public class FileSystem : FileSystemInternal
     DeleteFileEx(fullFilePath);
   }
 
-  public void PromoteAutoSave(string fullFilePath, FileVersion version)
+  public void PromoteAutoSave(string fullFilePath, LevelVersion version)
   {
     GetFileInfoFromFullFilePathEx(fullFilePath, out FileInfo fileInfo);
     GetVersionLevelData(fileInfo.m_FileData, version, out LevelData level);

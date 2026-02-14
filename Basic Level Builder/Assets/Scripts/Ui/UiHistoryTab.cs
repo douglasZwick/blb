@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using static FileVersioning;
+using static LevelVersioning;
 
 public class UiHistoryTab : UiTab
 {
@@ -219,7 +219,7 @@ public class UiHistoryTab : UiTab
       throw new Exception("Exporting version(s) with no version(s) selected");
     }
 
-    List<FileVersion> versions = new();
+    List<LevelVersion> versions = new();
     foreach (var item in m_Selection)
     {
       versions.Add(item.GetVersion());
@@ -302,11 +302,11 @@ public class UiHistoryTab : UiTab
     FileSystem.Instance.GetFileInfoFromFullFilePath(m_FileInfo.FullFilePath, out FileSystemInternal.FileInfo fileInfo);
     if (m_Selection.Count > 1)
     {
-      List<FileVersion> versions = new();
+      List<LevelVersion> versions = new();
       int lastManual = -1;
       foreach (var item in m_Selection)
       {
-        FileVersion version = item.GetVersion();
+        LevelVersion version = item.GetVersion();
 
         // Skip auto save if we have selected its manual
         // Because all of a manuals autos are deleted with it, otherwise we are doing a double delete
@@ -469,10 +469,10 @@ public class UiHistoryTab : UiTab
     return items;
   }
 
-  private bool IsCameraDifferent(FileVersion version)
+  private bool IsCameraDifferent(LevelVersion version)
   {
     FileSystem.Instance.GetFileInfoFromFullFilePath(m_FileInfo.FullFilePath, out FileSystemInternal.FileInfo fileInfo);
-    return FileVersioning.IsCameraDifferent(fileInfo.m_FileData, version);
+    return LevelVersioning.IsCameraDifferent(fileInfo.m_FileData, version);
   }
 
   private void ClearSelection()

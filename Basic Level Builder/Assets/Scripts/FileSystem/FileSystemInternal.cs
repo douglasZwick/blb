@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using UnityEngine;
 using static FileDirUtilities;
-using static FileVersioning;
+using static LevelVersioning;
 
 public class FileSystemInternal : MonoBehaviour
 {
@@ -64,7 +64,7 @@ public class FileSystemInternal : MonoBehaviour
 
   protected string m_PendingSaveFullFilePath = "";
   protected FileData m_PendingExportFileData = null;
-  protected List<FileVersion> m_PendingExportVersions = null;
+  protected List<LevelVersion> m_PendingExportVersions = null;
 
   private string m_PendingThumbnail = "";
   private Vector2 m_PendingCameraPos;
@@ -72,7 +72,7 @@ public class FileSystemInternal : MonoBehaviour
   protected FileInfo m_MountedFileInfo;
 
   // The version of the manual or autosave that is loaded
-  FileVersion m_loadedVersion;
+  LevelVersion m_loadedVersion;
 
   // A thread to run when saving should be performed.
   // Only one save thread is run at once.
@@ -145,7 +145,7 @@ public class FileSystemInternal : MonoBehaviour
       m_RemovedTiles = new List<Vector2Int>();
     }
 
-    public FileVersion m_Version;
+    public LevelVersion m_Version;
     public string m_Name;
     public uint m_Id;
     public Vector2 m_CameraPos;
@@ -1044,7 +1044,7 @@ public class FileSystemInternal : MonoBehaviour
     GetDataFromJson(File.ReadAllBytes(fullFilePath), ref fileInfo);
   }
 
-  protected void LoadFromFullFilePathEx(string fullFilePath, FileVersion? version = null)
+  protected void LoadFromFullFilePathEx(string fullFilePath, LevelVersion? version = null)
   {
     if (GlobalData.AreEffectsUnderway())
       return;
@@ -1088,7 +1088,7 @@ public class FileSystemInternal : MonoBehaviour
   }
 
   // Intermidiatarty load function. Calls the rest of the load functions.
-  private void LoadFromJson(byte[] json, FileVersion? version = null)
+  private void LoadFromJson(byte[] json, LevelVersion? version = null)
   {
     // Make sure we have file data for the load
     if (!FileDataExists(m_MountedFileInfo.m_FileData))
@@ -1196,7 +1196,7 @@ public class FileSystemInternal : MonoBehaviour
     m_FileDirUtilities.UpdateFilesList();
   }
 
-  protected void UpdateLoadedVersionIfDeleted(FileInfo fileInfo, FileVersion version)
+  protected void UpdateLoadedVersionIfDeleted(FileInfo fileInfo, LevelVersion version)
   {
     // If deleting from our own loaded file
     if (m_MountedFileInfo.m_SaveFilePath == fileInfo.m_SaveFilePath)
