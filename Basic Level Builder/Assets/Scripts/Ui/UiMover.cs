@@ -5,8 +5,20 @@ using UnityEngine;
 [RequireComponent(typeof(RectTransform))]
 public class UiMover : MonoBehaviour
 {
+  public bool m_MoveX = true;
+
+  [HideIf("m_MoveX", hideWhenTrue: false)]
   public float m_HiddenX = 0;
+  [HideIf("m_MoveX", hideWhenTrue: false)]
   public float m_ShownX = 0;
+  
+  public bool m_MoveY = false;
+
+  [HideIf("m_MoveY", hideWhenTrue: false)]
+  public float m_HiddenY = 0;
+  [HideIf("m_MoveY", hideWhenTrue: false)]
+  public float m_ShownY = 0;
+
   public float m_Duration = 0.5f;
   public bool m_Hidden = false;
 
@@ -20,7 +32,12 @@ public class UiMover : MonoBehaviour
     if (m_Hidden)
     {
       var anchoredPosition = m_RectTransform.anchoredPosition;
-      anchoredPosition.x = m_HiddenX;
+      
+      if (m_MoveX)
+        anchoredPosition.x = m_HiddenX;
+      if (m_MoveY)
+        anchoredPosition.y = m_HiddenY;
+
       m_RectTransform.anchoredPosition = anchoredPosition;
     }
   }
@@ -40,7 +57,10 @@ public class UiMover : MonoBehaviour
     m_Hidden = false;
 
     Cancel();
-    ActionMaster.Actions.MoveRTX(gameObject, m_ShownX, m_Duration, new Ease(Ease.Quad.InOut));
+    if (m_MoveX)
+      ActionMaster.Actions.MoveRTX(gameObject, m_ShownX, m_Duration, new Ease(Ease.Quad.InOut));
+    if (m_MoveY)
+      ActionMaster.Actions.MoveRTY(gameObject, m_ShownY, m_Duration, new Ease(Ease.Quad.InOut));
   }
 
 
@@ -49,7 +69,10 @@ public class UiMover : MonoBehaviour
     m_Hidden = true;
 
     Cancel();
-    ActionMaster.Actions.MoveRTX(gameObject, m_HiddenX, m_Duration, new Ease(Ease.Quad.InOut));
+    if (m_MoveX)
+      ActionMaster.Actions.MoveRTX(gameObject, m_HiddenX, m_Duration, new Ease(Ease.Quad.InOut));
+    if (m_MoveY)
+      ActionMaster.Actions.MoveRTY(gameObject, m_HiddenY, m_Duration, new Ease(Ease.Quad.InOut));
   }
 
 
