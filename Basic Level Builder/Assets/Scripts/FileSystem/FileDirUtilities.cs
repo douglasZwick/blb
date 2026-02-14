@@ -220,7 +220,7 @@ public class FileDirUtilities : MonoBehaviour
     return rt;
   }
 
-  private bool IsFileValid(string fullFilePath)
+  static private bool IsFileValid(string fullFilePath)
   {
     if (!isValidExtension(fullFilePath))
       return false;
@@ -231,29 +231,15 @@ public class FileDirUtilities : MonoBehaviour
     return true;
   }
 
-  private bool isValidExtension(string fullFilePath)
+  static public bool isValidExtension(string fullFilePath)
   {
     return fullFilePath.EndsWith(s_FilenameExtension);
   }
 
-  private bool IsTempFile(string fullFilePath)
+  static public bool IsTempFile(string fullFilePath)
   {
-    IEnumerable<string> lines = null;
-    try
-    {
-      lines = File.ReadLines(fullFilePath);
-    }
-    catch (Exception e)
-    {
-      string errorStr = $"Error reading save file {Path.GetFileName(fullFilePath)}. {e.Message} ({e.GetType()})";
-      Debug.Log(errorStr);
-    }
-
-    // We must have at least two lines. One for the header and one for the data
-    if (lines.Count() < 2) return false;
-
-    FileSystemInternal.FileHeader header;
-    header = JsonUtility.FromJson<FileSystemInternal.FileHeader>(lines.First());
+    if (!TryGetHeader(fullFilePath, out FileSystemInternal.FileHeader header))
+      return false;
 
     // If the save file was not read properly
     if (header.m_BlbVersion == null)
@@ -266,9 +252,9 @@ public class FileDirUtilities : MonoBehaviour
     return header.m_IsTempFile;
   }
 
-  private bool HasHeader(string fullFilePath)
+  static public bool TryGetHeader(string fullFilePath, out FileSystemInternal.FileHeader header)
   {
-    IEnumerable<string> lines = null;
+    IEnumerable<string> lines;
     try
     {
       lines = File.ReadLines(fullFilePath);
@@ -277,14 +263,21 @@ public class FileDirUtilities : MonoBehaviour
     {
       string errorStr = $"Error reading save file {Path.GetFileName(fullFilePath)}. {e.Message} ({e.GetType()})";
       Debug.Log(errorStr);
+
+      header = new();
+      return false;
     }
 
-    // We must have at least two lines. One for the header and one for the data
-    if (lines.Count() < 2) return false;
-
-    FileSystemInternal.FileHeader header;
     header = JsonUtility.FromJson<FileSystemInternal.FileHeader>(lines.First());
 
+    // Check if one of the header values are valid to confirm if the JSON was read correctly
+    return header.m_BlbVersion != null;
+  }
+
+  static public bool HasHeader(string fullFilePath)
+  {
+    if (!TryGetHeader(fullFilePath, out FileSystemInternal.FileHeader header))
+      return false;
     return header.m_BlbVersion != null;
   }
 
