@@ -200,10 +200,7 @@ public class FileSystemInternal : MonoBehaviour
     m_ThumbnailTileSize = new Vector2Int(tileHeight, tileHeight);
     GenerateThumbnailTiles();
 
-    // Check for temp files 0.2 secs later, this is done because of race conditions
-    // ModalDialogMaster "Start" function is not initiated before this and thus is not properly set up
-    // "TODO: Doug said he would fix this some time. Will find a better solution later."
-    Invoke(nameof(CheckForTempFiles), 0.2f);
+    CheckForTempFiles();
   }
 
   private void CheckForTempFiles()
