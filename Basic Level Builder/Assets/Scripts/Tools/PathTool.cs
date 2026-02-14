@@ -69,28 +69,30 @@ public class PathTool : BlbTool
       EnterIdle();
   }
 
-
-  protected override void Update()
+  public void Cancel()
   {
-    base.Update();
-
-    if (Input.GetButtonDown("Cancel") && m_State != State.Idle)
+    if (m_State != State.Idle)
     {
       EnterIdle();
     }
-    else if (Input.GetButtonDown("Submit") &&
-      (m_State == State.PlacingPathPoints || m_State == State.ReadyToModify))
+  }
+  public void Submit()
+  {
+    if (m_State == State.PlacingPathPoints || m_State == State.ReadyToModify)
     {
       AssignPathPoints();
       EnterIdle();
     }
-    else if (Input.GetButtonDown("Delete") && m_State == State.PlacingAnchorPoint)
+  }
+
+  public void Delete()
+  {
+    if (m_State == State.PlacingAnchorPoint)
     {
       DeletePath();
       EnterIdle();
     }
   }
-
 
   public override void LeftPointerDown(ToolEvent te)
   {

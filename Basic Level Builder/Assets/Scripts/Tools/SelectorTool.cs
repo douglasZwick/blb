@@ -146,31 +146,19 @@ public class SelectorTool : BlbTool
     base.Deactivate();
   }
 
-
-  /**
-  * FUNCTION NAME: Update
-  * DESCRIPTION  : Gets keyboard input for copy/cut/paste.
-  * INPUTS       : None
-  * OUTPUTS      : None
-  **/
-  protected override void Update()
+  public void Cut()
   {
-    base.Update();
+    CreateClipboard(cutting: true);
+  }
 
-    var modifierKeyHeld = HotkeyMaster.IsPrimaryModifierHeld();
+  public void Copy()
+  {
+    CreateClipboard(cutting: false);
+  }
 
-    //Copy.
-    if (modifierKeyHeld && Input.GetKeyDown(KeyCode.C))
-      CreateClipboard(cutting: false);
-
-    //Cut.
-    else if (modifierKeyHeld && Input.GetKeyDown(KeyCode.X))
-    {
-      CreateClipboard(cutting: true);
-    }
-
-    //Paste.
-    else if (modifierKeyHeld && Input.GetKeyDown(KeyCode.V) && m_bCanPaste)
+  public void Paste()
+  {
+    if (m_bCanPaste)
       CreateSavedTiles();
   }
 

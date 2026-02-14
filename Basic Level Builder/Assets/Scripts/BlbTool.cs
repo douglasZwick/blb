@@ -48,17 +48,6 @@ public class BlbTool : MonoBehaviour
     m_ToolsPalette = FindObjectOfType<ToolsPalette>();
   }
 
-
-  protected virtual void Update()
-  {
-    if (!HotkeyMaster.s_HotkeysEnabled || GlobalData.IsInPlayMode() || GlobalData.IsInUiPopup())
-      return;
-
-    if (Input.GetButtonDown(m_KeyboardShortcut))
-      RequestActivate();
-  }
-
-
   /************************************************************************************/
   /************************************************************************************/
   /*******************************POINTER FUNCTIONS************************************/
