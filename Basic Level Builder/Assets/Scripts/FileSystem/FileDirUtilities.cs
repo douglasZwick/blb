@@ -12,6 +12,8 @@ using System.IO.Compression;
 using System.Linq;
 using UnityEngine;
 using System.Runtime.InteropServices;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 public class FileDirUtilities : MonoBehaviour
 {
@@ -102,31 +104,34 @@ public class FileDirUtilities : MonoBehaviour
     if (!Directory.Exists(m_CurrentDirectoryPath))
       return null;
 
-    List<string> results = new();
-
     try
     {
       var filePaths = Directory.GetFiles(m_CurrentDirectoryPath);
-      var validFilePaths = filePaths.Where(path => isValidExtension(path)).ToArray();
+
+      var validFilePaths = filePaths
+          .Where(path => isValidExtension(path))
+          .ToArray();
 
       if (validFilePaths.Length == 0)
         return null;
 
       SortByDateModified(validFilePaths);
 
-      foreach (var fullFilePath in validFilePaths)
+      var results = new ConcurrentBag<string>();
+
+      Parallel.ForEach(validFilePaths, fullFilePath =>
       {
         if (IsTempFile(fullFilePath))
           results.Add(fullFilePath);
-      }
+      });
+
+      return results.Count == 0 ? null : results.ToArray();
     }
     catch (Exception e)
     {
-      // this probably can't happen, but....
       StatusBar.Print($"Error getting files in directory. {e.Message} ({e.GetType()})");
+      return null;
     }
-
-    return results.ToArray();
   }
 
   public string GetCurrentDirectoryPath()
