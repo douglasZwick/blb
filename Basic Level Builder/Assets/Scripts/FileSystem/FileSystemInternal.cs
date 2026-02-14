@@ -266,6 +266,12 @@ public class FileSystemInternal : MonoBehaviour
     bool isAutoSave = true;
     bool shouldPrintElapsedTime = false;
     Save(isAutoSave, null, false, shouldPrintElapsedTime);
+
+    // If we have a saving thread running, wait for it to finish before closing the program
+    if (m_SavingThread != null && m_SavingThread.IsAlive)
+    {
+      m_SavingThread.Join();
+    }
   }
 
   private void CreateEmptyTempFile()

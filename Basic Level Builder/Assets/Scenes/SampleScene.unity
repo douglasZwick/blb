@@ -1788,6 +1788,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40ce925be25835940928256a25e7c00c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_IsAppQuitting: 0
   m_DefaultDirectoryName: Default Project
   m_TileGrid: {fileID: 2031376952}
   m_FileDirUtilities: {fileID: 128438548}
@@ -53761,8 +53762,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1439737676}
   m_HandleRect: {fileID: 1439737675}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.65217394
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
