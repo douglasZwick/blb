@@ -206,7 +206,7 @@ public class FileSystemInternal : MonoBehaviour
   private void CheckForTempFiles()
   {
     string[] tempFiles = m_FileDirUtilities.GetTempFiles();
-    if (tempFiles.Length > 0)
+    if (tempFiles != null && tempFiles.Length > 0)
     {
       // We will only ask to restore the newst file
       // If there are more we will ask about them on the next open

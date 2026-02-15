@@ -115,8 +115,6 @@ public class FileDirUtilities : MonoBehaviour
       if (validFilePaths.Length == 0)
         return null;
 
-      SortByDateModified(validFilePaths);
-
       var results = new ConcurrentBag<string>();
 
       Parallel.ForEach(validFilePaths, fullFilePath =>
