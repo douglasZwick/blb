@@ -11,27 +11,33 @@ using UnityEngine.EventSystems;
 
 public class CursorHider : MonoBehaviour
 {
-  public Renderer[] renderers;
+  [SerializeField]
+  private Renderer[] m_Renderers;
 
-  private PointerEventData pointerData;
-  private List<RaycastResult> results = new();
+  [SerializeField]
+  private GameObject m_BackGround;
+
+  private PointerEventData m_PointerData;
+  private List<RaycastResult> m_Results = new();
 
   void Update()
   {
     if (EventSystem.current == null)
       return;
 
-    pointerData = new(EventSystem.current);
-    pointerData.position = Input.mousePosition;
+    m_PointerData = new(EventSystem.current);
+    m_PointerData.position = Input.mousePosition;
 
-    results.Clear();
-    EventSystem.current.RaycastAll(pointerData, results);
+    m_Results.Clear();
+    EventSystem.current.RaycastAll(m_PointerData, m_Results);
 
     bool overButton = false;
 
-    foreach (var result in results)
+    foreach (var result in m_Results)
     {
-      if (result.gameObject != gameObject)
+      //print(result);
+      // If we are raycasting the background, then there is no ui above the bg
+      if (result.gameObject != m_BackGround)
       {
         overButton = true;
         break;
@@ -43,7 +49,7 @@ public class CursorHider : MonoBehaviour
 
   private void SetVisible(bool visible)
   {
-    foreach (var r in renderers)
+    foreach (var r in m_Renderers)
     {
       r.gameObject.SetActive(visible);
     }
