@@ -5,46 +5,24 @@ Last Updated:   2/14/2026
 Copyright 2018-2026, DigiPen Institute of Technology
 ***************************************************/
 
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class CursorHider : MonoBehaviour
+public class CursorHider : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
   [SerializeField]
   private Renderer[] m_Renderers;
 
-  [SerializeField]
-  private GameObject m_BackGround;
-
-  private PointerEventData m_PointerData;
-  private List<RaycastResult> m_Results = new();
-
-  void Update()
+  // Called when pointer enters THIS UI element (background)
+  public void OnPointerEnter(PointerEventData eventData)
   {
-    if (EventSystem.current == null)
-      return;
+    SetVisible(true);
+  }
 
-    m_PointerData = new(EventSystem.current);
-    m_PointerData.position = Input.mousePosition;
-
-    m_Results.Clear();
-    EventSystem.current.RaycastAll(m_PointerData, m_Results);
-
-    bool overButton = false;
-
-    foreach (var result in m_Results)
-    {
-      //print(result);
-      // If we are raycasting the background, then there is no ui above the bg
-      if (result.gameObject != m_BackGround)
-      {
-        overButton = true;
-        break;
-      }
-    }
-
-    SetVisible(!overButton);
+  // Called when pointer exits THIS UI element
+  public void OnPointerExit(PointerEventData eventData)
+  {
+    SetVisible(false);
   }
 
   private void SetVisible(bool visible)
