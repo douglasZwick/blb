@@ -1604,6 +1604,7 @@ GameObject:
   - component: {fileID: 128438543}
   - component: {fileID: 128438546}
   - component: {fileID: 128438549}
+  - component: {fileID: 128438550}
   - component: {fileID: 128438544}
   m_Layer: 5
   m_Name: FilesPanel
@@ -1799,6 +1800,7 @@ MonoBehaviour:
   m_SaveAsDialogAdder: {fileID: 128438543}
   m_ExportAsDialogAdder: {fileID: 128438546}
   m_RestoreBackupDialogAdder: {fileID: 128438549}
+  m_AskToSaveDialogAdder: {fileID: 128438550}
 --- !u!114 &128438548
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1828,6 +1830,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_ModalDialogPrefabs:
   - {fileID: 1097369142805285253, guid: 5b171a5e8e593e94db5b18dca5a25a59, type: 3}
+--- !u!114 &128438550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 128438535}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 669a6586aefca754ba1732319aa8a037, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ModalDialogPrefabs:
+  - {fileID: 1365369660276513726, guid: c055dc06e69fabb46a2481863b1f6256, type: 3}
 --- !u!1 &146315540
 GameObject:
   m_ObjectHideFlags: 0
@@ -9645,8 +9661,8 @@ MonoBehaviour:
   m_UiScaleMode: 0
   m_ReferencePixelsPerUnit: 64
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
-  m_ScreenMatchMode: 0
+  m_ReferenceResolution: {x: 1920, y: 1080}
+  m_ScreenMatchMode: 2
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
@@ -11585,7 +11601,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 18.799988, y: -162.1}
+  m_AnchoredPosition: {x: 19, y: -162}
   m_SizeDelta: {x: 32.695496, y: 111.20001}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &568340459
@@ -36958,7 +36974,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -21.900024, y: -122.5}
+  m_AnchoredPosition: {x: -22, y: -122.5}
   m_SizeDelta: {x: 35, y: 81}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1447622811

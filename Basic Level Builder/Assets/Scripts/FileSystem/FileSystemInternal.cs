@@ -61,6 +61,8 @@ public class FileSystemInternal : MonoBehaviour
   protected ModalDialogAdder m_ExportAsDialogAdder;
   [SerializeField]
   private ModalDialogAdder m_RestoreBackupDialogAdder;
+  [SerializeField]
+  private ModalDialogAdder m_AskToSaveDialogAdder;
 
   protected string m_PendingSaveFullFilePath = "";
   protected FileData m_PendingExportFileData = null;
@@ -225,12 +227,14 @@ public class FileSystemInternal : MonoBehaviour
     m_DragAndDropHook = new UnityDragAndDropHook();
     m_DragAndDropHook.InstallHook();
     m_DragAndDropHook.OnDroppedFiles += OnDroppedFiles;
+    Application.wantsToQuit += OnWantsToQuit;
   }
 
   private void OnDisable()
   {
     m_DragAndDropHook.UninstallHook();
     m_DragAndDropHook.OnDroppedFiles -= OnDroppedFiles;
+    Application.wantsToQuit -= OnWantsToQuit;
   }
 
   // Check if any file got deleted when we were off the game
@@ -256,19 +260,69 @@ public class FileSystemInternal : MonoBehaviour
     }
   }
 
-  private void OnApplicationQuit()
+  private bool OnWantsToQuit()
   {
-    m_IsAppQuitting = true;
-    // Force autosave if we have changes.
-    bool isAutoSave = true;
-    bool shouldPrintElapsedTime = false;
-    Save(isAutoSave, null, false, shouldPrintElapsedTime);
-
     // If we have a saving thread running, wait for it to finish before closing the program
     if (m_SavingThread != null && m_SavingThread.IsAlive)
     {
       m_SavingThread.Join();
     }
+
+    // Check if we already asked to quit
+    if (m_IsAppQuitting)
+      return true;
+
+
+    // Check if we have unsaved changes, then ask to save if so
+    if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid))
+    {
+      // Ask to save
+      m_AskToSaveDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+
+      // No matter which option the user presses, we will still quit after saving or not.
+      // Mark this flag so we know to quit the next time this function is run
+      m_IsAppQuitting = true;
+
+      // Stops the quit from happening
+      return false;
+    }
+
+    return true;
+  }
+
+  protected void SaveAndQuitEx()
+  {
+    // Force autosave if we have changes.
+    bool isAutoSave = false;
+    bool shouldPrintElapsedTime = false;
+    Save(isAutoSave, null, false, shouldPrintElapsedTime);
+    // If we have a saving thread running, wait for it to finish before closing the program
+    if (m_SavingThread != null && m_SavingThread.IsAlive)
+    {
+      m_SavingThread.Join();
+    }
+
+    Application.Quit();
+  }
+
+  protected void QuitWithoutSaveEx()
+  {
+    // Force autosave if we have changes.
+    bool isAutoSave = true;
+    bool shouldPrintElapsedTime = false;
+    Save(isAutoSave, null, false, shouldPrintElapsedTime);
+    // If we have a saving thread running, wait for it to finish before closing the program
+    if (m_SavingThread != null && m_SavingThread.IsAlive)
+    {
+      m_SavingThread.Join();
+    }
+
+    Application.Quit();
+  }
+
+  private void OnApplicationQuit()
+  {
+    
   }
 
   private void CreateEmptyTempFile()

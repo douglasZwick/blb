@@ -75,6 +75,10 @@ public class FileSystem : FileSystemInternal
     Save(false, name, false, shouldPrintElapsedTime);
   }
 
+  public void SaveAndQuit() => SaveAndQuitEx();
+
+  public void QuitWithoutSave() => QuitWithoutSaveEx();
+
   public void ExportMultipleVersions(string sourcePath, List<LevelVersion> versions)
   {
     // Gather the level data to export
