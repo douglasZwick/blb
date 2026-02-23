@@ -35,6 +35,8 @@ public class UiHistoryTab : UiTab
   [SerializeField]
   private Image m_VersionInfoThumbnail;
   [SerializeField]
+  private GameObject m_ShowAutosaveButton;
+  [SerializeField]
   private UiIconRotator[] m_ExpandCollapseIcon;
   [SerializeField]
   private TMPro.TextMeshProUGUI m_ExpandCollapseButtonText;
@@ -130,8 +132,16 @@ public class UiHistoryTab : UiTab
 
       UpdateVersionList(items);
 
-      // First time run will collapse all
-      ToggleSaveExpansion();
+      // Disable the show autosaves button if we have none
+      if (fileInfo.m_FileData.m_AutoSaves.Count == 0)
+      {
+        m_ShowAutosaveButton.SetActive(false);
+      }
+      else
+      {
+        // First time run will collapse all
+        ToggleSaveExpansion();
+      }
     }
     catch (Exception e)
     {
