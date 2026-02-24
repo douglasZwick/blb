@@ -7,7 +7,7 @@ Copyright 2018-2026, DigiPen Institute of Technology
 
 using UnityEngine;
 
-public class UiUnsavedChangesModalDialog : ModalDialog
+public class UiSaveBeforeLoadModalDialog : ModalDialog
 {
   public TMPro.TextMeshProUGUI m_PromptTxt;
 
@@ -37,15 +37,16 @@ public class UiUnsavedChangesModalDialog : ModalDialog
     Destroy(gameObject);
   }
 
-  public void SaveAndQuit()
+  public void Yes()
   {
-    FileSystem.Instance.SaveAndQuit();
+    FileSystem.Instance.ManualSave();
+    FileSystem.Instance.LoadPendingFile();
     Close();
   }
 
-  public void QuitWithoutSave()
+  public void No()
   {
-    FileSystem.Instance.QuitWithoutSave();
+    FileSystem.Instance.LoadPendingFile();
     Close();
   }
 }

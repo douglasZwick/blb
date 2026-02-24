@@ -131,12 +131,26 @@ public class FileSystem : FileSystemInternal
     GetFileInfoFromFullFilePathEx(fullFilePath, out fileInfo);
   }
 
-  public void LoadFromFullFilePath(string fullFilePath, LevelVersion? version = null)
+  /// <summary>
+  /// Loads a file from a fill file path as the new mounted file
+  /// </summary>
+  /// <param name="fullFilePath">The full path to the file.</param>
+  /// <param name="askToSave">If there are unsaved changes in the editor, will ask to save them first.</param>
+  /// <param name="version">The version of the level to load.</param>
+  /// <exception cref="Exception">Thrown when the file cannot be found.</exception>
+  public void LoadFromFullFilePath(string fullFilePath, bool askToSave, LevelVersion? version = null)
   {
-    LoadFromFullFilePathEx(fullFilePath, version);
+    // Load, returns false if we needed to ask to save
+    if (LoadFromFullFilePathEx(fullFilePath, askToSave, version))
+      // Update file item ui
+      m_FileDirUtilities.FileItemSetSelected(fullFilePath);
+  }
 
-    // Update file item ui
-    m_FileDirUtilities.FileItemSetSelected(fullFilePath);
+  // Only to be called by the SaveBeforeLoad Dialog
+  public void LoadPendingFile()
+  {
+    LoadPendingFileEx();
+    m_FileDirUtilities.FileItemSetSelected(m_PendingSaveFullFilePath);
   }
 
   public void LoadFromTextAsset(TextAsset level)
@@ -218,7 +232,7 @@ public class FileSystem : FileSystemInternal
       bool isSaveAs = true;
       bool updateCameraPosButtonPressed = false;
       bool shouldPrintElapsedTime = true;
-      StartSavingThread(m_PendingSaveFullFilePath, autosave, isSaveAs, updateCameraPosButtonPressed, shouldPrintElapsedTime);
+      StartSavingThread(m_PendingSaveFullFilePath, m_TileGrid.GetGridDictionary(), autosave, isSaveAs, updateCameraPosButtonPressed, shouldPrintElapsedTime);
     }
     else
     {

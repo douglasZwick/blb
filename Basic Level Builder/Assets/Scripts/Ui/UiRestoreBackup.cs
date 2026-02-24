@@ -58,7 +58,7 @@ public class UiRestoreBackup : ModalDialog
   public void YesPressed()
   {
     // Load temp file
-    FileSystem.Instance.LoadFromFullFilePath(m_fullFilePath, m_VersionToLoad);
+    FileSystem.Instance.LoadFromFullFilePath(m_fullFilePath, false, m_VersionToLoad);
     Close();
   }
 

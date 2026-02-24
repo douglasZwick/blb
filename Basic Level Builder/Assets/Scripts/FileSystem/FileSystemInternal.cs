@@ -62,7 +62,9 @@ public class FileSystemInternal : MonoBehaviour
   [SerializeField]
   private ModalDialogAdder m_RestoreBackupDialogAdder;
   [SerializeField]
-  private ModalDialogAdder m_AskToSaveDialogAdder;
+  private ModalDialogAdder m_SaveAndQuitDialogAdder;
+  [SerializeField]
+  private ModalDialogAdder m_SaveAndLoadDialogAdder;
 
   protected string m_PendingSaveFullFilePath = "";
   protected FileData m_PendingExportFileData = null;
@@ -274,10 +276,10 @@ public class FileSystemInternal : MonoBehaviour
 
 
     // Check if we have unsaved changes, then ask to save if so
-    if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid))
+    if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
     {
       // Ask to save
-      m_AskToSaveDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+      m_SaveAndQuitDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
 
       // No matter which option the user presses, we will still quit after saving or not.
       // Mark this flag so we know to quit the next time this function is run
@@ -320,11 +322,6 @@ public class FileSystemInternal : MonoBehaviour
     Application.Quit();
   }
 
-  private void OnApplicationQuit()
-  {
-    
-  }
-
   private void CreateEmptyTempFile()
   {
     // This first save will be an empty manual
@@ -337,7 +334,7 @@ public class FileSystemInternal : MonoBehaviour
     // Mount temp file so we can check when the full file path isn't the temp file
     MountFile(destFilePath, m_MountedFileInfo);
   }
-  
+
   /// <summary>
   /// Creates new file data structures.
   /// </summary>
@@ -424,7 +421,7 @@ public class FileSystemInternal : MonoBehaviour
     if (validPaths.Count == 0)
       StatusBar.Print("Drag and drop only supports <b>.blb</b> files.");
     else
-      LoadFromFullFilePathEx(validPaths[0]);
+      LoadFromFullFilePathEx(validPaths[0], true);
   }
 
   /// <summary>
@@ -540,7 +537,7 @@ public class FileSystemInternal : MonoBehaviour
             // xSub and ySub are the x and y offsets within the tile
             var xSub = xTransformer(x, y);
             var ySub = yTransformer(x, y);
-            
+
             var bufferIndex = col * m_ThumbnailTileSize.x + xSub +
               (row * m_ThumbnailTileSize.y + ySub) * m_ThumbnailSize.x;
 
@@ -659,24 +656,21 @@ public class FileSystemInternal : MonoBehaviour
       }
     }
 
-    StartSavingThread(destFilePath, autosave, saveAsFileName != null, updateCameraPosButtonPressed, shouldPrintElapsedTime);
+    StartSavingThread(destFilePath, m_TileGrid.GetGridDictionary(), autosave, saveAsFileName != null, updateCameraPosButtonPressed, shouldPrintElapsedTime);
   }
 
-  protected void StartSavingThread(string destFilePath, bool autosave, bool isSaveAs, bool updateCameraPosButtonPressed, bool shouldPrintElapsedTime)
+  protected void StartSavingThread(string destFilePath, Dictionary<Vector2Int, TileGrid.Element> gridDictionary,
+                                   bool autosave, bool isSaveAs, bool updateCameraPosButtonPressed, bool shouldPrintElapsedTime)
   {
-
-    // Copy the map data into a buffer to use for the saving thread.
-    m_TileGrid.CopyGridBuffer();
-
     // Store camera position to the nearest tile
     m_PendingCameraPos = new Vector2(Camera.main.transform.position.x, Camera.main.transform.position.y);
 
     // Gernerate the version thumbnail to be used in the thread
     // EncodeToPNG can only be used on main thread
-    m_PendingThumbnail = GenerateThumbnail(m_TileGrid.GetGridBuffer());
+    m_PendingThumbnail = GenerateThumbnail(gridDictionary);
 
     // Define parameters for the branched thread function
-    object[] parameters = { destFilePath, autosave, shouldPrintElapsedTime, updateCameraPosButtonPressed};
+    object[] parameters = { destFilePath, autosave, shouldPrintElapsedTime, updateCameraPosButtonPressed, gridDictionary };
 
     // Create a new thread and pass the ParameterizedThreadStart delegate
     if (isSaveAs)
@@ -703,17 +697,20 @@ public class FileSystemInternal : MonoBehaviour
 
     // Access the parameters
     string destFilePath = (string)parameters[0];
+    Dictionary<Vector2Int, TileGrid.Element> gridDictionary = (Dictionary<Vector2Int, TileGrid.Element>)parameters[4];
     bool isOverwriting = File.Exists(destFilePath);
 
     // Create new file date to clear out the old and only write in the current tile grid
     m_MountedFileInfo.m_FileData = new();
 
-    m_TileGrid.GetLevelData(out LevelData levelData);
-
-    levelData.m_TimeStamp = DateTime.Now;
-    levelData.m_Version = new(1, 0);
-    levelData.m_Thumbnail = m_PendingThumbnail;
-    levelData.m_CameraPos = m_PendingCameraPos;
+    LevelData levelData = new()
+    {
+      m_AddedTiles = new List<TileGrid.Element>(gridDictionary.Values),
+      m_TimeStamp = DateTime.Now,
+      m_Version = new(1, 0),
+      m_Thumbnail = m_PendingThumbnail,
+      m_CameraPos = m_PendingCameraPos
+    };
 
     m_MountedFileInfo.m_FileData.m_ManualSaves.Add(levelData);
 
@@ -746,6 +743,7 @@ public class FileSystemInternal : MonoBehaviour
     bool autosave = (bool)parameters[1];
     bool shouldPrintElapsedTime = (bool)parameters[2];
     bool updateCameraPosButtonPressed = (bool)parameters[3];
+    Dictionary<Vector2Int, TileGrid.Element> gridDictionary = (Dictionary<Vector2Int, TileGrid.Element>)parameters[4];
     bool overwriting = File.Exists(destFilePath);
     // TODO, Don't auto save if the diffences from the last auto save are the same. Ie no unsaved changes.
     #region Add level changes to level data
@@ -768,7 +766,7 @@ public class FileSystemInternal : MonoBehaviour
 
     bool isCameraDifferent = m_PendingCameraPos != GetLastManualSaveData(m_MountedFileInfo.m_FileData).m_CameraPos;
     bool saveDiffs = isCameraDifferent && updateCameraPosButtonPressed;
-    
+
     // We can't update the camera pos if the camera is not different
     if (updateCameraPosButtonPressed && !isCameraDifferent)
     {
@@ -778,7 +776,7 @@ public class FileSystemInternal : MonoBehaviour
       return;
     }
 
-    bool hasDifferences = GetDifferences(out LevelData levelData, m_MountedFileInfo, m_TileGrid) || saveDiffs;
+    bool hasDifferences = GetDifferences(out LevelData levelData, m_MountedFileInfo, gridDictionary) || saveDiffs;
 
     levelData.m_Thumbnail = m_PendingThumbnail;
     levelData.m_CameraPos = m_PendingCameraPos;
@@ -859,7 +857,7 @@ public class FileSystemInternal : MonoBehaviour
         m_MountedFileInfo.m_FileData.m_ManualSaves.Add(levelData);
       }
       // If this is an auto save, store what version of the manual save we branched from to get these differences to save
-      else 
+      else
       {
         // Set the manual save version we are branching off from
         // Get the manual version or the branched manual version if we loaded an auto save
@@ -880,7 +878,7 @@ public class FileSystemInternal : MonoBehaviour
       // So just copy our file to the destination file
       copyFile = true;
     }
-#endregion Add level changes to level data
+    #endregion Add level changes to level data
 
     try
     {
@@ -1101,13 +1099,44 @@ public class FileSystemInternal : MonoBehaviour
     GetDataFromJson(File.ReadAllBytes(fullFilePath), ref fileInfo);
   }
 
-  protected void LoadFromFullFilePathEx(string fullFilePath, LevelVersion? version = null)
+  /// <summary>
+  /// Loads a file from a fill file path as the new mounted file
+  /// </summary>
+  /// <param name="fullFilePath">The full path to the file.</param>
+  /// <param name="askToSave">If there are unsaved changes in the editor, will ask to save them first.</param>
+  /// <param name="version">The version of the level to load.</param>
+  /// <returns>True if we loaded the file, false if there was an exeption or if we needed to ask to save.</returns>
+  /// <exception cref="Exception">Thrown when the file cannot be found.</exception>
+  protected bool LoadFromFullFilePathEx(string fullFilePath, bool askToSave, LevelVersion? version = null)
   {
     if (GlobalData.AreEffectsUnderway())
-      return;
+      return false;
+
+    // If we have a saving thread running, wait for it to finish before loading a save
+    if (m_SavingThread != null && m_SavingThread.IsAlive)
+    {
+      m_SavingThread.Join();
+    }
 
     try
     {
+      // Check if we have unsaved changes, then ask to save if so
+      if (askToSave && IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
+      {
+        // Ask to save
+        m_SaveAndLoadDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+
+        // Add the file to the pending list
+        m_PendingSaveFullFilePath = fullFilePath;
+        m_PendingExportVersions ??= new();
+        m_PendingExportVersions.Clear();
+        if (version != null)
+          m_PendingExportVersions.Add(version ?? new(0, 0));
+
+        // Stops the load from happening
+        return false;
+      }
+
       LoadFromJson(File.ReadAllBytes(fullFilePath), version);
       MountFile(fullFilePath, m_MountedFileInfo);
 
@@ -1121,7 +1150,16 @@ public class FileSystemInternal : MonoBehaviour
       // File not loaded, remove file mount
       UnmountFile();
       Debug.LogError($"Error while loading. {e.Message} ({e.GetType()})");
+      return false;
     }
+    return true;
+  }
+
+  protected void LoadPendingFileEx()
+  {
+    LevelVersion? version = m_PendingExportVersions.Count >= 1 ? m_PendingExportVersions[0] : null;
+
+    LoadFromFullFilePathEx(m_PendingSaveFullFilePath, false, version);
   }
 
   protected void LoadFromTextAssetEx(TextAsset level)
@@ -1284,7 +1322,7 @@ public class FileSystemInternal : MonoBehaviour
       StatusBar.Print($"Sucessfuly deleted {Path.GetFileName(fileInfo.m_SaveFilePath)}");
       return;
     }
-    
+
     // Write new file data to file
     try
     {

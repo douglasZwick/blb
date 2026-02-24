@@ -113,7 +113,6 @@ public class TileGrid : MonoBehaviour
 
 
   Dictionary<Vector2Int, Element> m_Grid = new();
-  Dictionary<Vector2Int, Element> m_GridSaveBuffer;
   public Transform m_BoundsRoot;
   public Transform m_MaskTransform;
   public Transform m_ColoredOutlineTransform;
@@ -245,22 +244,16 @@ public class TileGrid : MonoBehaviour
     m_WorldExtentsOutliner.OutlineWithBounds(m_MinBounds, m_MaxBounds);
   }
 
-  public void CopyGridBuffer()
+  public Dictionary<Vector2Int, Element> GetGridDictionary()
   {
-    m_GridSaveBuffer = m_Grid.ToDictionary(entry => entry.Key,
-                                           entry => (Element) entry.Value.Clone());
-  }
-
-  public Dictionary<Vector2Int, Element> GetGridBuffer()
-  {
-    return m_GridSaveBuffer;
+    return m_Grid.ToDictionary(entry => entry.Key, entry => (Element)entry.Value.Clone());
   }
 
   public string ToJsonString()
   {
     var gridStringBuilder = new StringBuilder();
 
-    foreach (var element in m_GridSaveBuffer)
+    foreach (var element in m_Grid)
       gridStringBuilder.AppendLine(JsonUtility.ToJson(element.Value));
 
     return gridStringBuilder.ToString();

@@ -1605,6 +1605,7 @@ GameObject:
   - component: {fileID: 128438546}
   - component: {fileID: 128438549}
   - component: {fileID: 128438550}
+  - component: {fileID: 128438551}
   - component: {fileID: 128438544}
   m_Layer: 5
   m_Name: FilesPanel
@@ -1800,7 +1801,8 @@ MonoBehaviour:
   m_SaveAsDialogAdder: {fileID: 128438543}
   m_ExportAsDialogAdder: {fileID: 128438546}
   m_RestoreBackupDialogAdder: {fileID: 128438549}
-  m_AskToSaveDialogAdder: {fileID: 128438550}
+  m_SaveAndQuitDialogAdder: {fileID: 128438550}
+  m_SaveAndLoadDialogAdder: {fileID: 128438551}
 --- !u!114 &128438548
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1844,6 +1846,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_ModalDialogPrefabs:
   - {fileID: 1365369660276513726, guid: c055dc06e69fabb46a2481863b1f6256, type: 3}
+--- !u!114 &128438551
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 128438535}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 669a6586aefca754ba1732319aa8a037, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ModalDialogPrefabs:
+  - {fileID: 575931503306775305, guid: 70eab3c3a0df9b547ba2b00b5c49cfcd, type: 3}
 --- !u!1 &146315540
 GameObject:
   m_ObjectHideFlags: 0

@@ -168,7 +168,7 @@ public class UiHistoryItem : MonoBehaviour
 
   public void Load()
   {
-    FileSystem.Instance.LoadFromFullFilePath(m_FileInfo.FullFilePath, m_LevelData.m_Version);
+    FileSystem.Instance.LoadFromFullFilePath(m_FileInfo.FullFilePath, true, m_LevelData.m_Version);
     OnCloseInfoWindow?.Invoke();
   }
 

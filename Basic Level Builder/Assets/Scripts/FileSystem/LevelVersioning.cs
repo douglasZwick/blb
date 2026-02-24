@@ -122,12 +122,11 @@ public static class LevelVersioning
     return targetData.m_CameraPos != previousData.m_CameraPos;
   }
 
-  // Make sure m_TileGrid.CopyGridBuffer is called before hand
-  public static bool GetDifferences(out LevelData differences, FileInfo fileInfo, TileGrid tileGrid, LevelVersion? version = null)
+  public static bool GetDifferences(out LevelData differences, FileInfo fileInfo, Dictionary<Vector2Int, TileGrid.Element> gridDictionary, LevelVersion? version = null)
   {
     Dictionary<Vector2Int, TileGrid.Element> oldGrid = GetGridDictionaryFromFileData(fileInfo, version);
 
-    return GetDifferencesEx(out differences, oldGrid, tileGrid.GetGridBuffer());
+    return GetDifferencesEx(out differences, oldGrid, gridDictionary);
   }
 
   public static bool GetVersionDifferences(out LevelData differences, FileInfo fileInfo, LevelVersion from, LevelVersion to)
