@@ -75,6 +75,11 @@ public class FileSystem : FileSystemInternal
     Save(false, name, false, shouldPrintElapsedTime);
   }
 
+  public void CreateNewLevel()
+  {
+    TryCreateNewLevel();
+  }
+
   public void SaveAndQuit() => SaveAndQuitEx();
 
   public void QuitWithoutSave() => QuitWithoutSaveEx();

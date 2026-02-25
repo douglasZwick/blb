@@ -173,6 +173,11 @@ public class FileDirUtilities : MonoBehaviour
     m_SaveList.ItemSetSelected(fullFilePath);
   }
 
+  public void DeselectAll()
+  {
+    m_SaveList.DeselectAll();
+  }
+
   public void MoveFileItemToTop(string fullFilePath)
   {
     var item = m_SaveList.GetItemByFullFilePath(fullFilePath);

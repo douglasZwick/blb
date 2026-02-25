@@ -39,6 +39,15 @@ public class UiListView : MonoBehaviour
     }
   }
 
+  public void DeselectAll()
+  {
+    var items = m_RectTransform.GetComponentsInChildren<UiSaveFileItem>();
+    foreach (var item in items)
+    {
+      item.SetBackgroundColor(s_UnselectedItemColor);
+    }
+  }
+
   public void Add(RectTransform item)
   {
     AddHelper(item);

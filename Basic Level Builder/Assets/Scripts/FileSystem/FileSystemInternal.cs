@@ -52,6 +52,9 @@ public class FileSystemInternal : MonoBehaviour
 
   UnityDragAndDropHook m_DragAndDropHook;
 
+  /**
+   * Modal Dialog Section
+   **/
   ModalDialogMaster m_ModalDialogMaster;
   [SerializeField]
   protected ModalDialogAdder m_OverrideDialogAdder;
@@ -66,12 +69,17 @@ public class FileSystemInternal : MonoBehaviour
   [SerializeField]
   private ModalDialogAdder m_SaveAndLoadDialogAdder;
 
+  /**
+   * Pending variables for Modal Dialogs
+   **/
   protected string m_PendingSaveFullFilePath = "";
   protected FileData m_PendingExportFileData = null;
   protected List<LevelVersion> m_PendingExportVersions = null;
 
   private string m_PendingThumbnail = "";
   private Vector2 m_PendingCameraPos;
+  private bool m_ForceEmptyLevelSave;
+
 
   protected FileInfo m_MountedFileInfo;
 
@@ -322,6 +330,31 @@ public class FileSystemInternal : MonoBehaviour
     Application.Quit();
   }
 
+  protected void TryCreateNewLevel()
+  {
+    // Check if we have unsaved changes, then ask to save if so
+    if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
+    {
+      // Ask to save
+      // TODO Make a new one for this
+      m_SaveAndQuitDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+
+      return;
+    }
+
+    CreateNewLevelEx();
+  }
+
+  private void CreateNewLevelEx()
+  {
+    UnmountFile();
+    m_TileGrid.ForceClearGrid();
+    // Set this variable so we can save an empty level
+    // This will be reset in the save function
+    m_ForceEmptyLevelSave = true;
+    m_SaveAsDialogAdder.RequestDialogsAtCenter();
+  }
+
   private void CreateEmptyTempFile()
   {
     // This first save will be an empty manual
@@ -378,6 +411,7 @@ public class FileSystemInternal : MonoBehaviour
     // Reset the loaded version to none
     m_loadedVersion = new();
     m_FileDirUtilities.SetTitleBarFileName(null);
+    m_FileDirUtilities.DeselectAll();
   }
 
   /// <summary>
@@ -572,13 +606,15 @@ public class FileSystemInternal : MonoBehaviour
 
     m_TileGrid.GetLevelData(out LevelData levelData);
     // Check if we are going to save an empty level
-    if (levelData.m_AddedTiles.Count == 0)
+    if (levelData.m_AddedTiles.Count == 0 && !m_ForceEmptyLevelSave)
     {
       var errorString = "Failed to save because the level is empty";
       m_MainThreadDispatcher.Enqueue(() => StatusBar.Print(errorString));
       Debug.Log(errorString);
       return;
     }
+    // Reset this flag if it was set to true
+    m_ForceEmptyLevelSave = false;
 
     // If we have a thread running
     if (m_SavingThread != null && m_SavingThread.IsAlive)
