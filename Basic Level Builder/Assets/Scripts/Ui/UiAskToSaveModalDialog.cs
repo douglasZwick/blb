@@ -7,10 +7,17 @@ Copyright 2018-2026, DigiPen Institute of Technology
 
 using UnityEngine;
 
-public class UiSaveBeforeLoadModalDialog : ModalDialog
+public class UiAskToSaveModalDialog : ModalDialog
 {
   public TMPro.TextMeshProUGUI m_PromptTxt;
-
+  public delegate void ConfirmSave();
+  public static event ConfirmSave OnConfirmSave;
+  public delegate void DenySave();
+  public static event DenySave OnDenySave;
+  public delegate void CancelAction();
+  public static event CancelAction OnCancelAction;
+  public delegate void RemoveSub();
+  public static event RemoveSub OnRemoveSub;
   public override void Open()
   {
     var anchoredX = 0;
@@ -39,14 +46,23 @@ public class UiSaveBeforeLoadModalDialog : ModalDialog
 
   public void Yes()
   {
-    FileSystem.Instance.ManualSave();
-    FileSystem.Instance.LoadPendingFile();
     Close();
+    OnConfirmSave?.Invoke();
+    OnRemoveSub?.Invoke();
   }
 
   public void No()
   {
-    FileSystem.Instance.LoadPendingFile();
     Close();
+    OnDenySave?.Invoke();
+    OnRemoveSub?.Invoke();
+  }
+
+
+  public void Cancel()
+  {
+    Close();
+    OnCancelAction?.Invoke();
+    OnRemoveSub?.Invoke();
   }
 }

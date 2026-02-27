@@ -65,9 +65,7 @@ public class FileSystemInternal : MonoBehaviour
   [SerializeField]
   private ModalDialogAdder m_RestoreBackupDialogAdder;
   [SerializeField]
-  private ModalDialogAdder m_SaveAndQuitDialogAdder;
-  [SerializeField]
-  private ModalDialogAdder m_SaveAndLoadDialogAdder;
+  private ModalDialogAdder m_AskToSaveDialogAdder;
 
   /**
    * Pending variables for Modal Dialogs
@@ -287,7 +285,19 @@ public class FileSystemInternal : MonoBehaviour
     if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
     {
       // Ask to save
-      m_SaveAndQuitDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+      m_AskToSaveDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+      void removeHandler()
+      {
+        UiAskToSaveModalDialog.OnCancelAction -= CancelQuit;
+        UiAskToSaveModalDialog.OnConfirmSave -= SaveAndQuit;
+        UiAskToSaveModalDialog.OnDenySave -= QuitWithoutSave;
+        UiAskToSaveModalDialog.OnRemoveSub -= removeHandler;
+      }
+
+      UiAskToSaveModalDialog.OnCancelAction += CancelQuit;
+      UiAskToSaveModalDialog.OnConfirmSave += SaveAndQuit;
+      UiAskToSaveModalDialog.OnDenySave += QuitWithoutSave;
+      UiAskToSaveModalDialog.OnRemoveSub += removeHandler;
 
       // No matter which option the user presses, we will still quit after saving or not.
       // Mark this flag so we know to quit the next time this function is run
@@ -300,7 +310,7 @@ public class FileSystemInternal : MonoBehaviour
     return true;
   }
 
-  protected void SaveAndQuitEx()
+  private void SaveAndQuit()
   {
     // Force autosave if we have changes.
     bool isAutoSave = false;
@@ -315,7 +325,7 @@ public class FileSystemInternal : MonoBehaviour
     Application.Quit();
   }
 
-  protected void QuitWithoutSaveEx()
+  private void QuitWithoutSave()
   {
     // Force autosave if we have changes.
     bool isAutoSave = true;
@@ -330,22 +340,52 @@ public class FileSystemInternal : MonoBehaviour
     Application.Quit();
   }
 
+  private void CancelQuit()
+  {
+    FileSystem.Instance.m_IsAppQuitting = false;
+  }
+
   protected void TryCreateNewLevel()
   {
     // Check if we have unsaved changes, then ask to save if so
     if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
     {
       // Ask to save
-      // TODO Make a new one for this
-      m_SaveAndQuitDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+      m_AskToSaveDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+
+      void removeHandler()
+      {
+        UiAskToSaveModalDialog.OnConfirmSave -= SaveAndCreateNewLevel;
+        UiAskToSaveModalDialog.OnDenySave -= CreateNewLevel;
+        UiAskToSaveModalDialog.OnRemoveSub -= removeHandler;
+      }
+
+      UiAskToSaveModalDialog.OnConfirmSave += SaveAndCreateNewLevel;
+      UiAskToSaveModalDialog.OnDenySave += CreateNewLevel;
+      UiAskToSaveModalDialog.OnRemoveSub += removeHandler;
 
       return;
     }
 
-    CreateNewLevelEx();
+    CreateNewLevel();
   }
 
-  private void CreateNewLevelEx()
+  private void SaveAndCreateNewLevel()
+  {
+    // Force autosave if we have changes.
+    bool isAutoSave = false;
+    bool shouldPrintElapsedTime = false;
+    Save(isAutoSave, null, false, shouldPrintElapsedTime);
+    // If we have a saving thread running, wait for it to finish before closing the program
+    if (m_SavingThread != null && m_SavingThread.IsAlive)
+    {
+      m_SavingThread.Join();
+    }
+
+    CreateNewLevel();
+  }
+
+  private void CreateNewLevel()
   {
     UnmountFile();
     m_TileGrid.ForceClearGrid();
@@ -1160,7 +1200,24 @@ public class FileSystemInternal : MonoBehaviour
       if (askToSave && IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
       {
         // Ask to save
-        m_SaveAndLoadDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+        m_AskToSaveDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+
+        void saveThenLoad()
+        {
+          Save(false);
+          LoadPendingFile();
+        }
+
+        void removeHandler()
+        {
+          UiAskToSaveModalDialog.OnConfirmSave -= saveThenLoad;
+          UiAskToSaveModalDialog.OnDenySave -= LoadPendingFile;
+          UiAskToSaveModalDialog.OnRemoveSub -= removeHandler;
+        }
+
+        UiAskToSaveModalDialog.OnConfirmSave += saveThenLoad;
+        UiAskToSaveModalDialog.OnDenySave += LoadPendingFile;
+        UiAskToSaveModalDialog.OnRemoveSub += removeHandler;
 
         // Add the file to the pending list
         m_PendingSaveFullFilePath = fullFilePath;
@@ -1191,11 +1248,13 @@ public class FileSystemInternal : MonoBehaviour
     return true;
   }
 
-  protected void LoadPendingFileEx()
+  protected void LoadPendingFile()
   {
     LevelVersion? version = m_PendingExportVersions.Count >= 1 ? m_PendingExportVersions[0] : null;
 
     LoadFromFullFilePathEx(m_PendingSaveFullFilePath, false, version);
+
+    m_FileDirUtilities.FileItemSetSelected(m_PendingSaveFullFilePath);
   }
 
   protected void LoadFromTextAssetEx(TextAsset level)

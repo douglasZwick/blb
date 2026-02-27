@@ -80,10 +80,6 @@ public class FileSystem : FileSystemInternal
     TryCreateNewLevel();
   }
 
-  public void SaveAndQuit() => SaveAndQuitEx();
-
-  public void QuitWithoutSave() => QuitWithoutSaveEx();
-
   public void ExportMultipleVersions(string sourcePath, List<LevelVersion> versions)
   {
     // Gather the level data to export
@@ -149,13 +145,6 @@ public class FileSystem : FileSystemInternal
     if (LoadFromFullFilePathEx(fullFilePath, askToSave, version))
       // Update file item ui
       m_FileDirUtilities.FileItemSetSelected(fullFilePath);
-  }
-
-  // Only to be called by the SaveBeforeLoad Dialog
-  public void LoadPendingFile()
-  {
-    LoadPendingFileEx();
-    m_FileDirUtilities.FileItemSetSelected(m_PendingSaveFullFilePath);
   }
 
   public void LoadFromTextAsset(TextAsset level)
