@@ -365,31 +365,42 @@ public class FileDirUtilities : MonoBehaviour
 
   public static void OpenInFinder(string path)
   {
-    // Check for macOS platform
-#if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
+    bool openInsidesOfFolder = false;
+
+    // try mac
+    string macPath = path.Replace("\\", "/"); // mac finder doesn't like backward slashes
+
+    if (Directory.Exists(macPath)) // if path requested is a folder, automatically open insides of that folder
+    {
+      openInsidesOfFolder = true;
+    }
+
+    if (!macPath.StartsWith("\""))
+    {
+      macPath = "\"" + macPath;
+    }
+
+    if (!macPath.EndsWith("\""))
+    {
+      macPath += "\"";
+    }
+
+    string arguments = (openInsidesOfFolder ? "" : "-R ") + macPath;
     try
     {
-      System.Diagnostics.Process process = new();
-      process.StartInfo.FileName = "open"; // The macOS command to open files/folders
-                                           // The "-R" argument reveals the file/folder in Finder, but we just want to open the folder
-                                           // Use "open " + path.Replace(" ", "\\ "); to open the folder directly
-      process.StartInfo.Arguments = path.Replace(" ", "\\ ");
-      process.StartInfo.UseShellExecute = false;
-      process.StartInfo.RedirectStandardError = true;
-      process.StartInfo.RedirectStandardOutput = true;
-
-      if (!process.Start())
-        Debug.LogError($"Error opening folder \"{path}\".");
+      System.Diagnostics.Process.Start("open", arguments);
     }
     catch (Exception e)
     {
-      Debug.LogError("Exception opening folder: " + e.Message);
-    }
-#elif UNITY_EDITOR // For testing in the Unity Editor on Windows/Linux
-        UnityEditor.EditorUtility.RevealInFinder(path);
-#else
-        Debug.Log("Opening folders in Finder is only supported on macOS standalone builds.");
+      e.HelpLink = ""; // do anything with this variable to silence warning about not using it
+
+#if UNITY_EDITOR
+      // EditorUtility.RevealInFinder is sure to work, but for files, it doesn't allow us to pre-select the file specified.
+      // For folders, it can't open the insides of a folder, instead it will open the parent folder.
+      // Very strange behavior, so we use EditorUtility.RevealInFinder only as our last resort.
+      UnityEditor.EditorUtility.RevealInFinder(path);
 #endif
+    }
   }
 
   /// <summary>

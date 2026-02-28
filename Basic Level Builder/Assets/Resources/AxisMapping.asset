@@ -106,3 +106,15 @@ MonoBehaviour:
   - m_axisName: Colorblind Mode
     m_buttons:
     - I
+  - m_axisName: Copy
+    m_buttons:
+    - C
+  - m_axisName: Cut
+    m_buttons:
+    - X
+  - m_axisName: Paste
+    m_buttons:
+    - V
+  - m_axisName: CreateNewLevel
+    m_buttons:
+    - N
