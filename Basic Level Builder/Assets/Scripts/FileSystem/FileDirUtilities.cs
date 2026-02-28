@@ -386,7 +386,7 @@ public class FileDirUtilities : MonoBehaviour
       Debug.LogError("Exception opening folder: " + e.Message);
     }
 #elif UNITY_EDITOR // For testing in the Unity Editor on Windows/Linux
-        EditorUtility.RevealInFinder(path);
+        UnityEditor.EditorUtility.RevealInFinder(path);
 #else
         Debug.Log("Opening folders in Finder is only supported on macOS standalone builds.");
 #endif
