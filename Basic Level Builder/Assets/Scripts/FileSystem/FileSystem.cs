@@ -203,7 +203,14 @@ public class FileSystem : FileSystemInternal
     if (Application.platform == RuntimePlatform.WebGLPlayer)
       return;
 
-    Application.OpenURL($"file://{m_FileDirUtilities.GetCurrentDirectoryPath()}");
+    if (Application.platform is RuntimePlatform.OSXEditor or RuntimePlatform.OSXPlayer)
+    {
+      FileDirUtilities.OpenInFinder(GetDirectoryPath());
+    }
+    else
+    {
+      Application.OpenURL($"file://{GetDirectoryPath()}");
+    }
   }
 
   public string GetDirectoryPath()

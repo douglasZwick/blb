@@ -337,6 +337,11 @@ public class FileDirUtilities : MonoBehaviour
       {
         case RuntimePlatform.OSXEditor:
         case RuntimePlatform.OSXPlayer:
+          // Documents folder can not be directly pathed with the SpecialFolder,
+          // so we need to find the home path and navigate to the document from there
+          string homePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+          return Path.Combine(homePath, "Documents");
+
         case RuntimePlatform.WindowsPlayer:
         case RuntimePlatform.WindowsEditor:
         case RuntimePlatform.LinuxPlayer:
@@ -356,6 +361,35 @@ public class FileDirUtilities : MonoBehaviour
 
       return Application.persistentDataPath;
     }
+  }
+
+  public static void OpenInFinder(string path)
+  {
+    // Check for macOS platform
+#if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
+    try
+    {
+      System.Diagnostics.Process process = new();
+      process.StartInfo.FileName = "open"; // The macOS command to open files/folders
+                                           // The "-R" argument reveals the file/folder in Finder, but we just want to open the folder
+                                           // Use "open " + path.Replace(" ", "\\ "); to open the folder directly
+      process.StartInfo.Arguments = path.Replace(" ", "\\ ");
+      process.StartInfo.UseShellExecute = false;
+      process.StartInfo.RedirectStandardError = true;
+      process.StartInfo.RedirectStandardOutput = true;
+
+      if (!process.Start())
+        Debug.LogError($"Error opening folder \"{path}\".");
+    }
+    catch (Exception e)
+    {
+      Debug.LogError("Exception opening folder: " + e.Message);
+    }
+#elif UNITY_EDITOR // For testing in the Unity Editor on Windows/Linux
+        EditorUtility.RevealInFinder(path);
+#else
+        Debug.Log("Opening folders in Finder is only supported on macOS standalone builds.");
+#endif
   }
 
   /// <summary>
