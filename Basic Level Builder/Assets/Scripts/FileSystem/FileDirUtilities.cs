@@ -26,10 +26,12 @@ public class FileDirUtilities : MonoBehaviour
 
   protected string m_CurrentDirectoryPath;
   private System.IntPtr m_WindowPtr;
+  private string m_AppName;
 
   private void Awake()
   {
-    m_WindowPtr = FindWindow(null, Application.productName);
+    m_AppName = Application.productName;
+    m_WindowPtr = FindWindow(null, m_AppName);
     if (m_WindowPtr == System.IntPtr.Zero)
     {
       Debug.LogWarning($"Error finding application window");
@@ -109,7 +111,7 @@ public class FileDirUtilities : MonoBehaviour
       var filePaths = Directory.GetFiles(m_CurrentDirectoryPath);
 
       var validFilePaths = filePaths
-          .Where(path => isValidExtension(path))
+          .Where(path => IsValidExtension(path))
           .ToArray();
 
       if (validFilePaths.Length == 0)
@@ -148,9 +150,9 @@ public class FileDirUtilities : MonoBehaviour
     if (m_WindowPtr != System.IntPtr.Zero && !FileSystem.Instance.m_IsAppQuitting)
     {
       if (string.IsNullOrEmpty(filePath))
-        SetWindowText(m_WindowPtr, Application.productName);
+        SetWindowText(m_WindowPtr, m_AppName);
       else
-        SetWindowText(m_WindowPtr, Application.productName + " - " + Path.GetFileNameWithoutExtension(filePath));
+        SetWindowText(m_WindowPtr, m_AppName + " - " + Path.GetFileNameWithoutExtension(filePath));
     }
   }
 
@@ -230,7 +232,7 @@ public class FileDirUtilities : MonoBehaviour
 
   static private bool IsFileValid(string fullFilePath)
   {
-    if (!isValidExtension(fullFilePath))
+    if (!IsValidExtension(fullFilePath))
       return false;
     if (!HasHeader(fullFilePath))
       return false;
@@ -239,7 +241,7 @@ public class FileDirUtilities : MonoBehaviour
     return true;
   }
 
-  static public bool isValidExtension(string fullFilePath)
+  static public bool IsValidExtension(string fullFilePath)
   {
     return fullFilePath.EndsWith(s_FilenameExtension);
   }
