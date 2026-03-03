@@ -87,6 +87,14 @@ public class FileSystemInternal : MonoBehaviour
   // A thread to run when saving should be performed.
   // Only one save thread is run at once.
   private Thread m_SavingThread;
+  private static int mainThreadId;
+  public static bool IsMainThread
+  {
+    get
+    {
+      return Thread.CurrentThread.ManagedThreadId == mainThreadId;
+    }
+  }
   // A queue of events that the saving thread will enqueue for the main thread
   protected readonly MainThreadDispatcher m_MainThreadDispatcher = new();
 
@@ -200,6 +208,7 @@ public class FileSystemInternal : MonoBehaviour
   // Start is called before the first frame update
   void Start()
   {
+    mainThreadId = Thread.CurrentThread.ManagedThreadId;
     s_EditorVersion = new(Application.version);
     m_ModalDialogMaster = FindObjectOfType<ModalDialogMaster>();
 
@@ -460,6 +469,14 @@ public class FileSystemInternal : MonoBehaviour
     m_MountedFileInfo = fileInfo;
     m_MountedFileInfo.m_SaveFilePath = filePath;
     m_FileDirUtilities.SetTitleBarFileName(filePath);
+    if (IsMainThread)
+    {
+      m_FileDirUtilities.FileItemSetSelected(filePath);
+    }
+    else
+    {
+      m_MainThreadDispatcher.Enqueue(() => m_FileDirUtilities.FileItemSetSelected(filePath));
+    }
   }
 
   private bool FileExists(string filePath)
@@ -1182,10 +1199,10 @@ public class FileSystemInternal : MonoBehaviour
   /// <param name="version">The version of the level to load.</param>
   /// <returns>True if we loaded the file, false if there was an exeption or if we needed to ask to save.</returns>
   /// <exception cref="Exception">Thrown when the file cannot be found.</exception>
-  protected bool LoadFromFullFilePathEx(string fullFilePath, bool askToSave, LevelVersion? version = null)
+  protected void LoadFromFullFilePathEx(string fullFilePath, bool askToSave, LevelVersion? version = null)
   {
     if (GlobalData.AreEffectsUnderway())
-      return false;
+      return;
 
     try
     {
@@ -1223,7 +1240,7 @@ public class FileSystemInternal : MonoBehaviour
           m_PendingExportVersions.Add(version ?? new(0, 0));
 
         // Stops the load from happening
-        return false;
+        return;
       }
 
       LoadFromJson(File.ReadAllBytes(fullFilePath), version);
@@ -1239,9 +1256,7 @@ public class FileSystemInternal : MonoBehaviour
       // File not loaded, remove file mount
       UnmountFile();
       Debug.LogError($"Error while loading. {e.Message} ({e.GetType()})");
-      return false;
     }
-    return true;
   }
 
   protected void LoadPendingFile()
@@ -1249,8 +1264,6 @@ public class FileSystemInternal : MonoBehaviour
     LevelVersion? version = m_PendingExportVersions.Count >= 1 ? m_PendingExportVersions[0] : null;
 
     LoadFromFullFilePathEx(m_PendingSaveFullFilePath, false, version);
-
-    m_FileDirUtilities.FileItemSetSelected(m_PendingSaveFullFilePath);
   }
 
   protected void LoadFromTextAssetEx(TextAsset level)

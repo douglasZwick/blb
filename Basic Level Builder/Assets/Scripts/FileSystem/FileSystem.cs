@@ -142,9 +142,7 @@ public class FileSystem : FileSystemInternal
   public void LoadFromFullFilePath(string fullFilePath, bool askToSave, LevelVersion? version = null)
   {
     // Load, returns false if we needed to ask to save
-    if (LoadFromFullFilePathEx(fullFilePath, askToSave, version))
-      // Update file item ui
-      m_FileDirUtilities.FileItemSetSelected(fullFilePath);
+    LoadFromFullFilePathEx(fullFilePath, askToSave, version);
   }
 
   public void LoadFromTextAsset(TextAsset level)
