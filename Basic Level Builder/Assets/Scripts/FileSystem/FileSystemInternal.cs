@@ -672,7 +672,9 @@ public class FileSystemInternal : MonoBehaviour
 
     // If we have a thread running
     if (m_SavingThread != null && m_SavingThread.IsAlive)
-      return;
+    {
+      m_SavingThread.Join();
+    }
 
     if (!FileDataExists(m_MountedFileInfo.m_FileData))
     {
@@ -791,8 +793,13 @@ public class FileSystemInternal : MonoBehaviour
     Dictionary<Vector2Int, TileGrid.Element> gridDictionary = (Dictionary<Vector2Int, TileGrid.Element>)parameters[5];
     bool isOverwriting = File.Exists(destFilePath);
 
-    // Create new file date to clear out the old and only write in the current tile grid
-    sourceFileInfo.m_FileData = new();
+    // With a temp save we just need to add manual save v1, as v0 is the first and only manual save
+    // created for temp files. If it isn't a temp save, clear all the data to start fresh.
+    if (!sourceFileInfo.m_FileHeader.m_IsTempFile)
+    {
+      // Create new file date to clear out the old and only write in the current tile grid
+      sourceFileInfo.m_FileData = new();
+    }
 
     LevelData levelData = new()
     {
