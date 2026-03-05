@@ -141,8 +141,10 @@ public class FileSystem : FileSystemInternal
   /// <exception cref="Exception">Thrown when the file cannot be found.</exception>
   public void LoadFromFullFilePath(string fullFilePath, bool askToSave, LevelVersion? version = null)
   {
-    // Load, returns false if we needed to ask to save
-    LoadFromFullFilePathEx(fullFilePath, askToSave, version);
+    if (askToSave)
+      LoadFromFullFilePathExAndAskToSave(fullFilePath, version);
+    else
+      LoadFromFullFilePathEx(fullFilePath, version);
   }
 
   public void LoadFromTextAsset(TextAsset level)

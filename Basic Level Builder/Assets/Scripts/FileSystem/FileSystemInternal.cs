@@ -73,10 +73,10 @@ public class FileSystemInternal : MonoBehaviour
   protected string m_PendingSaveFullFilePath = "";
   protected FileData m_PendingExportFileData = null;
   protected List<LevelVersion> m_PendingExportVersions = null;
+  private LevelVersion m_PendingSaveVersion = new();
 
   private string m_PendingThumbnail = "";
   private Vector2 m_PendingCameraPos;
-  private bool m_ForceEmptyLevelSave;
 
 
   protected FileInfo m_MountedFileInfo;
@@ -95,6 +95,7 @@ public class FileSystemInternal : MonoBehaviour
       return Thread.CurrentThread.ManagedThreadId == mainThreadId;
     }
   }
+
   // A queue of events that the saving thread will enqueue for the main thread
   protected readonly MainThreadDispatcher m_MainThreadDispatcher = new();
 
@@ -295,17 +296,20 @@ public class FileSystemInternal : MonoBehaviour
     {
       // Ask to save
       m_AskToSaveDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+
+      void cancelQuit() => m_IsAppQuitting = false;
+
       void removeHandler()
       {
-        UiAskToSaveModalDialog.OnCancelAction -= CancelQuit;
+        UiAskToSaveModalDialog.OnCancelAction -= cancelQuit;
         UiAskToSaveModalDialog.OnConfirmSave -= SaveAndQuit;
-        UiAskToSaveModalDialog.OnDenySave -= QuitWithoutSave;
+        UiAskToSaveModalDialog.OnDenySave -= Application.Quit;
         UiAskToSaveModalDialog.OnRemoveSub -= removeHandler;
       }
 
-      UiAskToSaveModalDialog.OnCancelAction += CancelQuit;
+      UiAskToSaveModalDialog.OnCancelAction += cancelQuit;
       UiAskToSaveModalDialog.OnConfirmSave += SaveAndQuit;
-      UiAskToSaveModalDialog.OnDenySave += QuitWithoutSave;
+      UiAskToSaveModalDialog.OnDenySave += Application.Quit;
       UiAskToSaveModalDialog.OnRemoveSub += removeHandler;
 
       // No matter which option the user presses, we will still quit after saving or not.
@@ -333,27 +337,6 @@ public class FileSystemInternal : MonoBehaviour
     }
 
     Application.Quit();
-  }
-
-  private void QuitWithoutSave()
-  {
-    // Force autosave if we have changes.
-    bool isAutoSave = true;
-    bool shouldPrintElapsedTime = false;
-    bool shouldMountFile = false;
-    Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
-    // If we have a saving thread running, wait for it to finish before closing the program
-    if (m_SavingThread != null && m_SavingThread.IsAlive)
-    {
-      m_SavingThread.Join();
-    }
-
-    Application.Quit();
-  }
-
-  private void CancelQuit()
-  {
-    FileSystem.Instance.m_IsAppQuitting = false;
   }
 
   protected void TryCreateNewLevel()
@@ -395,9 +378,6 @@ public class FileSystemInternal : MonoBehaviour
   {
     UnmountFile();
     m_TileGrid.ForceClearGrid();
-    // Set this variable so we can save an empty level
-    // This will be reset in the save function
-    m_ForceEmptyLevelSave = true;
     m_SaveAsDialogAdder.RequestDialogsAtCenter();
   }
 
@@ -509,7 +489,7 @@ public class FileSystemInternal : MonoBehaviour
     if (validPaths.Count == 0)
       StatusBar.Print("Drag and drop only supports <b>.blb</b> files.");
     else
-      LoadFromFullFilePathEx(validPaths[0], true);
+      LoadFromFullFilePathExAndAskToSave(validPaths[0]);
   }
 
   /// <summary>
@@ -658,18 +638,6 @@ public class FileSystemInternal : MonoBehaviour
     if (GlobalData.AreEffectsUnderway())
       return;
 
-    m_TileGrid.GetLevelData(out LevelData levelData);
-    // Check if we are going to save an empty level
-    if (levelData.m_AddedTiles.Count == 0 && !m_ForceEmptyLevelSave)
-    {
-      var errorString = "Failed to save because the level is empty";
-      m_MainThreadDispatcher.Enqueue(() => StatusBar.Print(errorString));
-      Debug.Log(errorString);
-      return;
-    }
-    // Reset this flag if it was set to true
-    m_ForceEmptyLevelSave = false;
-
     // If we have a thread running
     if (m_SavingThread != null && m_SavingThread.IsAlive)
     {
@@ -752,7 +720,7 @@ public class FileSystemInternal : MonoBehaviour
   }
 
   protected void StartSavingThread(string destFilePath, Dictionary<Vector2Int, TileGrid.Element> gridDictionary,
-                                   bool autosave, bool isSaveAs, bool updateCameraPosButtonPressed, bool shouldPrintElapsedTime, bool shouldMountFile = true)
+    bool autosave, bool isSaveAs, bool updateCameraPosButtonPressed, bool shouldPrintElapsedTime, bool shouldMountFile = true)
   {
     // Store camera position to the nearest tile
     m_PendingCameraPos = new Vector2(Camera.main.transform.position.x, Camera.main.transform.position.y);
@@ -1199,6 +1167,57 @@ public class FileSystemInternal : MonoBehaviour
   }
 
   /// <summary>
+  /// If there are unsaved changes, asks to save first then, loads a file from a fill file path as the new mounted file
+  /// </summary>
+  /// <param name="fullFilePath">The full path to the file.</param>
+  /// <param name="version">The version of the level to load.</param>
+  /// <returns>True if we loaded the file, false if there was an exeption or if we needed to ask to save.</returns>
+  /// <exception cref="Exception">Thrown when the file cannot be found.</exception>
+  protected void LoadFromFullFilePathExAndAskToSave(string fullFilePath, LevelVersion? version = null)
+  {
+    if (GlobalData.AreEffectsUnderway())
+      return;
+
+    // Check if we have unsaved changes, then ask to save if so
+    if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
+    {
+      // Ask to save
+      m_AskToSaveDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+
+      void loadPendingFile() => LoadFromFullFilePathEx(m_PendingSaveFullFilePath, version);
+
+      void saveThenLoad()
+      {
+        bool isAutoSave = false;
+        bool shouldPrintElapsedTime = false;
+        bool shouldMountFile = false;
+        Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
+        loadPendingFile();
+      }
+
+      void removeHandler()
+      {
+        UiAskToSaveModalDialog.OnConfirmSave -= saveThenLoad;
+        UiAskToSaveModalDialog.OnDenySave -= loadPendingFile;
+        UiAskToSaveModalDialog.OnRemoveSub -= removeHandler;
+      }
+
+      UiAskToSaveModalDialog.OnConfirmSave += saveThenLoad;
+      UiAskToSaveModalDialog.OnDenySave += loadPendingFile;
+      UiAskToSaveModalDialog.OnRemoveSub += removeHandler;
+
+      // Add the file to the pending list
+      m_PendingSaveFullFilePath = fullFilePath;
+      m_PendingSaveVersion = version ?? new(0, 0);
+
+      // Stops the load from happening
+      return;
+    }
+
+    LoadFromFullFilePathEx(fullFilePath, version);
+  }
+
+  /// <summary>
   /// Loads a file from a fill file path as the new mounted file
   /// </summary>
   /// <param name="fullFilePath">The full path to the file.</param>
@@ -1206,50 +1225,13 @@ public class FileSystemInternal : MonoBehaviour
   /// <param name="version">The version of the level to load.</param>
   /// <returns>True if we loaded the file, false if there was an exeption or if we needed to ask to save.</returns>
   /// <exception cref="Exception">Thrown when the file cannot be found.</exception>
-  protected void LoadFromFullFilePathEx(string fullFilePath, bool askToSave, LevelVersion? version = null)
+  protected void LoadFromFullFilePathEx(string fullFilePath, LevelVersion? version = null)
   {
     if (GlobalData.AreEffectsUnderway())
       return;
 
     try
     {
-      // Check if we have unsaved changes, then ask to save if so
-      if (askToSave && IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
-      {
-        // Ask to save
-        m_AskToSaveDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
-
-        void saveThenLoad()
-        {
-          bool isAutoSave = false;
-          bool shouldPrintElapsedTime = false;
-          bool shouldMountFile = false;
-          Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
-          LoadPendingFile();
-        }
-
-        void removeHandler()
-        {
-          UiAskToSaveModalDialog.OnConfirmSave -= saveThenLoad;
-          UiAskToSaveModalDialog.OnDenySave -= LoadPendingFile;
-          UiAskToSaveModalDialog.OnRemoveSub -= removeHandler;
-        }
-
-        UiAskToSaveModalDialog.OnConfirmSave += saveThenLoad;
-        UiAskToSaveModalDialog.OnDenySave += LoadPendingFile;
-        UiAskToSaveModalDialog.OnRemoveSub += removeHandler;
-
-        // Add the file to the pending list
-        m_PendingSaveFullFilePath = fullFilePath;
-        m_PendingExportVersions ??= new();
-        m_PendingExportVersions.Clear();
-        if (version != null)
-          m_PendingExportVersions.Add(version ?? new(0, 0));
-
-        // Stops the load from happening
-        return;
-      }
-
       LoadFromJson(File.ReadAllBytes(fullFilePath), version);
       MountFile(fullFilePath, m_MountedFileInfo);
 
@@ -1264,13 +1246,6 @@ public class FileSystemInternal : MonoBehaviour
       UnmountFile();
       Debug.LogError($"Error while loading. {e.Message} ({e.GetType()})");
     }
-  }
-
-  protected void LoadPendingFile()
-  {
-    LevelVersion? version = m_PendingExportVersions.Count >= 1 ? m_PendingExportVersions[0] : null;
-
-    LoadFromFullFilePathEx(m_PendingSaveFullFilePath, false, version);
   }
 
   protected void LoadFromTextAssetEx(TextAsset level)
