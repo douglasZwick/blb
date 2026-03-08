@@ -237,6 +237,12 @@ public class FileSystemInternal : MonoBehaviour
   {
     if (focus)
     {
+      // If we have a saving thread running, wait for it to finish before checking if a file was removed
+      if (m_SavingThread != null && m_SavingThread.IsAlive)
+      {
+        m_SavingThread.Join();
+      }
+
       if (IsFileMounted() && !FileExists(m_MountedFileInfo.m_SaveFilePath))
       {
         var errorString = $"Error: File with path \"{m_MountedFileInfo.m_SaveFilePath}\" could not be found. " +
@@ -1303,8 +1309,9 @@ public class FileSystemInternal : MonoBehaviour
     fileInfo.m_FileHeader.m_IsTempFile = reader.ReadBoolean();
     fileInfo.m_FileData.m_Description = reader.ReadString();
 
-    fileInfo.m_FileData.m_ManualSaves = new(reader.ReadUInt16());
-    for (ushort i = 0; i < fileInfo.m_FileData.m_ManualSaves.Capacity; ++i)
+    ushort count = reader.ReadUInt16();
+    fileInfo.m_FileData.m_ManualSaves = new(count);
+    for (ushort i = 0; i < count; ++i)
     {
       fileInfo.m_FileData.m_ManualSaves.Add(ReadLevelDataBinarySteam(reader));
       fileInfo.m_FileData.m_ManualSaves[i].m_Id = i;
@@ -1313,8 +1320,9 @@ public class FileSystemInternal : MonoBehaviour
     // Start the id count at the last manual save id for the auto saves
     uint id = (uint)fileInfo.m_FileData.m_ManualSaves.Count;
 
-    fileInfo.m_FileData.m_AutoSaves = new(reader.ReadUInt16());
-    for (ushort i = 0; i < fileInfo.m_FileData.m_AutoSaves.Capacity; ++i)
+    count = reader.ReadUInt16();
+    fileInfo.m_FileData.m_AutoSaves = new(count);
+    for (ushort i = 0; i < count; ++i)
     {
       fileInfo.m_FileData.m_AutoSaves.Add(ReadLevelDataBinarySteam(reader));
       fileInfo.m_FileData.m_AutoSaves[i].m_Id = id + i;
@@ -1334,14 +1342,16 @@ public class FileSystemInternal : MonoBehaviour
       m_TimeStamp = new(reader.ReadInt64()),
     };
 
-    levelData.m_AddedTiles = new(reader.ReadUInt16());
-    for (ushort i = 0; i < levelData.m_AddedTiles.Capacity; ++i)
+    ushort count = reader.ReadUInt16();
+    levelData.m_AddedTiles = new(count);
+    for (ushort i = 0; i < count; ++i)
     {
       levelData.m_AddedTiles.Add(TileGrid.Element.ReadBinary(reader));
     }
 
-    levelData.m_RemovedTiles = new(reader.ReadUInt16());
-    for (ushort i = 0; i < levelData.m_RemovedTiles.Capacity; ++i)
+    count = reader.ReadUInt16();
+    levelData.m_RemovedTiles = new(count);
+    for (ushort i = 0; i < count; ++i)
     {
       levelData.m_RemovedTiles.Add(new(reader.ReadInt16(), reader.ReadInt16()));
     }

@@ -47,7 +47,7 @@ public class TileGrid : MonoBehaviour
       writer.Write((short)m_GridIndex.y);
       writer.Write((byte)m_Type);
       // Write both enums as haf a byte (nibble)
-      writer.Write(((byte)m_TileColor << 4) | (byte)m_Direction);
+      writer.Write((byte)(((byte)m_TileColor << 4) | (byte)m_Direction));
 
       // Make sure the path exists before trying to write it
       if (m_Path != null) {
@@ -72,8 +72,8 @@ public class TileGrid : MonoBehaviour
       element.m_Type = (TileType)reader.ReadByte();
 
       byte combinedEnum = reader.ReadByte();
-      element.m_TileColor = (TileColor)(combinedEnum << 4);
-      element.m_Direction = (Direction)(combinedEnum & 0b1111);
+      element.m_TileColor = (TileColor)((combinedEnum >> 4) & 0x0F);
+      element.m_Direction = (Direction)(combinedEnum & 0x0F);
 
       ushort pathLength = reader.ReadUInt16();
       element.m_Path = new(pathLength);
