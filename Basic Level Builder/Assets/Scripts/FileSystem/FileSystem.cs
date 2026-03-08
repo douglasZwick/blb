@@ -149,7 +149,7 @@ public class FileSystem : FileSystemInternal
 
   public void LoadFromTextAsset(TextAsset level)
   {
-    LoadFromTextAssetEx(level);
+    //LoadFromTextAssetEx(level);
   }
 
   /// <summary>

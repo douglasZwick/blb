@@ -13,14 +13,12 @@ using UnityEngine;
 
 public class TileGrid : MonoBehaviour
 {
-  [System.Serializable]
   public class Element : ICloneable
   {
     public Vector2Int m_GridIndex;
     public TileType m_Type;
     public TileColor m_TileColor;
     public Direction m_Direction;
-    [System.NonSerialized]
     public GameObject m_GameObject;
     public List<Vector2Int> m_Path;
 
@@ -43,6 +41,41 @@ public class TileGrid : MonoBehaviour
         tileDirection.m_Element = this;
     }
 
+    public void WriteBinary(System.IO.BinaryWriter writer)
+    {
+      writer.Write((short)m_GridIndex.x);
+      writer.Write((short)m_GridIndex.y);
+      writer.Write((byte)m_Type);
+      // Write both enums as haf a byte (nibble)
+      writer.Write(((byte)m_TileColor << 4) | (byte)m_Direction);
+      writer.Write((ushort)m_Path.Count);
+      foreach (Vector2Int pos in m_Path)
+      {
+        writer.Write((short)pos.x);
+        writer.Write((short)pos.y);
+      }
+    }
+
+    public static Element ReadBinary(System.IO.BinaryReader reader)
+    {
+      Element element = new();
+
+      element.m_GridIndex = new(reader.ReadInt16(), reader.ReadInt16());
+      element.m_Type = (TileType)reader.ReadByte();
+      
+      byte combinedEnum = reader.ReadByte();
+      element.m_TileColor = (TileColor)(combinedEnum << 4);
+      element.m_Direction = (Direction)(combinedEnum & 0b1111);
+
+      ushort pathLength = reader.ReadUInt16();
+      element.m_Path = new(pathLength);
+      for (ushort i = 0; i < pathLength; ++i)
+      {
+        element.m_Path[i] = new(reader.ReadInt16(), reader.ReadInt16());
+      }
+      return element;
+    }
+
     public bool Equals(Element other)
     {
       if (m_GridIndex != other.m_GridIndex)
@@ -61,7 +94,7 @@ public class TileGrid : MonoBehaviour
     public bool PathsEqual(Element other)
     {
       // If both paths don't exist or the paths are equal
-      if ((other.m_Path == null && m_Path == null) || 
+      if ((other.m_Path == null && m_Path == null) ||
         (other.m_Path != null && m_Path != null && m_Path.SequenceEqual(other.m_Path)))
       {
         return true;
@@ -219,7 +252,7 @@ public class TileGrid : MonoBehaviour
     var lessThanRight = index.x < m_MaxBounds.x - Mathf.Epsilon;
     var greaterThanBottom = index.y > m_MinBounds.y + Mathf.Epsilon;
     var lessThanTop = index.y < m_MaxBounds.y - Mathf.Epsilon;
-    
+
     if (greaterThanLeft && lessThanRight && greaterThanBottom && lessThanTop)
       return;
 

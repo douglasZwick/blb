@@ -450,40 +450,4 @@ public class FileDirUtilities : MonoBehaviour
 
     return DateTime.Compare(dateTimeA, dateTimeB);
   }
-
-  /// <summary>
-  /// Utility class for compressing and decompressing string data using GZip.
-  /// </summary>
-  public static class StringCompression
-  {
-    /// <summary>
-    /// Compresses the input string data using GZip.
-    /// </summary>
-    /// <param name="input">The string to compress</param>
-    /// <returns>The compressed data as a byte array</returns>
-    public static byte[] Compress(string input)
-    {
-      byte[] byteArray = System.Text.Encoding.Default.GetBytes(input);
-
-      using MemoryStream ms = new();
-      using (GZipStream sw = new(ms, CompressionMode.Compress))
-      {
-        sw.Write(byteArray, 0, byteArray.Length);
-      }
-      return ms.ToArray();
-    }
-
-    /// <summary>
-    /// Decompresses the input data using GZip.
-    /// </summary>
-    /// <param name="compressedData">The compressed data as a byte array</param>
-    /// <returns>The decompressed string</returns>
-    public static string Decompress(byte[] compressedData)
-    {
-      using MemoryStream ms = new(compressedData);
-      using GZipStream sr = new(ms, CompressionMode.Decompress);
-      using StreamReader reader = new(sr);
-      return reader.ReadToEnd();
-    }
-  }
 }

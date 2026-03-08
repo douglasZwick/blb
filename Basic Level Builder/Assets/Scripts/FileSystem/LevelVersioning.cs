@@ -17,10 +17,9 @@ using static FileSystemInternal;
 
 public static class LevelVersioning
 {
-  [Serializable]
   public struct LevelVersion
   {
-    public LevelVersion(int manual, int Auto)
+    public LevelVersion(int manual = 0, int Auto = 0)
     {
       m_ManualVersion = manual;
       m_AutoVersion = Auto;
@@ -29,6 +28,21 @@ public static class LevelVersioning
     public readonly bool IsManual()
     {
       return m_AutoVersion == 0;
+    }
+
+    public readonly void WriteBinary(System.IO.BinaryWriter writer)
+    {
+      writer.Write((ushort)m_ManualVersion);
+      writer.Write((ushort)m_AutoVersion);
+    }
+
+    public static LevelVersion ReadBinary(System.IO.BinaryReader reader)
+    {
+      return new()
+      {
+        m_ManualVersion = reader.ReadUInt16(),
+        m_AutoVersion = reader.ReadUInt16()
+      };
     }
 
     public override readonly string ToString()
