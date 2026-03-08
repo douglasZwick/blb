@@ -48,11 +48,19 @@ public class TileGrid : MonoBehaviour
       writer.Write((byte)m_Type);
       // Write both enums as haf a byte (nibble)
       writer.Write(((byte)m_TileColor << 4) | (byte)m_Direction);
-      writer.Write((ushort)m_Path.Count);
-      foreach (Vector2Int pos in m_Path)
+
+      // Make sure the path exists before trying to write it
+      if (m_Path != null) {
+        writer.Write((ushort)m_Path.Count);
+        foreach (Vector2Int pos in m_Path)
+        {
+          writer.Write((short)pos.x);
+          writer.Write((short)pos.y);
+        }
+      }
+      else
       {
-        writer.Write((short)pos.x);
-        writer.Write((short)pos.y);
+        writer.Write((ushort)0);
       }
     }
 
@@ -62,7 +70,7 @@ public class TileGrid : MonoBehaviour
 
       element.m_GridIndex = new(reader.ReadInt16(), reader.ReadInt16());
       element.m_Type = (TileType)reader.ReadByte();
-      
+
       byte combinedEnum = reader.ReadByte();
       element.m_TileColor = (TileColor)(combinedEnum << 4);
       element.m_Direction = (Direction)(combinedEnum & 0b1111);
@@ -71,7 +79,7 @@ public class TileGrid : MonoBehaviour
       element.m_Path = new(pathLength);
       for (ushort i = 0; i < pathLength; ++i)
       {
-        element.m_Path[i] = new(reader.ReadInt16(), reader.ReadInt16());
+        element.m_Path.Add(new(reader.ReadInt16(), reader.ReadInt16()));
       }
       return element;
     }
@@ -282,16 +290,6 @@ public class TileGrid : MonoBehaviour
     return m_Grid.ToDictionary(entry => entry.Key, entry => (Element)entry.Value.Clone());
   }
 
-  public string ToJsonString()
-  {
-    var gridStringBuilder = new StringBuilder();
-
-    foreach (var element in m_Grid)
-      gridStringBuilder.AppendLine(JsonUtility.ToJson(element.Value));
-
-    return gridStringBuilder.ToString();
-  }
-
   public void GetLevelData(out FileSystemInternal.LevelData levelData)
   {
     levelData = new()
@@ -328,45 +326,6 @@ public class TileGrid : MonoBehaviour
       {
         Debug.LogError($"Failed to create the tile:\n \"{element.Value.ToState()}\" " +
           $"\nas a grid element. {e.Message} ({e.GetType()})");
-
-        ++failures;
-      }
-    }
-
-    // Reset so dialog pop ups don't appear when the user places its first tile
-    m_MostRecentlyCreatedTile = null;
-
-    RecomputeBounds();
-
-    PrintLoadErrors(failures, successes, startTime);
-  }
-
-  // Loads a file with no undoing.
-  public void LoadFromJsonStrings(string[] jsonStrings)
-  {
-    var startTime = DateTime.Now;
-
-    ForceClearGrid();
-
-    var successes = 0;
-    var failures = 0;
-
-    foreach (var jsonString in jsonStrings)
-    {
-      try
-      {
-        var element = JsonUtility.FromJson<Element>(jsonString);
-        var index = element.m_GridIndex;
-        var state = element.ToState();
-
-        CreateTile(index, state, false);
-
-        ++successes;
-      }
-      catch (System.ArgumentException e)
-      {
-        Debug.LogError($"Failed to parse the line \"{jsonString}\" " +
-          $"as a grid element. {e.Message} ({e.GetType()})");
 
         ++failures;
       }

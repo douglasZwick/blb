@@ -8,7 +8,6 @@ Copyright 2018-2025, DigiPen Institute of Technology
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using UnityEngine;
 using System.Runtime.InteropServices;
@@ -234,7 +233,7 @@ public class FileDirUtilities : MonoBehaviour
   {
     if (!IsValidExtension(fullFilePath))
       return false;
-    if (!HasHeader(fullFilePath))
+    if (!IsSupportedVersion(fullFilePath))
       return false;
     if (IsTempFile(fullFilePath))
       return false;
@@ -248,47 +247,40 @@ public class FileDirUtilities : MonoBehaviour
 
   static public bool IsTempFile(string fullFilePath)
   {
-    if (!TryGetHeader(fullFilePath, out FileSystemInternal.FileHeader header))
-      return false;
-
-    // If the save file was not read properly
-    if (header.m_BlbVersion == null)
-    {
-      string errorStr = $"Error reading save file {Path.GetFileName(fullFilePath)}. It may have been made with a different BLB version or is corrupted.";
-      Debug.Log(errorStr);
-      return false;
-    }
-
-    return header.m_IsTempFile;
-  }
-
-  static public bool TryGetHeader(string fullFilePath, out FileSystemInternal.FileHeader header)
-  {
-    IEnumerable<string> lines;
     try
     {
-      lines = File.ReadLines(fullFilePath);
+      using FileStream stream = new(fullFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+      using BinaryReader reader = new(stream);
+      // Read the file version, but discard it as we want the next feild
+      reader.ReadString();
+      return reader.ReadBoolean();
     }
     catch (Exception e)
     {
-      string errorStr = $"Error reading save file {Path.GetFileName(fullFilePath)}. {e.Message} ({e.GetType()})";
+      string errorStr = $"Error checking save file version: {Path.GetFileName(fullFilePath)}. {e.Message} ({e.GetType()})";
       Debug.Log(errorStr);
+    }
 
-      header = new();
+    return false;
+  }
+
+  static public bool IsSupportedVersion(string fullFilePath)
+  {
+    Version fileVersion;
+    try
+    {
+      using FileStream stream = new(fullFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+      using BinaryReader reader = new(stream);
+      fileVersion = new(reader.ReadString());
+    }
+    catch (Exception e)
+    {
+      string errorStr = $"Error checking save file version: {Path.GetFileName(fullFilePath)}. {e.Message} ({e.GetType()})";
+      Debug.Log(errorStr);
       return false;
     }
 
-    header = JsonUtility.FromJson<FileSystemInternal.FileHeader>(lines.First());
-
-    // Check if one of the header values are valid to confirm if the JSON was read correctly
-    return header.m_BlbVersion != null;
-  }
-
-  static public bool HasHeader(string fullFilePath)
-  {
-    if (!TryGetHeader(fullFilePath, out FileSystemInternal.FileHeader header))
-      return false;
-    return header.m_BlbVersion != null;
+    return fileVersion > new Version(1,2);
   }
 
   // Skips rename if the file already exists

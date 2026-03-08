@@ -124,6 +124,7 @@ public class FileSystemInternal : MonoBehaviour
     {
       m_ManualSaves = new List<LevelData>();
       m_AutoSaves = new List<LevelData>();
+      m_Description = "";
     }
     public List<LevelData> m_ManualSaves;
     public List<LevelData> m_AutoSaves;
@@ -137,6 +138,7 @@ public class FileSystemInternal : MonoBehaviour
     {
       m_AddedTiles = new List<TileGrid.Element>();
       m_RemovedTiles = new List<Vector2Int>();
+      m_Name = "";
     }
 
     public LevelVersion m_Version;
@@ -767,6 +769,9 @@ public class FileSystemInternal : MonoBehaviour
       var errorString = $"Error while flattening and saving file: {e.Message} ({e.GetType()})";
       m_MainThreadDispatcher.Enqueue(() => StatusBar.Print(errorString));
       Debug.LogError(errorString);
+      // If we couldn't finish the save, remove the corrupted file, then unmount
+      File.Delete(destFilePath);
+      UnmountFile();
     }
   }
 
@@ -1116,14 +1121,14 @@ public class FileSystemInternal : MonoBehaviour
     if (GlobalData.AreEffectsUnderway())
       return;
 
-    var jsonString = m_TileGrid.ToJsonString();
+    //var jsonString = m_TileGrid.ToJsonString();
     // If we are useing a compression alg for loading/saving, copy this level as a copressed string
     //if (s_ShouldCompress)
     //jsonString = StringCompression.Compress(jsonString);
 
-    var te = new TextEditor { text = jsonString };
-    te.SelectAll();
-    te.Copy();
+    //var te = new TextEditor { text = jsonString };
+    //te.SelectAll();
+    //te.Copy();
 
     StatusBar.Print("Level copied to clipboard.");
   }
@@ -1299,9 +1304,9 @@ public class FileSystemInternal : MonoBehaviour
     fileInfo.m_FileData.m_Description = reader.ReadString();
 
     fileInfo.m_FileData.m_ManualSaves = new(reader.ReadUInt16());
-    for (ushort i = 0; i < fileInfo.m_FileData.m_ManualSaves.Count; ++i)
+    for (ushort i = 0; i < fileInfo.m_FileData.m_ManualSaves.Capacity; ++i)
     {
-      fileInfo.m_FileData.m_ManualSaves[i] = ReadLevelDataBinarySteam(reader);
+      fileInfo.m_FileData.m_ManualSaves.Add(ReadLevelDataBinarySteam(reader));
       fileInfo.m_FileData.m_ManualSaves[i].m_Id = i;
     }
 
@@ -1309,9 +1314,9 @@ public class FileSystemInternal : MonoBehaviour
     uint id = (uint)fileInfo.m_FileData.m_ManualSaves.Count;
 
     fileInfo.m_FileData.m_AutoSaves = new(reader.ReadUInt16());
-    for (ushort i = 0; i < fileInfo.m_FileData.m_AutoSaves.Count; ++i)
+    for (ushort i = 0; i < fileInfo.m_FileData.m_AutoSaves.Capacity; ++i)
     {
-      fileInfo.m_FileData.m_AutoSaves[i] = ReadLevelDataBinarySteam(reader);
+      fileInfo.m_FileData.m_AutoSaves.Add(ReadLevelDataBinarySteam(reader));
       fileInfo.m_FileData.m_AutoSaves[i].m_Id = id + i;
     }
 
@@ -1320,23 +1325,25 @@ public class FileSystemInternal : MonoBehaviour
 
   private LevelData ReadLevelDataBinarySteam(BinaryReader reader)
   {
-    LevelData levelData = new();
-    levelData.m_Version = LevelVersion.ReadBinary(reader);
-    levelData.m_Name = reader.ReadString();
-    levelData.m_CameraPos = new(reader.ReadInt16(), reader.ReadInt16());
-    levelData.m_Thumbnail = reader.ReadString();
-    levelData.m_TimeStamp = new(reader.ReadInt64());
+    LevelData levelData = new()
+    {
+      m_Version = LevelVersion.ReadBinary(reader),
+      m_Name = reader.ReadString(),
+      m_CameraPos = new(reader.ReadInt16(), reader.ReadInt16()),
+      m_Thumbnail = reader.ReadString(),
+      m_TimeStamp = new(reader.ReadInt64()),
+    };
 
     levelData.m_AddedTiles = new(reader.ReadUInt16());
-    for (ushort i = 0; i < levelData.m_AddedTiles.Count; ++i)
+    for (ushort i = 0; i < levelData.m_AddedTiles.Capacity; ++i)
     {
-      levelData.m_AddedTiles[i] = TileGrid.Element.ReadBinary(reader);
+      levelData.m_AddedTiles.Add(TileGrid.Element.ReadBinary(reader));
     }
 
     levelData.m_RemovedTiles = new(reader.ReadUInt16());
-    for (ushort i = 0; i < levelData.m_RemovedTiles.Count; ++i)
+    for (ushort i = 0; i < levelData.m_RemovedTiles.Capacity; ++i)
     {
-      levelData.m_RemovedTiles[i] = new(reader.ReadInt16(), reader.ReadInt16());
+      levelData.m_RemovedTiles.Add(new(reader.ReadInt16(), reader.ReadInt16()));
     }
 
     return levelData;
