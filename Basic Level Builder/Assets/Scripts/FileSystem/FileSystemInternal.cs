@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using static LevelVersioning;
 
@@ -72,14 +73,11 @@ public class FileSystemInternal : MonoBehaviour
   protected FileData m_PendingExportFileData = null;
   protected List<LevelVersion> m_PendingExportVersions = null;
 
-  private string m_PendingThumbnail = "";
-  private Vector2 m_PendingCameraPos;
-
   protected FileInfo m_MountedFileInfo;
 
   // A thread to run when saving should be performed.
   // Only one save thread is run at once.
-  private Thread m_SavingThread;
+  private Task m_SavingThread;
   private static int mainThreadId;
   public static bool IsMainThread
   {
@@ -238,10 +236,7 @@ public class FileSystemInternal : MonoBehaviour
     if (focus)
     {
       // If we have a saving thread running, wait for it to finish before checking if a file was removed
-      if (m_SavingThread != null && m_SavingThread.IsAlive)
-      {
-        m_SavingThread.Join();
-      }
+      m_SavingThread?.Wait();
 
       if (IsFileMounted() && !FileExists(m_MountedFileInfo.m_SaveFilePath))
       {
@@ -264,10 +259,7 @@ public class FileSystemInternal : MonoBehaviour
   private bool OnWantsToQuit()
   {
     // If we have a saving thread running, wait for it to finish before closing the program
-    if (m_SavingThread != null && m_SavingThread.IsAlive)
-    {
-      m_SavingThread.Join();
-    }
+    m_SavingThread?.Wait();
 
     // Check if we already asked to quit
     if (m_IsAppQuitting)
@@ -314,10 +306,7 @@ public class FileSystemInternal : MonoBehaviour
     bool shouldMountFile = false;
     Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
     // If we have a saving thread running, wait for it to finish before closing the program
-    if (m_SavingThread != null && m_SavingThread.IsAlive)
-    {
-      m_SavingThread.Join();
-    }
+    m_SavingThread?.Wait();
 
     Application.Quit();
   }
@@ -621,10 +610,7 @@ public class FileSystemInternal : MonoBehaviour
       return;
 
     // If we have a thread running
-    if (m_SavingThread != null && m_SavingThread.IsAlive)
-    {
-      m_SavingThread.Join();
-    }
+    m_SavingThread?.Wait();
 
     if (!FileDataExists(m_MountedFileInfo.m_FileData))
     {
@@ -705,42 +691,55 @@ public class FileSystemInternal : MonoBehaviour
     bool autosave, bool isSaveAs, bool updateCameraPosButtonPressed, bool shouldPrintElapsedTime, bool shouldMountFile = true)
   {
     // Store camera position to the nearest tile
-    m_PendingCameraPos = new Vector2(Camera.main.transform.position.x, Camera.main.transform.position.y);
+    Vector2 cameraPos = new(Camera.main.transform.position.x, Camera.main.transform.position.y);
 
     // Gernerate the version thumbnail to be used in the thread
     // EncodeToPNG can only be used on main thread
-    m_PendingThumbnail = GenerateThumbnail(gridDictionary);
-
-    // Define parameters for the branched thread function
-    object[] parameters = { m_MountedFileInfo, destFilePath, autosave, shouldPrintElapsedTime, updateCameraPosButtonPressed, gridDictionary, shouldMountFile };
+    string thumbnail = GenerateThumbnail(gridDictionary);
 
     // Create a new thread and pass the ParameterizedThreadStart delegate
     if (isSaveAs)
-      m_SavingThread = new Thread(new ParameterizedThreadStart(SavingThreadFlatten));
+    {
+      m_SavingThread = Task.Run(() =>
+      {
+        SavingThreadFlatten(
+            m_MountedFileInfo,
+            destFilePath,
+            shouldPrintElapsedTime,
+            gridDictionary,
+            cameraPos,
+            thumbnail,
+            shouldMountFile);
+      });
+    }
     else
-      m_SavingThread = new Thread(new ParameterizedThreadStart(SavingThread));
-
-    m_SavingThread.Start(parameters);
+    {
+      m_SavingThread = Task.Run(() =>
+      {
+        SavingThread(
+            m_MountedFileInfo,
+            destFilePath,
+            autosave,
+            shouldPrintElapsedTime,
+            updateCameraPosButtonPressed,
+            gridDictionary,
+            cameraPos,
+            thumbnail,
+            shouldMountFile);
+      });
+    }
   }
 
   protected void StartExportSavingThread(string destFilePath)
   {
-    m_SavingThread = new Thread(new ParameterizedThreadStart(ExportSavingThread));
-
-    m_SavingThread.Start(destFilePath);
+    m_SavingThread = Task.Run(() => ExportSavingThread(destFilePath));
   }
 
-  private void SavingThreadFlatten(object threadParameters)
+  private void SavingThreadFlatten(FileInfo sourceFileInfo, string destFilePath, bool shouldPrintElapsedTime,
+    Dictionary<Vector2Int, TileGrid.Element> gridDictionary, Vector2 cameraPos, string thumbnail, bool shouldMountFile)
   {
     var startTime = DateTime.Now;
 
-    // Extract the parameters from the object array
-    object[] parameters = (object[])threadParameters;
-
-    // Access the parameters
-    FileInfo sourceFileInfo = (FileInfo)parameters[0];
-    string destFilePath = (string)parameters[1];
-    Dictionary<Vector2Int, TileGrid.Element> gridDictionary = (Dictionary<Vector2Int, TileGrid.Element>)parameters[5];
     bool isOverwriting = File.Exists(destFilePath);
 
     // With a temp save we just need to add manual save v1, as v0 is the first and only manual save
@@ -756,8 +755,8 @@ public class FileSystemInternal : MonoBehaviour
       m_AddedTiles = new List<TileGrid.Element>(gridDictionary.Values),
       m_TimeStamp = DateTime.Now,
       m_Version = new(1, 0),
-      m_Thumbnail = m_PendingThumbnail,
-      m_CameraPos = m_PendingCameraPos
+      m_Thumbnail = thumbnail,
+      m_CameraPos = cameraPos
     };
 
     sourceFileInfo.m_FileData.m_ManualSaves.Add(levelData);
@@ -765,9 +764,7 @@ public class FileSystemInternal : MonoBehaviour
     try
     {
       bool isAutosave = false;
-      bool shouldMountFile = (bool)parameters[6];
       bool shouldCopyFile = false;
-      bool shouldPrintElapsedTime = (bool)parameters[3];
       WriteDataToFile(destFilePath, sourceFileInfo, shouldMountFile, isOverwriting, startTime, isAutosave, shouldCopyFile, shouldPrintElapsedTime);
     }
     catch (Exception e)
@@ -781,21 +778,11 @@ public class FileSystemInternal : MonoBehaviour
     }
   }
 
-  private void SavingThread(object threadParameters)
+  private void SavingThread(FileInfo sourceFileInfo, string destFilePath, bool autosave, bool shouldPrintElapsedTime,
+    bool updateCameraPosButtonPressed, Dictionary<Vector2Int, TileGrid.Element> gridDictionary, Vector2 cameraPos, string thumbnail, bool shouldMountFile)
   {
     var startTime = DateTime.Now;
 
-    // Extract the parameters from the object array
-    object[] parameters = (object[])threadParameters;
-
-    // Access the parameters
-    FileInfo sourceFileInfo = (FileInfo)parameters[0];
-    string destFilePath = (string)parameters[1];
-    bool autosave = (bool)parameters[2];
-    bool shouldPrintElapsedTime = (bool)parameters[3];
-    bool updateCameraPosButtonPressed = (bool)parameters[4];
-    Dictionary<Vector2Int, TileGrid.Element> gridDictionary = (Dictionary<Vector2Int, TileGrid.Element>)parameters[5];
-    bool shouldMountFile = (bool)parameters[6];
     bool overwriting = File.Exists(destFilePath);
     // TODO, Don't auto save if the diffences from the last auto save are the same. Ie no unsaved changes.
     #region Add level changes to level data
@@ -816,7 +803,7 @@ public class FileSystemInternal : MonoBehaviour
     // If we will be copying the mounted file over to a diffrent file
     bool copyFile = false;
 
-    bool isCameraDifferent = m_PendingCameraPos != GetLastManualSaveData(sourceFileInfo.m_FileData).m_CameraPos;
+    bool isCameraDifferent = cameraPos != GetLastManualSaveData(sourceFileInfo.m_FileData).m_CameraPos;
     bool saveDiffs = isCameraDifferent && updateCameraPosButtonPressed;
 
     // We can't update the camera pos if the camera is not different
@@ -830,8 +817,8 @@ public class FileSystemInternal : MonoBehaviour
 
     bool hasDifferences = GetDifferences(out LevelData levelData, sourceFileInfo, gridDictionary) || saveDiffs;
 
-    levelData.m_Thumbnail = m_PendingThumbnail;
-    levelData.m_CameraPos = m_PendingCameraPos;
+    levelData.m_Thumbnail = thumbnail;
+    levelData.m_CameraPos = cameraPos;
 
     // If we are writting to our own file yet we have no changes, skip the save
     // Or we are writting to a temp file with no changes, ignore write
@@ -851,38 +838,6 @@ public class FileSystemInternal : MonoBehaviour
     {
       Debug.LogError("Damn, This should not happen. Check why file data doesn't exist here.");
     }
-
-    // Return to skip checking if we reached the max number of saves.
-    // Add back in later if a reason to keep is found
-    // TODOMAXSAVES (Quick find tag for later)
-#if false
-    // If we are doing an auto check if we have to many
-    if (autosave)
-    {
-      // first of all, if m_MaxAutosaveCount <= 0, then no autosaving
-      // should occur at all
-      // TODO: do we still want to disable autsaves?
-      if (s_MaxAutoSaveCount <= 0)
-        return;
-
-      // now, if the autosave count is at its limit, then we should
-      // get rid of the oldest autosave
-      if (sourceFileInfo.m_FileData.m_AutoSaves.Count >= s_MaxAutoSaveCount)
-      {
-        sourceFileInfo.m_FileData.m_AutoSaves.RemoveAt(0);
-      }
-    }
-    else
-    {
-      // now, if the manual count is at its limit, then we should
-      // get rid of the oldest save
-      // TODO: Add warning pop up if first time.
-      if (sourceFileInfo.m_FileData.m_ManualSaves.Count >= s_MaxManualSaveCount)
-      {
-        sourceFileInfo.m_FileData.m_ManualSaves.RemoveAt(0);
-      }
-    }
-#endif
 
     // TODO, check if the auto save has differences from the last auto save, if not, discard save,
     // TODO, check if manual save is the same as the last auto save, if so just move auto to manual
@@ -945,12 +900,9 @@ public class FileSystemInternal : MonoBehaviour
     }
   }
 
-  private void ExportSavingThread(object threadParameter)
+  private void ExportSavingThread(string destFilePath)
   {
     var startTime = DateTime.Now;
-
-    // Extract the parameters from the object array
-    string destFilePath = (string)threadParameter;
 
     bool isOverwriting = File.Exists(destFilePath);
 
