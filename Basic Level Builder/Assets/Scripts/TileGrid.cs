@@ -8,7 +8,6 @@ Copyright 2018-2025, DigiPen Institute of Technology
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 
 public class TileGrid : MonoBehaviour
@@ -290,14 +289,6 @@ public class TileGrid : MonoBehaviour
     return m_Grid.ToDictionary(entry => entry.Key, entry => (Element)entry.Value.Clone());
   }
 
-  public void GetLevelData(out FileSystemInternal.LevelData levelData)
-  {
-    levelData = new()
-    {
-      m_AddedTiles = new List<Element>(m_Grid.Values)
-    };
-  }
-
   public void LoadFromDictonary(Dictionary<Vector2Int, Element> grid)
   {
     var startTime = DateTime.Now;
@@ -305,7 +296,7 @@ public class TileGrid : MonoBehaviour
     ForceClearGrid();
 
     // Create a shallow copy of the dictonary
-    m_Grid = grid.ToDictionary(pair => pair.Key, pair => pair.Value);
+    m_Grid = grid;
 
     var successes = 0;
     var failures = 0;

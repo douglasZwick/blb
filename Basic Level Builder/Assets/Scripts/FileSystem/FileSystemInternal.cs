@@ -1102,7 +1102,7 @@ public class FileSystemInternal : MonoBehaviour
     writer.Write(levelData.m_Name);
     writer.Write((short)levelData.m_CameraPos.x);
     writer.Write((short)levelData.m_CameraPos.y);
-    writer.Write(levelData.m_Thumbnail);
+    writer.Write(levelData.m_Thumbnail ?? "");
     writer.Write(levelData.m_TimeStamp.Ticks);
 
     writer.Write((ushort)levelData.m_AddedTiles.Count);
