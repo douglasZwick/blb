@@ -24,17 +24,21 @@ public class FileDirUtilities : MonoBehaviour
   public UiListView m_SaveList;
 
   protected string m_CurrentDirectoryPath;
-  private System.IntPtr m_WindowPtr;
   private string m_AppName;
-
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+  private System.IntPtr m_WindowPtr;
+#endif
+  
   private void Awake()
   {
     m_AppName = Application.productName;
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
     m_WindowPtr = FindWindow(null, m_AppName);
     if (m_WindowPtr == System.IntPtr.Zero)
     {
       Debug.LogWarning($"Error finding application window");
     }
+#endif
   }
 
   public void SetDirectoryName(string name)
@@ -138,21 +142,25 @@ public class FileDirUtilities : MonoBehaviour
     return m_CurrentDirectoryPath;
   }
 
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
   [DllImport("user32.dll", EntryPoint = "SetWindowText")]
   public static extern bool SetWindowText(System.IntPtr hwnd, string lpString);
   [DllImport("user32.dll", EntryPoint = "FindWindow")]
   public static extern System.IntPtr FindWindow(string className, string windowName);
+#endif
 
   public void SetTitleBarFileName(string filePath)
   {
-    // If the window is found, set the new title
-    if (m_WindowPtr != System.IntPtr.Zero && !FileSystem.Instance.m_IsAppQuitting)
-    {
-      if (string.IsNullOrEmpty(filePath))
-        SetWindowText(m_WindowPtr, m_AppName);
-      else
-        SetWindowText(m_WindowPtr, m_AppName + " - " + Path.GetFileNameWithoutExtension(filePath));
-    }
+    #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+    if (m_WindowPtr == System.IntPtr.Zero ||FileSystem.Instance.m_IsAppQuitting)
+      return;
+
+    string newTitle = string.IsNullOrEmpty(filePath)
+        ? m_AppName
+        : m_AppName + " - " + Path.GetFileNameWithoutExtension(filePath);
+
+    SetWindowText(m_WindowPtr, newTitle);
+    #endif
   }
 
   public static bool IsFileNameValid(string name)
@@ -331,6 +339,8 @@ public class FileDirUtilities : MonoBehaviour
       {
         case RuntimePlatform.OSXEditor:
         case RuntimePlatform.OSXPlayer:
+        case RuntimePlatform.LinuxPlayer:
+        case RuntimePlatform.LinuxEditor:
           // Documents folder can not be directly pathed with the SpecialFolder,
           // so we need to find the home path and navigate to the document from there
           string homePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -338,8 +348,6 @@ public class FileDirUtilities : MonoBehaviour
 
         case RuntimePlatform.WindowsPlayer:
         case RuntimePlatform.WindowsEditor:
-        case RuntimePlatform.LinuxPlayer:
-        case RuntimePlatform.LinuxEditor:
         case RuntimePlatform.WSAPlayerX86:
         case RuntimePlatform.WSAPlayerX64:
         case RuntimePlatform.WSAPlayerARM:
