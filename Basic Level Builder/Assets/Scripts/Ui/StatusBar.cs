@@ -1,7 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/***************************************************
+Authors:        Douglas Zwick, Brenden Epp
+Last Updated:   5/24/2026
+
+Copyright 2018-2026, DigiPen Institute of Technology
+***************************************************/
+
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(TextMeshProUGUI))]
 public class StatusBar : MonoBehaviour
@@ -9,13 +15,18 @@ public class StatusBar : MonoBehaviour
   public static string s_PreAwakeMessage = null;
 
   static TextMeshProUGUI s_Text;
+  static Image s_Forground;
   static string s_WarningColorCode = "#FFF820";
   static string s_ErrorColorCode = "#FF2028";
-
+  static Color s_ForgroundColor;
+  static Color s_FlashColor = new(0.25f, 0.25f, 0.25f, 0.5f);
+  static float s_MessageFlashTime = 0;
 
   private void Awake()
   {
     s_Text = GetComponent<TextMeshProUGUI>();
+    s_Forground = GetComponentInParent<Image>();
+    s_ForgroundColor = s_Forground.color;
   }
 
 
@@ -23,6 +34,16 @@ public class StatusBar : MonoBehaviour
   {
     if (s_PreAwakeMessage != null)
       Print(s_PreAwakeMessage);
+  }
+
+  private void Update()
+  {
+    if (s_MessageFlashTime > 0)
+    {
+      s_MessageFlashTime -= Time.deltaTime;
+      var flashAmount = Mathf.Clamp01(s_MessageFlashTime);
+      s_Forground.color = Color.Lerp(s_ForgroundColor, s_FlashColor, flashAmount);
+    }
   }
 
 
@@ -77,6 +98,8 @@ public class StatusBar : MonoBehaviour
       clearSeq.Delay(duration);
       clearSeq.Call(Clear, s_Text.gameObject);
     }
+
+    s_MessageFlashTime = 1f;
   }
 
 
