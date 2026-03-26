@@ -269,33 +269,21 @@ public class FileSystemInternal : MonoBehaviour
     // Check if we have unsaved changes, then ask to save if so
     if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
     {
-      // Ask to save
-      m_AskToSaveDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
-
-      void cancelQuit() => m_IsAppQuitting = false;
-
-      void removeHandler()
-      {
-        UiAskToSaveModalDialog.OnCancelAction -= cancelQuit;
-        UiAskToSaveModalDialog.OnConfirmSave -= SaveAndQuit;
-        UiAskToSaveModalDialog.OnDenySave -= Application.Quit;
-        UiAskToSaveModalDialog.OnRemoveSub -= removeHandler;
-      }
-
-      UiAskToSaveModalDialog.OnCancelAction += cancelQuit;
-      UiAskToSaveModalDialog.OnConfirmSave += SaveAndQuit;
-      UiAskToSaveModalDialog.OnDenySave += Application.Quit;
-      UiAskToSaveModalDialog.OnRemoveSub += removeHandler;
-
-      // No matter which option the user presses, we will still quit after saving or not.
-      // Mark this flag so we know to quit the next time this function is run
-      m_IsAppQuitting = true;
-
-      // Stops the quit from happening
+      // Make the async function a helper function so this funtion can return bool instead of Task
+      _ = HandleQuitAsync();
       return false;
     }
 
     return true;
+  }
+
+  private async Task HandleQuitAsync()
+  {
+    var result = await m_AskToSaveDialogAdder.RequestAskToSaveDialogAsync(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+    if (result == ModalDialog.DialogResult.Confirm)
+      SaveAndQuit();
+    else
+      Application.Quit();
   }
 
   private void SaveAndQuit()
@@ -311,25 +299,17 @@ public class FileSystemInternal : MonoBehaviour
     Application.Quit();
   }
 
-  protected void TryCreateNewLevel()
+  protected async Task TryCreateNewLevel()
   {
     // Check if we have unsaved changes, then ask to save if so
     if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
     {
-      // Ask to save
-      m_AskToSaveDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
-
-      void removeHandler()
-      {
-        UiAskToSaveModalDialog.OnConfirmSave -= SaveAndCreateNewLevel;
-        UiAskToSaveModalDialog.OnDenySave -= CreateNewLevel;
-        UiAskToSaveModalDialog.OnRemoveSub -= removeHandler;
-      }
-
-      UiAskToSaveModalDialog.OnConfirmSave += SaveAndCreateNewLevel;
-      UiAskToSaveModalDialog.OnDenySave += CreateNewLevel;
-      UiAskToSaveModalDialog.OnRemoveSub += removeHandler;
-
+      var result = await m_AskToSaveDialogAdder.RequestAskToSaveDialogAsync(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+      if (result == ModalDialog.DialogResult.Confirm)
+        SaveAndCreateNewLevel();
+      else if (result == ModalDialog.DialogResult.Deny)
+        CreateNewLevel();
+      // If cancled, do nothing and stay on the current level
       return;
     }
 
@@ -450,7 +430,7 @@ public class FileSystemInternal : MonoBehaviour
     m_MountedFileInfo.m_SaveFilePath = newFilePath;
   }
 
-  private void OnDroppedFiles(List<string> paths, POINT dropPoint)
+  private async void OnDroppedFiles(List<string> paths, POINT dropPoint)
   {
     if (m_ModalDialogMaster.m_Active || GlobalData.AreEffectsUnderway() || GlobalData.IsInPlayMode())
       return;
@@ -460,7 +440,7 @@ public class FileSystemInternal : MonoBehaviour
     if (validPaths.Count == 0)
       StatusBar.Print("Drag and drop only supports <b>.blb</b> files.");
     else
-      LoadFromFullFilePathExAndAskToSave(validPaths[0]);
+      await LoadFromFullFilePathExAndAskToSave(validPaths[0]);
   }
 
   /// <summary>
@@ -1149,40 +1129,34 @@ public class FileSystemInternal : MonoBehaviour
   /// <param name="version">The version of the level to load.</param>
   /// <returns>True if we loaded the file, false if there was an exeption or if we needed to ask to save.</returns>
   /// <exception cref="Exception">Thrown when the file cannot be found.</exception>
-  protected void LoadFromFullFilePathExAndAskToSave(string fullFilePath, LevelVersion? version = null)
+  protected async Task LoadFromFullFilePathExAndAskToSave(string fullFilePath, LevelVersion? version = null)
   {
+    // Skip if there are effects underway, or if we are trying to load the same file and version
     if (GlobalData.AreEffectsUnderway())
       return;
+
+    // If we are trying to load the same file and version as we currently have mounted, skip
+    if (IsFileMounted() && m_MountedFileInfo.m_SaveFilePath.Equals(fullFilePath)){
+      LevelVersion toLoadVersion = version ?? new(GetLastManualSaveVersion(m_MountedFileInfo.m_FileData), 0);
+      if (toLoadVersion.Equals(m_MountedFileInfo.m_LoadedVersion))
+        return;
+    }
 
     // Check if we have unsaved changes, then ask to save if so
     if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
     {
-      // Ask to save
-      m_AskToSaveDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
-
-      void loadPendingFile() => LoadFromFullFilePathEx(fullFilePath, version);
-
-      void saveThenLoad()
+      var result = await m_AskToSaveDialogAdder.RequestAskToSaveDialogAsync(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+      if (result == ModalDialog.DialogResult.Confirm)
       {
         bool isAutoSave = false;
         bool shouldPrintElapsedTime = false;
         bool shouldMountFile = false;
         Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
-        loadPendingFile();
       }
-
-      void removeHandler()
-      {
-        UiAskToSaveModalDialog.OnConfirmSave -= saveThenLoad;
-        UiAskToSaveModalDialog.OnDenySave -= loadPendingFile;
-        UiAskToSaveModalDialog.OnRemoveSub -= removeHandler;
-      }
-
-      UiAskToSaveModalDialog.OnConfirmSave += saveThenLoad;
-      UiAskToSaveModalDialog.OnDenySave += loadPendingFile;
-      UiAskToSaveModalDialog.OnRemoveSub += removeHandler;
-
-      // Stops the load from happening
+      else if (result == ModalDialog.DialogResult.Cancel)
+         return;
+      // Load the file if confirmed or denied, but not canceled
+      LoadFromFullFilePathEx(fullFilePath, version);
       return;
     }
 

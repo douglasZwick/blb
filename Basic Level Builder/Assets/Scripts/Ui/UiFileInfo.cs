@@ -7,6 +7,7 @@ Copyright 2018-2025, DigiPen Institute of Technology
 
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -151,27 +152,17 @@ public class UiFileInfo : MonoBehaviour
     }
   }
 
-  public void DeleteFileCoda()
+  public async void DeleteFileCoda()
   {
-    m_CodaAdder.RequestDialogsAtCenterWithStrings($"Are you sure you want to delete this file?{System.Environment.NewLine}This can not be undone.");
-    UiConfirmDestructiveActionModalDialog.OnConfirmDestructiveAction += DeleteFile;
-    UiConfirmDestructiveActionModalDialog.OnDenyDestructiveAction += CancelDelete;
-  }
-
-  public void CancelDelete()
-  {
-    UnsubFromCoda();
-  }
-
-  public void UnsubFromCoda()
-  {
-    UiConfirmDestructiveActionModalDialog.OnConfirmDestructiveAction -= DeleteFile;
-    UiConfirmDestructiveActionModalDialog.OnDenyDestructiveAction -= CancelDelete;
+    var result = await m_CodaAdder.RequestConfirmDestructiveDialogAsync($"Are you sure you want to delete this file?{System.Environment.NewLine}This can not be undone.");
+    if (result == ModalDialog.DialogResult.Confirm)
+    {
+      DeleteFile();
+    }
   }
 
   public void DeleteFile()
   {
-    UnsubFromCoda();
     FileSystem.Instance.DeleteFile(m_FullFilePath);
     StatusBar.Print($"Sucessfuly deleted {Path.GetFileName(m_FullFilePath)}");
     CloseWindow();

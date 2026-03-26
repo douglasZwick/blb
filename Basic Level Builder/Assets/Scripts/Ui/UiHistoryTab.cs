@@ -8,6 +8,7 @@ Copyright 2018-2025, DigiPen Institute of Technology
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using static LevelVersioning;
@@ -241,7 +242,7 @@ public class UiHistoryTab : UiTab
       FileSystem.Instance.ExportMultipleVersions(m_FileInfo.FullFilePath, versions);
   }
 
-  public void DeleteSelectedVersionsCoda()
+  public async void DeleteSelectedVersionsCoda()
   {
     FileSystem.Instance.GetFileInfoFromFullFilePath(m_FileInfo.FullFilePath, out FileSystemInternal.FileInfo fileInfo);
     int manualsSelected = 0;
@@ -269,31 +270,18 @@ public class UiHistoryTab : UiTab
       prompt = $"Are you sure you want to delete {target}?{Environment.NewLine}This can not be undone.";
     }
 
-
-    m_CodaAdder.RequestDialogsAtCenterWithStrings(prompt);
-
-    if (shouldDeleteFile)
-      UiConfirmDestructiveActionModalDialog.OnConfirmDestructiveAction += DeleteFile;
-    else
-      UiConfirmDestructiveActionModalDialog.OnConfirmDestructiveAction += DeleteSelectedVersions;
-    UiConfirmDestructiveActionModalDialog.OnDenyDestructiveAction += CancelDelete;
-  }
-
-  public void CancelDelete()
-  {
-    UnsubFromCoda();
-  }
-
-  public void UnsubFromCoda()
-  {
-    UiConfirmDestructiveActionModalDialog.OnConfirmDestructiveAction -= DeleteSelectedVersions;
-    UiConfirmDestructiveActionModalDialog.OnDenyDestructiveAction -= CancelDelete;
+    var result = await m_CodaAdder.RequestConfirmDestructiveDialogAsync(prompt);
+    if (result == ModalDialog.DialogResult.Confirm)
+    {
+      if (shouldDeleteFile)
+        DeleteFile();
+      else
+        DeleteSelectedVersions();
+    }
   }
 
   private void DeleteFile()
   {
-    UiConfirmDestructiveActionModalDialog.OnConfirmDestructiveAction -= DeleteFile;
-    UiConfirmDestructiveActionModalDialog.OnDenyDestructiveAction -= CancelDelete;
     FindObjectOfType<UiFileInfo>().DeleteFile();
   }
 
@@ -301,8 +289,6 @@ public class UiHistoryTab : UiTab
   // Or remove delete button if there is only one version left
   public void DeleteSelectedVersions()
   {
-    UnsubFromCoda();
-
     // This shouldn't happen as the button wouldn't be visable if no version are selected
     if (m_Selection.Count <= 0)
     {

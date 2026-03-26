@@ -15,6 +15,8 @@ public class UiConfirmDestructiveActionModalDialog : ModalDialog
   public static event ConfirmDestructiveAction OnConfirmDestructiveAction;
   public delegate void DenyDestructiveAction();
   public static event DenyDestructiveAction OnDenyDestructiveAction;
+  public delegate void RemoveSub();
+  public static event RemoveSub OnRemoveSub;
 
   private void Update()
   {
@@ -53,6 +55,7 @@ public class UiConfirmDestructiveActionModalDialog : ModalDialog
   public void Confirm()
   {
     OnConfirmDestructiveAction?.Invoke();
+    OnRemoveSub?.Invoke();
     Close();
   }
 
@@ -60,6 +63,7 @@ public class UiConfirmDestructiveActionModalDialog : ModalDialog
   public void Cancel()
   {
     OnDenyDestructiveAction?.Invoke();
+    OnRemoveSub?.Invoke();
     Close();
   }
 }

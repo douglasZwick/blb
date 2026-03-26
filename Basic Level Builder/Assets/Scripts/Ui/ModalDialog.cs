@@ -3,6 +3,7 @@
 [RequireComponent(typeof(RectTransform))]
 public class ModalDialog : MonoBehaviour
 {
+  public enum DialogResult { Confirm, Deny, Cancel }
   public bool m_OverrideSize = false;
   public Vector2 m_SizeToOverrideWith = new(200, 200);
   protected RectTransform m_RectTransform;

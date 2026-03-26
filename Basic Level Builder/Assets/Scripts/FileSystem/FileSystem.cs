@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using static LevelVersioning;
 
@@ -75,9 +76,9 @@ public class FileSystem : FileSystemInternal
     Save(false, name, false, shouldPrintElapsedTime);
   }
 
-  public void CreateNewLevel()
+  public async void CreateNewLevel()
   {
-    TryCreateNewLevel();
+    await TryCreateNewLevel();
   }
 
   public void ExportMultipleVersions(string sourcePath, List<LevelVersion> versions)
@@ -139,10 +140,10 @@ public class FileSystem : FileSystemInternal
   /// <param name="askToSave">If there are unsaved changes in the editor, will ask to save them first.</param>
   /// <param name="version">The version of the level to load.</param>
   /// <exception cref="Exception">Thrown when the file cannot be found.</exception>
-  public void LoadFromFullFilePath(string fullFilePath, bool askToSave, LevelVersion? version = null)
+  public async void LoadFromFullFilePath(string fullFilePath, bool askToSave, LevelVersion? version = null)
   {
     if (askToSave)
-      LoadFromFullFilePathExAndAskToSave(fullFilePath, version);
+      await LoadFromFullFilePathExAndAskToSave(fullFilePath, version);
     else
       LoadFromFullFilePathEx(fullFilePath, version);
   }
