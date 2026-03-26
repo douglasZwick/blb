@@ -47,7 +47,7 @@ public class StatusBar : MonoBehaviour
   }
 
 
-  public static void  Print(object messageObject, bool highPriority = false, float duration = 0)
+  public static void Print(object messageObject, bool highPriority = false, float duration = 0)
   {
     if (messageObject == null)
       return;

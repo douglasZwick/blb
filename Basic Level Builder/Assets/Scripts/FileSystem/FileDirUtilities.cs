@@ -97,7 +97,7 @@ public class FileDirUtilities : MonoBehaviour
     catch (Exception e)
     {
       // this probably can't happen, but....
-      StatusBar.Print($"Error getting files in directory. {e.Message} ({e.GetType()})");
+      StatusBar.Error($"Error getting files in directory.", $"{e.Message} ({e.GetType()})");
     }
   }
 
@@ -132,7 +132,7 @@ public class FileDirUtilities : MonoBehaviour
     }
     catch (Exception e)
     {
-      StatusBar.Print($"Error getting files in directory. {e.Message} ({e.GetType()})");
+      StatusBar.Error($"Error getting files in directory.", $"{e.Message} ({e.GetType()})");
       return null;
     }
   }
@@ -170,7 +170,7 @@ public class FileDirUtilities : MonoBehaviour
 
     if (emptyName || whiteSpaceName)
     {
-      StatusBar.Print("<color=#ffff00>Entered file name is invalid.</color>");
+      StatusBar.Log("Entered file name is invalid.");
 
       return false;
     }
@@ -300,7 +300,7 @@ public class FileDirUtilities : MonoBehaviour
 
     if (File.Exists(newFilePath))
     {
-      StatusBar.Print("<color=#ffff00>Entered file name already exists</color>");
+      StatusBar.Log("Entered file name already exists.");
       return oldFilePath;
     }
 
@@ -310,8 +310,7 @@ public class FileDirUtilities : MonoBehaviour
     }
     catch (Exception e)
     {
-      Debug.Log($"Error renaming save file {oldFilePath}. {e.Message} ({e.GetType()})");
-      StatusBar.Print($"<color=#ffff00>Error renaming save file {oldFilePath}</color>");
+      StatusBar.Log($"Error renaming save file {oldFilePath}", $"{e.Message} ({e.GetType()})");
       return oldFilePath;
     }
 
