@@ -124,7 +124,7 @@ public class UiHistoryTab : UiTab
 
       if (items.Count == 0)
       {
-        StatusBar.Warning($"Error: File empty", $"No versions found in file: {m_FileInfo.FullFilePath}");
+        StatusBar.Warning($"Error: File is empty", $"No versions found in file: {m_FileInfo.FullFilePath}");
         FindObjectOfType<UiFileInfo>().CloseWindow();
         return;
       }

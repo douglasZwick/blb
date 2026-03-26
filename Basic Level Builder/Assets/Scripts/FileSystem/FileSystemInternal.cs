@@ -457,7 +457,7 @@ public class FileSystemInternal : MonoBehaviour
     var validPaths = paths.Where(path => path.EndsWith(".blb")).ToList();
 
     if (validPaths.Count == 0)
-      StatusBar.Warning("Drag and drop only supports <b>.blb</b> files.");
+      StatusBar.Warning("Warning: Drag and drop only supports <b>.blb</b> files.");
     else
       LoadFromFullFilePathExAndAskToSave(validPaths[0]);
   }
@@ -767,7 +767,7 @@ public class FileSystemInternal : MonoBehaviour
     }
     catch (Exception e)
     {
-      m_MainThreadDispatcher.Enqueue(() => StatusBar.Error($"Error while flattening and saving file", $"{e.Message} ({e.GetType()}"));
+      m_MainThreadDispatcher.Enqueue(() => StatusBar.Error($"Error: Failed to flatten and save file.", $"{e.Message} ({e.GetType()}"));
       // If we couldn't finish the save, remove the corrupted file, then unmount
       File.Delete(destFilePath);
       UnmountFile();
@@ -887,7 +887,7 @@ public class FileSystemInternal : MonoBehaviour
     }
     catch (Exception e)
     {
-      m_MainThreadDispatcher.Enqueue(() => StatusBar.Error("Error while saving file", $"{e.Message} ({e.GetType()})"));
+      m_MainThreadDispatcher.Enqueue(() => StatusBar.Error("Error: Failed to save file.", $"{e.Message} ({e.GetType()})"));
     }
   }
 
@@ -919,7 +919,7 @@ public class FileSystemInternal : MonoBehaviour
     }
     catch (Exception e)
     {
-      m_MainThreadDispatcher.Enqueue(() => StatusBar.Error("Error while exporting and saving file.", $"{e.Message} ({e.GetType()})"));
+      m_MainThreadDispatcher.Enqueue(() => StatusBar.Error("Error: Failed to export and save file.", $"{e.Message} ({e.GetType()})"));
     }
   }
 
@@ -1094,7 +1094,7 @@ public class FileSystemInternal : MonoBehaviour
 
     if (string.IsNullOrEmpty(text))
     {
-      StatusBar.Print("You tried to paste a level from the clipboard, but it's empty.");
+      StatusBar.Print("Failed to paste level from clipboard: clipboard is empty.");
     }
     else
     {
@@ -1340,7 +1340,7 @@ public class FileSystemInternal : MonoBehaviour
       }
       UnmountFile();
       m_FileDirUtilities.UpdateFilesList();
-      StatusBar.SilentPrint($"Sucessfuly deleted {Path.GetFileName(fileInfo.m_SaveFilePath)}");
+      StatusBar.SilentPrint($"Successfully deleted \"{Path.GetFileName(fileInfo.m_SaveFilePath)}\".");
       return;
     }
 
@@ -1363,7 +1363,7 @@ public class FileSystemInternal : MonoBehaviour
 
     m_FileDirUtilities.MoveFileItemToTop(fileInfo.m_SaveFilePath);
 
-    StatusBar.SilentPrint($"Sucessfuly deleted {versionDescription} from {Path.GetFileName(fileInfo.m_SaveFilePath)}");
+    StatusBar.SilentPrint($"Successfully deleted {versionDescription} from \"{Path.GetFileName(fileInfo.m_SaveFilePath)}\".");
   }
 
   /// <summary>

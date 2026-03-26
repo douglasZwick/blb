@@ -367,11 +367,11 @@ public class TileGrid : MonoBehaviour
     {
       if (failures > 0)
       {
-        StatusBar.Warning($"This level seems to be invalid (containing {failString} we didn't recognize).");
+        StatusBar.Warning($"Warning: Level is invalid (containing {failString} unrecognized tiles).");
       }
       else
       {
-        StatusBar.Print("Loading save file results in an empty level.");
+        StatusBar.Print("Warning: Loading save file results in an empty level.");
       }
     }
   }

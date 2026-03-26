@@ -471,7 +471,7 @@ public class PathTool : BlbTool
   {
     if (m_Path.Count == 0 && m_AnchorIndex == gridIndex)
     {
-      StatusBar.Print("You cannot make the first point of a path the same as the Anchor point.");
+      StatusBar.Print("You cannot make the first point of a path the same as the anchor point.");
       return;
     }
 

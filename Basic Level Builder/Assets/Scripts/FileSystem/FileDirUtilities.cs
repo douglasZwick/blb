@@ -97,7 +97,7 @@ public class FileDirUtilities : MonoBehaviour
     catch (Exception e)
     {
       // this probably can't happen, but....
-      StatusBar.Error($"Error getting files in directory.", $"{e.Message} ({e.GetType()})");
+      StatusBar.Error($"Error: Failed to get files in directory.", $"{e.Message} ({e.GetType()})");
     }
   }
 
@@ -132,7 +132,7 @@ public class FileDirUtilities : MonoBehaviour
     }
     catch (Exception e)
     {
-      StatusBar.Error($"Error getting files in directory.", $"{e.Message} ({e.GetType()})");
+      StatusBar.Error($"Error: Failed to get files in directory.", $"{e.Message} ({e.GetType()})");
       return null;
     }
   }
@@ -310,7 +310,7 @@ public class FileDirUtilities : MonoBehaviour
     }
     catch (Exception e)
     {
-      StatusBar.Log($"Error renaming save file {oldFilePath}", $"{e.Message} ({e.GetType()})");
+      StatusBar.Log($"Error: Failed to rename save file {oldFilePath}", $"{e.Message} ({e.GetType()})");
       return oldFilePath;
     }
 
