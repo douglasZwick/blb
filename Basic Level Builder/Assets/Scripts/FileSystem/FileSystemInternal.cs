@@ -1189,6 +1189,9 @@ public class FileSystemInternal : MonoBehaviour
     if (GlobalData.AreEffectsUnderway())
       return;
 
+    // Wait for any running thread to finish before loading a new file
+    m_SavingThread?.Wait();
+
     try
     {
       using FileStream stream = new(fullFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
