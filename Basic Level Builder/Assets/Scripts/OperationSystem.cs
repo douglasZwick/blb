@@ -66,7 +66,7 @@ public class OperationSystem : MonoBehaviour
     s_UseAutosaving = m_UseAutosaving = value;
 
     var enabledString = value ? "enabled" : "disabled";
-    StatusBar.Print($"Autosaving {enabledString}");
+    StatusBar.SilentPrint($"Autosaving {enabledString}");
   }
 
 
@@ -161,7 +161,7 @@ public class OperationSystem : MonoBehaviour
     if (s_StackIndex > s_Operations.Count - 1)
     {
       // nothing to undo
-      StatusBar.Print("Nothing to undo.", highPriority: false, duration: 5);
+      StatusBar.SilentPrint("Nothing to undo.", highPriority: false, duration: 5);
     }
     else
     {
@@ -175,7 +175,7 @@ public class OperationSystem : MonoBehaviour
     var indexToUndo = (s_Operations.Count - s_StackIndex) - 1;
     var operationToUndo = s_Operations[indexToUndo];
 
-    StatusBar.Print("Undoing " + operationToUndo.m_Name + "...");
+    StatusBar.SilentPrint("Undoing " + operationToUndo.m_Name + "...");
 
     foreach (var delta in operationToUndo.m_Deltas)
     {
@@ -199,7 +199,7 @@ public class OperationSystem : MonoBehaviour
     if (s_StackIndex <= 0)
     {
       // nothing to redo
-      StatusBar.Print("Nothing to redo.", highPriority: false, duration: 5);
+      StatusBar.SilentPrint("Nothing to redo.", highPriority: false, duration: 5);
     }
     else
     {
@@ -213,7 +213,7 @@ public class OperationSystem : MonoBehaviour
     var indexToRedo = s_Operations.Count - s_StackIndex;
     var operationToRedo = s_Operations[indexToRedo];
 
-    StatusBar.Print("Redoing " + operationToRedo.m_Name + "...");
+    StatusBar.SilentPrint("Redoing " + operationToRedo.m_Name + "...");
 
     foreach (var delta in operationToRedo.m_Deltas)
     {

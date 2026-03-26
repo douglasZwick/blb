@@ -457,7 +457,7 @@ public class FileSystemInternal : MonoBehaviour
     var validPaths = paths.Where(path => path.EndsWith(".blb")).ToList();
 
     if (validPaths.Count == 0)
-      StatusBar.Print("Drag and drop only supports <b>.blb</b> files.");
+      StatusBar.Warning("Drag and drop only supports <b>.blb</b> files.");
     else
       LoadFromFullFilePathExAndAskToSave(validPaths[0]);
   }
@@ -919,9 +919,7 @@ public class FileSystemInternal : MonoBehaviour
     }
     catch (Exception e)
     {
-      var errorString = $"Error while exporting and saving file: {e.Message} ({e.GetType()})";
-      m_MainThreadDispatcher.Enqueue(() => StatusBar.Print(errorString));
-      Debug.LogError(errorString);
+      m_MainThreadDispatcher.Enqueue(() => StatusBar.Error("Error while exporting and saving file.", $"{e.Message} ({e.GetType()})"));
     }
   }
 
@@ -1126,9 +1124,8 @@ public class FileSystemInternal : MonoBehaviour
     }
     catch (Exception e)
     {
-      var errorString = $"Error reading save file {Path.GetFileName(fileInfo.m_SaveFilePath)}. The file data may be corrupted.\n {e.Message} ({e.GetType()})";
-      m_MainThreadDispatcher.Enqueue(() => StatusBar.Print(errorString));
-      Debug.LogError(errorString);
+      var errorString = $"Error reading save file {Path.GetFileName(fileInfo.m_SaveFilePath)}. The file data may be corrupted.";
+      m_MainThreadDispatcher.Enqueue(() => StatusBar.Error(errorString, $"{e.Message} ({e.GetType()})"));
       throw new Exception(errorString);
     }
   }
@@ -1206,9 +1203,7 @@ public class FileSystemInternal : MonoBehaviour
     {
       // File not loaded, remove file mount
       UnmountFile();
-      var errorString = $"Error loading save file {Path.GetFileName(fullFilePath)}. The file data may be corrupted.\n {e.Message} ({e.GetType()})";
-      Debug.LogError(errorString);
-      m_MainThreadDispatcher.Enqueue(() => StatusBar.Print(errorString));
+      m_MainThreadDispatcher.Enqueue(() => StatusBar.Error($"Error loading save file {Path.GetFileName(fullFilePath)}. The file data may be corrupted.", $"{e.Message} ({e.GetType()})"));
     }
   }
 
@@ -1345,7 +1340,7 @@ public class FileSystemInternal : MonoBehaviour
       }
       UnmountFile();
       m_FileDirUtilities.UpdateFilesList();
-      StatusBar.Print($"Sucessfuly deleted {Path.GetFileName(fileInfo.m_SaveFilePath)}");
+      StatusBar.SilentPrint($"Sucessfuly deleted {Path.GetFileName(fileInfo.m_SaveFilePath)}");
       return;
     }
 
@@ -1368,7 +1363,7 @@ public class FileSystemInternal : MonoBehaviour
 
     m_FileDirUtilities.MoveFileItemToTop(fileInfo.m_SaveFilePath);
 
-    StatusBar.Print($"Sucessfuly deleted {versionDescription} from {Path.GetFileName(fileInfo.m_SaveFilePath)}");
+    StatusBar.SilentPrint($"Sucessfuly deleted {versionDescription} from {Path.GetFileName(fileInfo.m_SaveFilePath)}");
   }
 
   /// <summary>

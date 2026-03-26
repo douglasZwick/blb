@@ -215,10 +215,11 @@ public static class LevelVersioning
 
         AddLevelDeltasToGrid(ref tiles, autoSaveData);
       }
-      catch (InvalidOperationException)
+      catch (InvalidOperationException e)
       {
-        Debug.Log($"Couldn't find {version} in file `{fileInfo.m_SaveFilePath}");
-        FileSystem.Instance.MainThreadDispatcherQueue(() => StatusBar.Print("Error, couldn't find the proper save to load. Loaded branched manual instead."));
+        var message = "Error: couldn't find the proper save to load. Loaded branched manual instead.";
+        var exceptionMessage = $"Couldn't find {version} in file {fileInfo.m_SaveFilePath}" + Environment.NewLine + $"{e.Message} ({e.GetType()})";
+        FileSystem.Instance.MainThreadDispatcherQueue(() => StatusBar.Log(message, exceptionMessage));
         // Just return the tiles we've loaded so far (the manual save)
       }
     }
