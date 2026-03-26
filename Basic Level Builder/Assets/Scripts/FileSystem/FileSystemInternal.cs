@@ -240,15 +240,14 @@ public class FileSystemInternal : MonoBehaviour
 
       if (IsFileMounted() && !FileExists(m_MountedFileInfo.m_SaveFilePath))
       {
-        var errorString = $"Error: File with path \"{m_MountedFileInfo.m_SaveFilePath}\" could not be found. " +
-               "Loaded level has been saved with the same name.";
         var tempPath = Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath);
-        Debug.LogWarning(errorString);
 
         UnmountFile();
         Save(false, tempPath, false, false);
 
-        StatusBar.Print(errorString);
+        var errorString = $"Error: File with path \"{m_MountedFileInfo.m_SaveFilePath}\" could not be found. " +
+               "Loaded level has been saved with the same name.";
+        StatusBar.Warning(errorString);
       }
 
       // Update file list incase files were added or removed
