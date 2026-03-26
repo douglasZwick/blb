@@ -367,7 +367,7 @@ public class TileGrid : MonoBehaviour
     {
       if (failures > 0)
       {
-        StatusBar.Print($"This level seems to be invalid (containing {failString} we didn't recognize).");
+        StatusBar.Warning($"This level seems to be invalid (containing {failString} we didn't recognize).");
       }
       else
       {
