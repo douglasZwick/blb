@@ -1141,16 +1141,12 @@ public class FileSystemInternal : MonoBehaviour
     {
       var result = await m_AskToSaveDialogAdder.RequestAskToSaveDialogAsync(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
       if (result == ModalDialog.DialogResult.Confirm)
-      {
         CreateManualSave();
-      }
       else if (result == ModalDialog.DialogResult.Cancel)
         return;
-      // Load the file if confirmed or denied, but not canceled
-      LoadFromFullFilePathEx(fullFilePath, version);
-      return;
     }
 
+    // Fall through to load file if we saved or if we chose to not save, or if we have no changes to save
     LoadFromFullFilePathEx(fullFilePath, version);
   }
 
