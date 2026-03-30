@@ -269,36 +269,34 @@ public class FileSystemInternal : MonoBehaviour
     // Check if we have unsaved changes, then ask to save if so
     if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
     {
-      // Make the async function a helper function so this funtion can return bool instead of Task
-      _ = HandleQuitAsync();
+      // Create an async task and leave the it for the task pool to clean up.
+      _ = PromptSaveAndQuitAsync();
       return false;
     }
 
     return true;
   }
 
-  private async Task HandleQuitAsync()
+  private async Task PromptSaveAndQuitAsync()
   {
     var result = await m_AskToSaveDialogAdder.RequestAskToSaveDialogAsync(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
     if (result == ModalDialog.DialogResult.Confirm)
-      SaveAndQuit();
-    else
-      Application.Quit();
-  }
+    {
+      // Force autosave if we have changes.
+      bool isAutoSave = false;
+      bool shouldPrintElapsedTime = false;
+      bool shouldMountFile = false;
+      Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
+      // If we have a saving thread running, wait for it to finish before closing the program
+      m_SavingThread?.Wait();
+    }
+    else if (result == ModalDialog.DialogResult.Cancel)
+      return;
 
-  private void SaveAndQuit()
-  {
-    // Force autosave if we have changes.
-    bool isAutoSave = false;
-    bool shouldPrintElapsedTime = false;
-    bool shouldMountFile = false;
-    Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
-    // If we have a saving thread running, wait for it to finish before closing the program
-    m_SavingThread?.Wait();
-
+    m_IsAppQuitting = true;
     Application.Quit();
   }
-
+  
   protected async Task TryCreateNewLevel()
   {
     // Check if we have unsaved changes, then ask to save if so
@@ -343,7 +341,7 @@ public class FileSystemInternal : MonoBehaviour
     m_MountedFileInfo.m_FileData.m_ManualSaves.Add(new LevelData());
     m_MountedFileInfo.m_FileData.m_ManualSaves[0].m_TimeStamp = DateTime.Now;
     // Mount temp file so we can check when the full file path isn't the temp file
-    MountFile(destFilePath, m_MountedFileInfo, new(0,0));
+    MountFile(destFilePath, m_MountedFileInfo, new(0, 0));
   }
 
   /// <summary>
@@ -1136,7 +1134,8 @@ public class FileSystemInternal : MonoBehaviour
       return;
 
     // If we are trying to load the same file and version as we currently have mounted, skip
-    if (IsFileMounted() && m_MountedFileInfo.m_SaveFilePath.Equals(fullFilePath)){
+    if (IsFileMounted() && m_MountedFileInfo.m_SaveFilePath.Equals(fullFilePath))
+    {
       LevelVersion toLoadVersion = version ?? new(GetLastManualSaveVersion(m_MountedFileInfo.m_FileData), 0);
       if (toLoadVersion.Equals(m_MountedFileInfo.m_LoadedVersion))
         return;
@@ -1154,7 +1153,7 @@ public class FileSystemInternal : MonoBehaviour
         Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
       }
       else if (result == ModalDialog.DialogResult.Cancel)
-         return;
+        return;
       // Load the file if confirmed or denied, but not canceled
       LoadFromFullFilePathEx(fullFilePath, version);
       return;
