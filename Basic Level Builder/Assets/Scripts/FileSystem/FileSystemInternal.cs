@@ -282,11 +282,7 @@ public class FileSystemInternal : MonoBehaviour
     var result = await m_AskToSaveDialogAdder.RequestAskToSaveDialogAsync(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
     if (result == ModalDialog.DialogResult.Confirm)
     {
-      // Force autosave if we have changes.
-      bool isAutoSave = false;
-      bool shouldPrintElapsedTime = false;
-      bool shouldMountFile = false;
-      Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
+      CreateManualSave();
       // If we have a saving thread running, wait for it to finish before closing the program
       m_SavingThread?.Wait();
     }
@@ -296,7 +292,7 @@ public class FileSystemInternal : MonoBehaviour
     m_IsAppQuitting = true;
     Application.Quit();
   }
-  
+
   protected async Task TryCreateNewLevel()
   {
     // Check if we have unsaved changes, then ask to save if so
@@ -304,27 +300,18 @@ public class FileSystemInternal : MonoBehaviour
     {
       var result = await m_AskToSaveDialogAdder.RequestAskToSaveDialogAsync(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
       if (result == ModalDialog.DialogResult.Confirm)
-        SaveAndCreateNewLevel();
-      else if (result == ModalDialog.DialogResult.Deny)
-        CreateNewLevel();
-      // If cancled, do nothing and stay on the current level
-      return;
+      {
+        CreateManualSave();
+      }
+      else if (result == ModalDialog.DialogResult.Cancel)
+        return;
     }
 
-    CreateNewLevel();
+    // Level is created when fall through for both confirm/deny returns of dialog or if there are no changes
+    PerformCreateNewLevel();
   }
 
-  private void SaveAndCreateNewLevel()
-  {
-    // Force autosave if we have changes.
-    bool isAutoSave = false;
-    bool shouldPrintElapsedTime = false;
-    bool shouldMountFile = false;
-    Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
-    CreateNewLevel();
-  }
-
-  private void CreateNewLevel()
+  private void PerformCreateNewLevel()
   {
     UnmountFile();
     m_TileGrid.ForceClearGrid();
@@ -663,6 +650,14 @@ public class FileSystemInternal : MonoBehaviour
     }
 
     StartSavingThread(destFilePath, m_TileGrid.GetGridDictionary(), autosave, saveAsFileName != null, updateCameraPosButtonPressed, shouldPrintElapsedTime, shouldMountFile);
+  }
+
+  private void CreateManualSave()
+  {
+    bool isAutoSave = false;
+    bool shouldPrintElapsedTime = false;
+    bool shouldMountFile = false;
+    Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
   }
 
   protected void StartSavingThread(string destFilePath, Dictionary<Vector2Int, TileGrid.Element> gridDictionary,
@@ -1147,10 +1142,7 @@ public class FileSystemInternal : MonoBehaviour
       var result = await m_AskToSaveDialogAdder.RequestAskToSaveDialogAsync(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
       if (result == ModalDialog.DialogResult.Confirm)
       {
-        bool isAutoSave = false;
-        bool shouldPrintElapsedTime = false;
-        bool shouldMountFile = false;
-        Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
+        CreateManualSave();
       }
       else if (result == ModalDialog.DialogResult.Cancel)
         return;
