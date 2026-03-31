@@ -5,7 +5,7 @@ Last Updated:   3/30/2026
 Copyright 2018-2026, DigiPen Institute of Technology
 
 Description:    Global dialog manager providing easy access to modal dialogs
-               without requiring ModalDialogAdder components on every object.
+                without requiring ModalDialogAdder components on every object.
 ***************************************************/
 
 using System.Threading.Tasks;

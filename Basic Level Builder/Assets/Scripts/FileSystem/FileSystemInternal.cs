@@ -65,7 +65,6 @@ public class FileSystemInternal : MonoBehaviour
   /**
    * Pending variables for Modal Dialogs
    **/
-  protected string m_PendingSaveFullFilePath = "";
   protected FileData m_PendingExportFileData = null;
   protected List<LevelVersion> m_PendingExportVersions = null;
 
