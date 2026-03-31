@@ -1797,11 +1797,9 @@ MonoBehaviour:
   m_ThumbnailSize: {x: 100, y: 100}
   m_ThumbnailTileAtlas: {fileID: 21300000, guid: 7e860478d976dbd44b12c1c72457b9c4,
     type: 3}
-  m_OverrideDialogAdder: {fileID: 128438542}
   m_SaveAsDialogAdder: {fileID: 128438543}
   m_ExportAsDialogAdder: {fileID: 128438546}
   m_RestoreBackupDialogAdder: {fileID: 128438549}
-  m_AskToSaveDialogAdder: {fileID: 128438550}
 --- !u!114 &128438548
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10024,8 +10022,8 @@ GameObject:
   - component: {fileID: 419018388}
   - component: {fileID: 419018387}
   - component: {fileID: 419018386}
-  - component: {fileID: 419018390}
   - component: {fileID: 419018391}
+  - component: {fileID: 419018392}
   m_Layer: 5
   m_Name: TrashButton
   m_TagString: Untagged
@@ -10098,9 +10096,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 419018390}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: RequestDialogsAtCenter
+      - m_Target: {fileID: 419018392}
+        m_TargetAssemblyTypeName: UITrashButton, Assembly-CSharp
+        m_MethodName: CreateTrashConfirmation
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -10168,20 +10166,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 419018384}
   m_CullTransparentMesh: 0
---- !u!114 &419018390
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 419018384}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 669a6586aefca754ba1732319aa8a037, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_ModalDialogPrefabs:
-  - {fileID: -2514170894193223469, guid: 9a34b7cd355eb754b8d7c989a22593c1, type: 3}
 --- !u!114 &419018391
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10199,6 +10183,18 @@ MonoBehaviour:
   m_Text: Clear Level
   m_TooltipPrefab: {fileID: 3956001862937307442, guid: 13d12636cc140d346b13d5ca53a5625d,
     type: 3}
+--- !u!114 &419018392
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 419018384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c896f6deee1d2647b2a22a9b856ff17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &421261985
 GameObject:
   m_ObjectHideFlags: 0
@@ -22796,7 +22792,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 40, y: 0}
   m_SizeDelta: {x: 0, y: 32}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &678381422
@@ -23394,10 +23390,10 @@ GameObject:
   - component: {fileID: 776520069}
   - component: {fileID: 776520068}
   - component: {fileID: 776520067}
-  - component: {fileID: 776520066}
   - component: {fileID: 776520065}
   - component: {fileID: 776520071}
   - component: {fileID: 776520072}
+  - component: {fileID: 776520073}
   m_Layer: 5
   m_Name: ExitButton
   m_TagString: Untagged
@@ -23443,20 +23439,6 @@ MonoBehaviour:
   m_Text: Exit
   m_TooltipPrefab: {fileID: 3956001862937307442, guid: 13d12636cc140d346b13d5ca53a5625d,
     type: 3}
---- !u!114 &776520066
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 776520063}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 669a6586aefca754ba1732319aa8a037, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_ModalDialogPrefabs:
-  - {fileID: 7684276993607053908, guid: 2e034a9a4890c2847855c0d52d19cfce, type: 3}
 --- !u!114 &776520067
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23501,9 +23483,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 776520066}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: RequestDialogsAtCenter
+      - m_Target: {fileID: 776520073}
+        m_TargetAssemblyTypeName: ApplicationQuitter, Assembly-CSharp
+        m_MethodName: Quit
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -23601,9 +23583,9 @@ MonoBehaviour:
     m_Event:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 776520066}
-          m_TargetAssemblyTypeName: 
-          m_MethodName: RequestDialogsAtCenter
+        - m_Target: {fileID: 776520073}
+          m_TargetAssemblyTypeName: ApplicationQuitter, Assembly-CSharp
+          m_MethodName: Quit
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -23616,6 +23598,18 @@ MonoBehaviour:
     m_SubjectToHotkeyDisabling: 0
     m_AllowedInPlayMode: 0
     m_AllowedInUiPopups: 0
+--- !u!114 &776520073
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 776520063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f75dfb49af4c3c04fb1b2f6e652aa3a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &803031638
 GameObject:
   m_ObjectHideFlags: 0
@@ -36161,7 +36155,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 74, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1399586401

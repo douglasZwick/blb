@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 using static LevelVersioning;
 
@@ -50,30 +49,30 @@ public class FileSystem : FileSystemInternal
   /// <summary>
   /// Performs a manual save of the current level.
   /// </summary>
-  public void SaveCameraPosition()
+  public async void SaveCameraPosition()
   {
-    Save(false, null, true);
+    await Save(false, null, true);
   }
 
   /// <summary>
   /// Performs a manual save of the current level.
   /// </summary>
-  public void ManualSave()
+  public async void ManualSave()
   {
-    Save(false);
+    await Save(false);
   }
 
   /// <summary>
   /// Performs an automatic save of the current level.
   /// </summary>
-  public void Autosave()
+  public async void Autosave()
   {
-    Save(true);
+    await Save(true);
   }
 
-  public void SaveAs(string name, bool shouldPrintElapsedTime = true)
+  public async void SaveAs(string name, bool shouldPrintElapsedTime = true)
   {
-    Save(false, name, false, shouldPrintElapsedTime);
+    await Save(false, name, false, shouldPrintElapsedTime);
   }
 
   public async void CreateNewLevel()
@@ -224,41 +223,18 @@ public class FileSystem : FileSystemInternal
     m_MainThreadDispatcher.Enqueue(action);
   }
 
-  public void ConfirmOverwrite()
-  {
-    // Check if we were doing a SaveAs or an Export
-    // If the Export data is empty, then we are doing a SaveAs
-    if (m_PendingExportFileData == null)
-    {
-      bool autosave = false;
-      bool isSaveAs = true;
-      bool updateCameraPosButtonPressed = false;
-      bool shouldPrintElapsedTime = true;
-      StartSavingThread(m_PendingSaveFullFilePath, m_TileGrid.GetGridDictionary(), autosave, isSaveAs, updateCameraPosButtonPressed, shouldPrintElapsedTime);
-    }
-    else
-    {
-      StartExportSavingThread(m_PendingSaveFullFilePath);
-    }
-    m_PendingSaveFullFilePath = "";
-  }
-
-  public void CancelOverwrite()
-  {
-    m_PendingSaveFullFilePath = "";
-  }
-
-  public void TryStartExportSavingThread(string fileName)
+  public async void TryStartExportSavingThread(string fileName)
   {
     string destFilePath = m_FileDirUtilities.CreateFilePath(fileName);
 
     // Give prompt if we are going to write to and existing file
     if (File.Exists(destFilePath))
     {
-      m_PendingSaveFullFilePath = destFilePath;
+      var result = await DialogManager.ShowConfirmOverwriteDialog(Path.GetFileNameWithoutExtension(destFilePath));
+      if (result != ModalDialog.DialogResult.Confirm)
+        return;
 
-      m_OverrideDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileName(destFilePath));
-      return;
+      // Continue with export
     }
 
     StartExportSavingThread(destFilePath);

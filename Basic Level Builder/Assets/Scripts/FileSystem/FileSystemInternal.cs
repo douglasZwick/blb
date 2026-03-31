@@ -56,8 +56,6 @@ public class FileSystemInternal : MonoBehaviour
    **/
   ModalDialogMaster m_ModalDialogMaster;
   [SerializeField]
-  protected ModalDialogAdder m_OverrideDialogAdder;
-  [SerializeField]
   protected ModalDialogAdder m_SaveAsDialogAdder;
   [SerializeField]
   protected ModalDialogAdder m_ExportAsDialogAdder;
@@ -229,7 +227,7 @@ public class FileSystemInternal : MonoBehaviour
   }
 
   // Check if any file got deleted when we were off the game
-  private void OnApplicationFocus(bool focus)
+  private async void OnApplicationFocus(bool focus)
   {
     if (focus)
     {
@@ -241,7 +239,7 @@ public class FileSystemInternal : MonoBehaviour
         var tempPath = Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath);
 
         UnmountFile();
-        Save(false, tempPath, false, false);
+        await Save(false, tempPath, false, false);
 
         var errorString = $"Error: File with path \"{m_MountedFileInfo.m_SaveFilePath}\" could not be found. " +
                "Loaded level has been saved with the same name.";
@@ -258,35 +256,39 @@ public class FileSystemInternal : MonoBehaviour
     // If we have a saving thread running, wait for it to finish before closing the program
     m_SavingThread?.Wait();
 
-    // Check if we already asked to quit
     if (m_IsAppQuitting)
       return true;
 
+    // First ask if user really wants to exit
+    _ = PromptExitAsync();
+    return false;
+  }
+
+  private async Task PromptExitAsync()
+  {
+    string exitMessage = "Are you sure you want to exit the application?";
+    var result = await DialogManager.ShowGenericDialog(UiGenericModalDialog.ButtonOptions.ConfirmAndDeny, exitMessage);
+    // If we don't confirm to quit return to cancle the quit
+    if (result != ModalDialog.DialogResult.Confirm)
+      return;
 
     // Check if we have unsaved changes, then ask to save if so
     if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
     {
-      // Create an async task and leave the it for the task pool to clean up.
-      _ = PromptSaveAndQuitAsync();
-      return false;
+      string levelName = Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath);
+      result = await DialogManager.ShowAskToSaveDialog(levelName);
+      if (result == ModalDialog.DialogResult.Confirm)
+      {
+        await CreateManualSave();
+        // If we have a saving thread running, wait for it to finish before closing the program
+        m_SavingThread?.Wait();
+      }
+      // If we cancle the save we are also canceling the quit, so return to stop the quit
+      else if (result == ModalDialog.DialogResult.Cancel)
+        return;
     }
 
-    return true;
-  }
-
-  private async Task PromptSaveAndQuitAsync()
-  {
-    string levelName = Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath);
-    var result = await DialogManager.ShowAskToSaveDialog(levelName);
-    if (result == ModalDialog.DialogResult.Confirm)
-    {
-      CreateManualSave();
-      // If we have a saving thread running, wait for it to finish before closing the program
-      m_SavingThread?.Wait();
-    }
-    else if (result == ModalDialog.DialogResult.Cancel)
-      return;
-
+    // No unsaved changes, or fall through to quit
     m_IsAppQuitting = true;
     Application.Quit();
   }
@@ -300,7 +302,7 @@ public class FileSystemInternal : MonoBehaviour
       var result = await DialogManager.ShowAskToSaveDialog(levelName);
       if (result == ModalDialog.DialogResult.Confirm)
       {
-        CreateManualSave();
+        await CreateManualSave();
       }
       else if (result == ModalDialog.DialogResult.Cancel)
         return;
@@ -568,7 +570,7 @@ public class FileSystemInternal : MonoBehaviour
     return fileInfo;
   }
 
-  protected void Save(bool autosave, string saveAsFileName = null, bool updateCameraPosButtonPressed = false, bool shouldPrintElapsedTime = true, bool shouldMountFile = true)
+  protected async Task Save(bool autosave, string saveAsFileName = null, bool updateCameraPosButtonPressed = false, bool shouldPrintElapsedTime = true, bool shouldMountFile = true)
   {
     if (GlobalData.AreEffectsUnderway())
       return;
@@ -590,10 +592,11 @@ public class FileSystemInternal : MonoBehaviour
       // Give prompt if we are going to write to and existing file
       if (File.Exists(destFilePath))
       {
-        m_PendingSaveFullFilePath = destFilePath;
+        var result = await DialogManager.ShowConfirmOverwriteDialog(Path.GetFileNameWithoutExtension(destFilePath));
+        if (result != ModalDialog.DialogResult.Confirm)
+          return;
 
-        m_OverrideDialogAdder.RequestDialogsAtCenterWithStrings(Path.GetFileName(destFilePath));
-        return;
+        // Continue with save
       }
     }
     else
@@ -650,12 +653,12 @@ public class FileSystemInternal : MonoBehaviour
     StartSavingThread(destFilePath, m_TileGrid.GetGridDictionary(), autosave, saveAsFileName != null, updateCameraPosButtonPressed, shouldPrintElapsedTime, shouldMountFile);
   }
 
-  private void CreateManualSave()
+  private async Task CreateManualSave()
   {
     bool isAutoSave = false;
     bool shouldPrintElapsedTime = false;
     bool shouldMountFile = false;
-    Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
+    await Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
   }
 
   protected void StartSavingThread(string destFilePath, Dictionary<Vector2Int, TileGrid.Element> gridDictionary,
@@ -1130,7 +1133,7 @@ public class FileSystemInternal : MonoBehaviour
       string levelName = Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath);
       var result = await DialogManager.ShowAskToSaveDialog(levelName);
       if (result == ModalDialog.DialogResult.Confirm)
-        CreateManualSave();
+        await CreateManualSave();
       else if (result == ModalDialog.DialogResult.Cancel)
         return;
     }

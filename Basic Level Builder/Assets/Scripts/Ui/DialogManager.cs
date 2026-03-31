@@ -48,6 +48,19 @@ public static class DialogManager
   }
 
   /// <summary>
+  /// Shows a confirmation dialog for overwriting a file.
+  /// </summary>
+  /// <param name="fileName">The name of the file that will be overwritten</param>
+  /// <returns>A task that completes with the dialog result</returns>
+  public static Task<ModalDialog.DialogResult> ShowConfirmOverwriteDialog(string fileName)
+  {
+    string overwriteMessage = $"<b>\"{fileName}\"</b>{System.Environment.NewLine}" +
+      $"A file with this name already exists{System.Environment.NewLine}" +
+      "Do you want to overwrite it?";
+    return ShowGenericDialog(UiGenericModalDialog.ButtonOptions.ConfirmAndDeny, overwriteMessage);
+  }
+
+  /// <summary>
   /// Shows a generic modal dialog with custom button options.
   /// </summary>
   /// <param name="buttonOptions">Flags indicating which buttons should be displayed</param>

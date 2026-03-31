@@ -34,19 +34,23 @@ public sealed class UITrashButton : MonoBehaviour
 
   /**
   * FUNCTION NAME: CreateTrashConfirmation
-  * DESCRIPTION  : Create a trash dialouge prompt.
+  * DESCRIPTION  : Create a trash dialogue prompt.
   * INPUTS       : None
   * OUTPUTS      : None
   **/
-  public void CreateTrashConfirmation()
+  public async void CreateTrashConfirmation()
   {
     //Prevent mass spawning.
     if (m_pTrashUI)
       return;
 
-    GameObject prefab = Resources.Load<GameObject>("Prefabs/ConfirmTrashUI");
-    m_pTrashUI = (GameObject)Instantiate(prefab, new Vector3(Screen.width / 2, Screen.height / 2, 0), Quaternion.identity);
-    m_pTrashUI.transform.SetParent(GameObject.FindGameObjectWithTag("EditorCanvas").transform);
+    string trashMessage = "Are you sure you want to clear the entire level?" +
+      $"{System.Environment.NewLine}This action cannot be undone.";
+    var result = await DialogManager.ShowGenericDialog(UiGenericModalDialog.ButtonOptions.ConfirmAndDeny, trashMessage);
+    if (result == ModalDialog.DialogResult.Confirm)
+    {
+      TrashTheLevel();
+    }
   }
 
   /**
