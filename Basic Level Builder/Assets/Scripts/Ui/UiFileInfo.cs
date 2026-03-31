@@ -44,10 +44,8 @@ public class UiFileInfo : MonoBehaviour
   {
     if (focus && !File.Exists(m_FullFilePath))
     {
-      var errorString = $"Error: File names \"{Path.GetFileName(m_FullFilePath)}\" could not be found.";
-      Debug.LogWarning(errorString);
-
-      StatusBar.Print("<color=#ffff00>" + errorString);
+      var errorString = $"Error: File named \"{Path.GetFileName(m_FullFilePath)}\" could not be found.";
+      StatusBar.Warning(errorString);
 
       CloseWindow();
       // Attempt to remove any open dialougs
@@ -164,7 +162,7 @@ public class UiFileInfo : MonoBehaviour
   public void DeleteFile()
   {
     FileSystem.Instance.DeleteFile(m_FullFilePath);
-    StatusBar.Print($"Sucessfuly deleted {Path.GetFileName(m_FullFilePath)}");
+    StatusBar.SilentPrint($"Successfully deleted \"{Path.GetFileName(m_FullFilePath)}\".");
     CloseWindow();
   }
 }

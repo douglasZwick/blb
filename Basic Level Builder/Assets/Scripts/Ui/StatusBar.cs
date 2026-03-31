@@ -15,18 +15,18 @@ public class StatusBar : MonoBehaviour
   public static string s_PreAwakeMessage = null;
 
   static TextMeshProUGUI s_Text;
-  static Image s_Forground;
+  static Image s_Foreground;
   static string s_WarningColorCode = "#FFF820";
   static string s_ErrorColorCode = "#FF2028";
-  static Color s_ForgroundColor;
+  static Color s_ForegroundColor;
   static Color s_FlashColor = new(0.25f, 0.25f, 0.25f, 0.5f);
   static float s_MessageFlashTime = 0;
 
   private void Awake()
   {
     s_Text = GetComponent<TextMeshProUGUI>();
-    s_Forground = GetComponentInParent<Image>();
-    s_ForgroundColor = s_Forground.color;
+    s_Foreground = GetComponentInParent<Image>();
+    s_ForegroundColor = s_Foreground.color;
   }
 
 
@@ -42,7 +42,7 @@ public class StatusBar : MonoBehaviour
     {
       s_MessageFlashTime -= Time.deltaTime;
       var flashAmount = Mathf.Clamp01(s_MessageFlashTime);
-      s_Forground.color = Color.Lerp(s_ForgroundColor, s_FlashColor, flashAmount);
+      s_Foreground.color = Color.Lerp(s_ForegroundColor, s_FlashColor, flashAmount);
     }
   }
 
@@ -55,8 +55,15 @@ public class StatusBar : MonoBehaviour
     PrintHelper(messageObject.ToString(), highPriority, duration);
   }
 
+  public static void SilentPrint(object messageObject, bool highPriority = false, float duration = 0)
+  {
+    if (messageObject == null)
+      return;
 
-  public static void Warning(object messageObject)
+    PrintHelper(messageObject.ToString(), highPriority, duration, isSilent: true);
+  }
+
+  public static void Log(object messageObject, object extendedMessageObject = null)
   {
     if (messageObject == null)
       return;
@@ -64,11 +71,24 @@ public class StatusBar : MonoBehaviour
     var message = messageObject.ToString();
     var formattedMessage = $"<color={s_WarningColorCode}>" + message + "</color>";
     PrintHelper(formattedMessage, highPriority: true, duration: 0);
-    Debug.LogWarning(message);
+    var extendedMessage = extendedMessageObject != null ? " " + extendedMessageObject.ToString() : "";
+    Debug.Log(message + extendedMessage);
+  }
+
+  public static void Warning(object messageObject, object extendedMessageObject = null)
+  {
+    if (messageObject == null)
+      return;
+
+    var message = messageObject.ToString();
+    var formattedMessage = $"<color={s_WarningColorCode}>" + message + "</color>";
+    PrintHelper(formattedMessage, highPriority: true, duration: 0);
+    var extendedMessage = extendedMessageObject != null ? " " + extendedMessageObject.ToString() : "";
+    Debug.LogWarning(message + extendedMessage);
   }
 
 
-  public static void Error(object messageObject)
+  public static void Error(object messageObject, object extendedMessageObject = null)
   {
     if (messageObject == null)
       return;
@@ -76,11 +96,12 @@ public class StatusBar : MonoBehaviour
     var message = messageObject.ToString();
     var formattedMessage = $"<color={s_ErrorColorCode}>" + message + "</color>";
     PrintHelper(formattedMessage, highPriority: true, duration: 0);
-    Debug.LogError(message);
+    var extendedMessage = extendedMessageObject != null ? " " + extendedMessageObject.ToString() : "";
+    Debug.LogError(message + extendedMessage);
   }
 
 
-  static void PrintHelper(string message, bool highPriority, float duration)
+  static void PrintHelper(string message, bool highPriority, float duration, bool isSilent = false)
   {
     if (s_Text == null)
     {
@@ -99,7 +120,8 @@ public class StatusBar : MonoBehaviour
       clearSeq.Call(Clear, s_Text.gameObject);
     }
 
-    s_MessageFlashTime = 1f;
+    if (!isSilent)
+      s_MessageFlashTime = 1f;
   }
 
 

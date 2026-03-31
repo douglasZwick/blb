@@ -240,15 +240,14 @@ public class FileSystemInternal : MonoBehaviour
 
       if (IsFileMounted() && !FileExists(m_MountedFileInfo.m_SaveFilePath))
       {
-        var errorString = $"Error: File with path \"{m_MountedFileInfo.m_SaveFilePath}\" could not be found. " +
-               "Loaded level has been saved with the same name.";
         var tempPath = Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath);
-        Debug.LogWarning(errorString);
 
         UnmountFile();
         Save(false, tempPath, false, false);
 
-        StatusBar.Print(errorString);
+        var errorString = $"Error: File with path \"{m_MountedFileInfo.m_SaveFilePath}\" could not be found. " +
+               "Loaded level has been saved with the same name.";
+        StatusBar.Warning(errorString);
       }
 
       // Update file list incase files were added or removed
@@ -423,7 +422,7 @@ public class FileSystemInternal : MonoBehaviour
     var validPaths = paths.Where(path => path.EndsWith(".blb")).ToList();
 
     if (validPaths.Count == 0)
-      StatusBar.Print("Drag and drop only supports <b>.blb</b> files.");
+      StatusBar.Warning("Warning: Drag and drop only supports <b>.blb</b> files.");
     else
       await LoadFromFullFilePathExAndAskToSave(validPaths[0]);
   }
@@ -621,10 +620,9 @@ public class FileSystemInternal : MonoBehaviour
           {
             // Because of the file validation on application focus, this SHOULD never happen.
             // But to be safe incase the file is deleted while playing the game, do this
-            var errorString = $"Error: File with path \"{m_MountedFileInfo.m_SaveFilePath}\" could not be found." + Environment.NewLine +
+            var errorString = $"Error: File with path \"{m_MountedFileInfo.m_SaveFilePath}\" could not be found." +
               "A new file has been made for this save.";
-            StatusBar.Print(errorString);
-            Debug.LogWarning(errorString);
+            StatusBar.Warning(errorString);
             m_FileDirUtilities.RemoveFileItem(m_MountedFileInfo.m_SaveFilePath);
             UnmountFile();
           }
@@ -742,9 +740,7 @@ public class FileSystemInternal : MonoBehaviour
     }
     catch (Exception e)
     {
-      var errorString = $"Error while flattening and saving file: {e.Message} ({e.GetType()})";
-      m_MainThreadDispatcher.Enqueue(() => StatusBar.Print(errorString));
-      Debug.LogError(errorString);
+      m_MainThreadDispatcher.Enqueue(() => StatusBar.Error($"Error: Failed to flatten and save file.", $"{e.Message} ({e.GetType()}"));
       // If we couldn't finish the save, remove the corrupted file, then unmount
       File.Delete(destFilePath);
       UnmountFile();
@@ -783,8 +779,7 @@ public class FileSystemInternal : MonoBehaviour
     if (updateCameraPosButtonPressed && !isCameraDifferent)
     {
       var errorString = "Skipped updating the camera position because the camera position has not changed";
-      m_MainThreadDispatcher.Enqueue(() => StatusBar.Print(errorString));
-      Debug.Log(errorString);
+      m_MainThreadDispatcher.Enqueue(() => StatusBar.Log(errorString));
       return;
     }
 
@@ -798,9 +793,7 @@ public class FileSystemInternal : MonoBehaviour
     if (overwriting && FileExists(sourceFileInfo.m_SaveFilePath) && destFilePath.Equals(sourceFileInfo.m_SaveFilePath) && !hasDifferences)
     {
       // #7
-      var errorString = "Skipped save because there is nothing new to save";
-      m_MainThreadDispatcher.Enqueue(() => StatusBar.Print(errorString));
-      Debug.Log(errorString);
+      m_MainThreadDispatcher.Enqueue(() => StatusBar.Log("Skipped save because there is nothing new to save"));
       return;
     }
 
@@ -867,9 +860,7 @@ public class FileSystemInternal : MonoBehaviour
     }
     catch (Exception e)
     {
-      var errorString = $"Error while saving file: {e.Message} ({e.GetType()})";
-      m_MainThreadDispatcher.Enqueue(() => StatusBar.Print(errorString));
-      Debug.LogError(errorString);
+      m_MainThreadDispatcher.Enqueue(() => StatusBar.Error("Error: Failed to save file.", $"{e.Message} ({e.GetType()})"));
     }
   }
 
@@ -901,9 +892,7 @@ public class FileSystemInternal : MonoBehaviour
     }
     catch (Exception e)
     {
-      var errorString = $"Error while exporting and saving file: {e.Message} ({e.GetType()})";
-      m_MainThreadDispatcher.Enqueue(() => StatusBar.Print(errorString));
-      Debug.LogError(errorString);
+      m_MainThreadDispatcher.Enqueue(() => StatusBar.Error("Error: Failed to export and save file.", $"{e.Message} ({e.GetType()})"));
     }
   }
 
@@ -1078,7 +1067,7 @@ public class FileSystemInternal : MonoBehaviour
 
     if (string.IsNullOrEmpty(text))
     {
-      StatusBar.Print("You tried to paste a level from the clipboard, but it's empty.");
+      StatusBar.Print("Failed to paste level from clipboard: clipboard is empty.");
     }
     else
     {
@@ -1108,9 +1097,8 @@ public class FileSystemInternal : MonoBehaviour
     }
     catch (Exception e)
     {
-      var errorString = $"Error reading save file {Path.GetFileName(fileInfo.m_SaveFilePath)}. The file data may be corrupted.\n {e.Message} ({e.GetType()})";
-      m_MainThreadDispatcher.Enqueue(() => StatusBar.Print(errorString));
-      Debug.LogError(errorString);
+      var errorString = $"Error reading save file {Path.GetFileName(fileInfo.m_SaveFilePath)}. The file data may be corrupted.";
+      m_MainThreadDispatcher.Enqueue(() => StatusBar.Error(errorString, $"{e.Message} ({e.GetType()})"));
       throw new Exception(errorString);
     }
   }
@@ -1162,6 +1150,9 @@ public class FileSystemInternal : MonoBehaviour
     if (GlobalData.AreEffectsUnderway())
       return;
 
+    // Wait for any running thread to finish before loading a new file
+    m_SavingThread?.Wait();
+
     try
     {
       using FileStream stream = new(fullFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -1176,9 +1167,7 @@ public class FileSystemInternal : MonoBehaviour
     {
       // File not loaded, remove file mount
       UnmountFile();
-      var errorString = $"Error loading save file {Path.GetFileName(fullFilePath)}. The file data may be corrupted.\n {e.Message} ({e.GetType()})";
-      Debug.LogError(errorString);
-      m_MainThreadDispatcher.Enqueue(() => StatusBar.Print(errorString));
+      m_MainThreadDispatcher.Enqueue(() => StatusBar.Error($"Error loading save file {Path.GetFileName(fullFilePath)}. The file data may be corrupted.", $"{e.Message} ({e.GetType()})"));
     }
   }
 
@@ -1315,7 +1304,7 @@ public class FileSystemInternal : MonoBehaviour
       }
       UnmountFile();
       m_FileDirUtilities.UpdateFilesList();
-      StatusBar.Print($"Sucessfuly deleted {Path.GetFileName(fileInfo.m_SaveFilePath)}");
+      StatusBar.SilentPrint($"Successfully deleted \"{Path.GetFileName(fileInfo.m_SaveFilePath)}\".");
       return;
     }
 
@@ -1338,7 +1327,7 @@ public class FileSystemInternal : MonoBehaviour
 
     m_FileDirUtilities.MoveFileItemToTop(fileInfo.m_SaveFilePath);
 
-    StatusBar.Print($"Sucessfuly deleted {versionDescription} from {Path.GetFileName(fileInfo.m_SaveFilePath)}");
+    StatusBar.SilentPrint($"Successfully deleted {versionDescription} from \"{Path.GetFileName(fileInfo.m_SaveFilePath)}\".");
   }
 
   /// <summary>

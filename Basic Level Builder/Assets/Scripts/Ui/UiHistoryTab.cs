@@ -106,8 +106,8 @@ public class UiHistoryTab : UiTab
       }
       catch (Exception e)
       {
-        Debug.LogWarning($"Failed to get data from file path: {m_FileInfo.FullFilePath}. {e.Message}");
-        StatusBar.Print($"Error: Could not load file history.");
+        var errorString = $"Failed to get data from file path: {m_FileInfo.FullFilePath}. {e.Message}";
+        StatusBar.Warning($"Error: Could not load file history.", errorString);
         FindObjectOfType<UiFileInfo>().CloseWindow();
         return;
       }
@@ -125,8 +125,7 @@ public class UiHistoryTab : UiTab
 
       if (items.Count == 0)
       {
-        Debug.LogWarning($"No versions found in file: {m_FileInfo.FullFilePath}");
-        StatusBar.Print($"Error: File empty");
+        StatusBar.Warning($"Error: File is empty", $"No versions found in file: {m_FileInfo.FullFilePath}");
         FindObjectOfType<UiFileInfo>().CloseWindow();
         return;
       }
@@ -146,8 +145,7 @@ public class UiHistoryTab : UiTab
     }
     catch (Exception e)
     {
-      Debug.LogError($"Unexpected error loading file history: {e.Message} ({e.GetType()})");
-      StatusBar.Print($"Error: Could not load file history due to an unexpected error.");
+      StatusBar.Error($"Error: Could not load file history due to an unexpected error.", $"{e.Message} ({e.GetType()})");
       FindObjectOfType<UiFileInfo>().CloseWindow();
     }
   }

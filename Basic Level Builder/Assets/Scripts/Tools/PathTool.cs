@@ -368,7 +368,7 @@ public class PathTool : BlbTool
     var message = "Move path points with the <b>left mouse button</b>, " +
       "or move the anchor point with the <b>right mouse button</b>. " +
       "Press <b>Space</b> to finish.";
-    StatusBar.Print(message);
+    StatusBar.SilentPrint(message);
   }
 
 
@@ -471,7 +471,7 @@ public class PathTool : BlbTool
   {
     if (m_Path.Count == 0 && m_AnchorIndex == gridIndex)
     {
-      StatusBar.Print("You cannot make the first point of a path the same as the Anchor point.");
+      StatusBar.Print("You cannot make the first point of a path the same as the anchor point.");
       return;
     }
 
@@ -670,13 +670,13 @@ public class PathTool : BlbTool
     var diagonalString = diagonal.ToString("f2");
     var message = $"Selection size: <b>{width}</b> wide x <b>{height}</b> high, " +
       $"<b>{diagonalString}</b> diagonal";
-    StatusBar.Print(message);
+    StatusBar.SilentPrint(message);
   }
 
 
   void PrintAnchorPointMessage()
   {
-    StatusBar.Print("Next, <b>left-click</b> to place the path's <b>anchor point</b>, or press <b>Delete</b> to delete the selected path");
+    StatusBar.SilentPrint("Next, <b>left-click</b> to place the path's <b>anchor point</b>, or press <b>Delete</b> to delete the selected path");
   }
 
 
@@ -685,13 +685,13 @@ public class PathTool : BlbTool
     var x = m_AnchorIndex.x;
     var y = m_AnchorIndex.y;
     var message = $"Anchor point at <color=#FFFF00><b>({x}, {y})</b></color>";
-    StatusBar.Print(message);
+    StatusBar.SilentPrint(message);
   }
 
 
   void PrintPathPointMessage()
   {
-    StatusBar.Print("Next, <b>left-click</b> to place <b>path points</b> relative to the anchor point. Press <b>Space</b> to finish");
+    StatusBar.SilentPrint("Next, <b>left-click</b> to place <b>path points</b> relative to the anchor point. Press <b>Space</b> to finish");
   }
 
 
@@ -733,7 +733,7 @@ public class PathTool : BlbTool
 
     message += " | Press <b>Space</b> to finish";
 
-    StatusBar.Print(message);
+    StatusBar.SilentPrint(message);
   }
 
 

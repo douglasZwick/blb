@@ -109,8 +109,7 @@ public class UiSaveFileItem : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     }
     catch (Exception e)
     {
-      Debug.LogWarning($"Failed to get data from file path: {m_FullFilePath}. {e.Message}");
-      StatusBar.Print($"Error: Could not load file thumbnail for file \"{Path.GetFileName(m_FullFilePath)}\".");
+      StatusBar.Warning($"Error: Could not load file thumbnail for file \"{Path.GetFileName(m_FullFilePath)}\".", $"{e.Message} ({e.GetType()})");
       return;
     }
 
@@ -121,8 +120,7 @@ public class UiSaveFileItem : MonoBehaviour, IPointerEnterHandler, IPointerExitH
       levelData = fileInfo.m_FileData.m_ManualSaves[^1];
     else
     {
-      Debug.LogWarning($"No saves found in file \"{m_FullFilePath}\"");
-      StatusBar.Print($"Error: Could not load file. No saves found in file \"{Path.GetFileName(m_FullFilePath)}\"");
+      StatusBar.Warning($"Error: Could not load file. No saves found in file \"{Path.GetFileName(m_FullFilePath)}\"");
       return;
     }
 

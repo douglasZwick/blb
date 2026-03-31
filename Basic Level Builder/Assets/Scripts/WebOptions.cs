@@ -118,7 +118,7 @@ public class WebOptions : MonoBehaviour
 
     statusMessage += ProcessDataStrings(blocks);
 
-    StatusBar.Print(statusMessage, highPriority: true);
+    StatusBar.SilentPrint(statusMessage, highPriority: true);
   }
 
 
