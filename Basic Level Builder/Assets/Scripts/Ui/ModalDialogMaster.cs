@@ -40,6 +40,8 @@ public class ModalDialogMaster : MonoBehaviour
     m_Image.color = color;
 
     m_ActivationSequence = ActionMaster.Actions.Sequence();
+
+    DialogManager.Initialize(this);
   }
 
 

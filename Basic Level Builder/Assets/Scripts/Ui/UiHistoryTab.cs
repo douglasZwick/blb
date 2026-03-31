@@ -52,9 +52,6 @@ public class UiHistoryTab : UiTab
   [SerializeField]
   private GameObject m_DeleteButton;
 
-  [SerializeField]
-  private ModalDialogAdder m_CodaAdder;
-
 
   private List<UiHistoryItem> m_Selection = new();
 
@@ -268,7 +265,7 @@ public class UiHistoryTab : UiTab
       prompt = $"Are you sure you want to delete {target}?{Environment.NewLine}This can not be undone.";
     }
 
-    var result = await m_CodaAdder.RequestConfirmDestructiveDialogAsync(prompt);
+    var result = await DialogManager.ShowConfirmDestructiveDialog(prompt);
     if (result == ModalDialog.DialogResult.Confirm)
     {
       if (shouldDeleteFile)

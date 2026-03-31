@@ -63,8 +63,6 @@ public class FileSystemInternal : MonoBehaviour
   protected ModalDialogAdder m_ExportAsDialogAdder;
   [SerializeField]
   private ModalDialogAdder m_RestoreBackupDialogAdder;
-  [SerializeField]
-  private ModalDialogAdder m_AskToSaveDialogAdder;
 
   /**
    * Pending variables for Modal Dialogs
@@ -278,7 +276,8 @@ public class FileSystemInternal : MonoBehaviour
 
   private async Task PromptSaveAndQuitAsync()
   {
-    var result = await m_AskToSaveDialogAdder.RequestAskToSaveDialogAsync(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+    string levelName = Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath);
+    var result = await DialogManager.ShowAskToSaveDialog(levelName);
     if (result == ModalDialog.DialogResult.Confirm)
     {
       CreateManualSave();
@@ -297,7 +296,8 @@ public class FileSystemInternal : MonoBehaviour
     // Check if we have unsaved changes, then ask to save if so
     if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
     {
-      var result = await m_AskToSaveDialogAdder.RequestAskToSaveDialogAsync(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+      string levelName = Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath);
+      var result = await DialogManager.ShowAskToSaveDialog(levelName);
       if (result == ModalDialog.DialogResult.Confirm)
       {
         CreateManualSave();
@@ -1127,7 +1127,8 @@ public class FileSystemInternal : MonoBehaviour
     // Check if we have unsaved changes, then ask to save if so
     if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
     {
-      var result = await m_AskToSaveDialogAdder.RequestAskToSaveDialogAsync(Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath));
+      string levelName = Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath);
+      var result = await DialogManager.ShowAskToSaveDialog(levelName);
       if (result == ModalDialog.DialogResult.Confirm)
         CreateManualSave();
       else if (result == ModalDialog.DialogResult.Cancel)

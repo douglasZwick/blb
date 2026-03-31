@@ -24,8 +24,6 @@ public class UiFileInfo : MonoBehaviour
   private Color m_MinimizedColor;
   [SerializeField]
   private Color m_MaximizedColor;
-  [SerializeField]
-  private ModalDialogAdder m_CodaAdder;
 
   private List<UiTab> m_Tabs = new();
 
@@ -152,7 +150,7 @@ public class UiFileInfo : MonoBehaviour
 
   public async void DeleteFileCoda()
   {
-    var result = await m_CodaAdder.RequestConfirmDestructiveDialogAsync($"Are you sure you want to delete this file?{System.Environment.NewLine}This can not be undone.");
+    var result = await DialogManager.ShowConfirmDestructiveDialog($"Are you sure you want to delete this file?{System.Environment.NewLine}This can not be undone.");
     if (result == ModalDialog.DialogResult.Confirm)
     {
       DeleteFile();

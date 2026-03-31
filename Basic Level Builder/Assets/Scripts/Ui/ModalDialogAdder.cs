@@ -48,43 +48,4 @@ public class ModalDialogAdder : MonoBehaviour
 
     m_ModalDialogMaster.Begin(false);
   }
-
-  public Task<ModalDialog.DialogResult> RequestAskToSaveDialogAsync(params string[] strings)
-  {
-    var tcs = new TaskCompletionSource<ModalDialog.DialogResult>();
-    void onConfirm() => tcs.SetResult(ModalDialog.DialogResult.Confirm);
-    void onDeny() => tcs.SetResult(ModalDialog.DialogResult.Deny);
-    void onCancel() => tcs.SetResult(ModalDialog.DialogResult.Cancel);
-    void removeHandler()
-    {
-      UiAskToSaveModalDialog.OnConfirmSave -= onConfirm;
-      UiAskToSaveModalDialog.OnDenySave -= onDeny;
-      UiAskToSaveModalDialog.OnCancelAction -= onCancel;
-      UiAskToSaveModalDialog.OnRemoveSub -= removeHandler;
-    }
-    UiAskToSaveModalDialog.OnConfirmSave += onConfirm;
-    UiAskToSaveModalDialog.OnDenySave += onDeny;
-    UiAskToSaveModalDialog.OnCancelAction += onCancel;
-    UiAskToSaveModalDialog.OnRemoveSub += removeHandler;
-    RequestDialogsAtCenterWithStrings(strings);
-    return tcs.Task;
-  }
-
-  public Task<ModalDialog.DialogResult> RequestConfirmDestructiveDialogAsync(params string[] strings)
-  {
-    var tcs = new TaskCompletionSource<ModalDialog.DialogResult>();
-    void onConfirm() => tcs.SetResult(ModalDialog.DialogResult.Confirm);
-    void onDeny() => tcs.SetResult(ModalDialog.DialogResult.Deny);
-    void removeHandler()
-    {
-      UiConfirmDestructiveActionModalDialog.OnConfirmDestructiveAction -= onConfirm;
-      UiConfirmDestructiveActionModalDialog.OnDenyDestructiveAction -= onDeny;
-      UiConfirmDestructiveActionModalDialog.OnRemoveSub -= removeHandler;
-    }
-    UiConfirmDestructiveActionModalDialog.OnConfirmDestructiveAction += onConfirm;
-    UiConfirmDestructiveActionModalDialog.OnDenyDestructiveAction += onDeny;
-    UiConfirmDestructiveActionModalDialog.OnRemoveSub += removeHandler;
-    RequestDialogsAtCenterWithStrings(strings);
-    return tcs.Task;
-  }
 }
