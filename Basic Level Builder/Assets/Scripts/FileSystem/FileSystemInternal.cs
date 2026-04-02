@@ -276,10 +276,21 @@ public class FileSystemInternal : MonoBehaviour
       return;
 
     // Check if we have unsaved changes, then ask to save if so
-    if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
+    bool hasUnsavedChanges = IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary());
+    bool hasNoFileChanges = m_TileGrid.GetGridDictionary().Count != 0;
+    if (hasUnsavedChanges || hasNoFileChanges)
     {
-      string levelName = Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath);
-      result = await DialogManager.ShowAskToSaveDialog(levelName);
+      if (hasNoFileChanges)
+      {
+        string dialogMessage = $"You have unsaved changes.{Environment.NewLine}Would you like to save to a new level?";
+        result = await DialogManager.ShowGenericDialog(UiGenericModalDialog.ButtonOptions.ConfirmDenyCancel, dialogMessage);
+      }
+      else
+      {
+        string levelName = Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath);
+        result = await DialogManager.ShowAskToSaveDialog(levelName);
+      }
+      
       if (result == ModalDialog.DialogResult.Confirm)
       {
         await CreateManualSave();
