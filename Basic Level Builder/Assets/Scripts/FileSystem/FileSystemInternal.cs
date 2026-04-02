@@ -252,6 +252,10 @@ public class FileSystemInternal : MonoBehaviour
 
   private bool OnWantsToQuit()
   {
+    // If we have a ui popup the user needs to respond to it first before they can quit
+    if (GlobalData.IsInUiPopup())
+      return false;
+
     // If we have a saving thread running, wait for it to finish before closing the program
     m_SavingThread?.Wait();
 

@@ -8,6 +8,7 @@ Description:    Generic modal dialog that supports Confirm, Deny, and Cancel but
                Uses a single prefab with dynamic button visibility configuration.
 ***************************************************/
 
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class UiGenericModalDialog : ModalDialog
@@ -32,15 +33,7 @@ public class UiGenericModalDialog : ModalDialog
   private UnityEngine.UI.Button m_DenyButton;
   [SerializeField]
   private UnityEngine.UI.Button m_CancelButton;
-
-  public delegate void ConfirmAction();
-  public static event ConfirmAction OnConfirm;
-  public delegate void DenyAction();
-  public static event DenyAction OnDeny;
-  public delegate void CancelAction();
-  public static event CancelAction OnCancel;
-  public delegate void RemoveSub();
-  public static event RemoveSub OnRemoveSub;
+  private TaskCompletionSource<DialogResult> m_Task;
 
   private ButtonOptions m_ButtonOptions = ButtonOptions.ConfirmDenyCancel;
 
@@ -50,9 +43,10 @@ public class UiGenericModalDialog : ModalDialog
       CancelPressed();
   }
 
-  public void SetButtonOptions(ButtonOptions options)
+  public void SetUpGeneric(ButtonOptions options, TaskCompletionSource<DialogResult> task)
   {
     m_ButtonOptions = options;
+    m_Task = task;
   }
 
   public override void StringsSetup(string[] strings = null)
@@ -95,21 +89,18 @@ public class UiGenericModalDialog : ModalDialog
   public void ConfirmPressed()
   {
     Close();
-    OnConfirm?.Invoke();
-    OnRemoveSub?.Invoke();
+    m_Task.TrySetResult(DialogResult.Confirm);
   }
 
   public void DenyPressed()
   {
     Close();
-    OnDeny?.Invoke();
-    OnRemoveSub?.Invoke();
+    m_Task.TrySetResult(DialogResult.Deny);
   }
 
   public void CancelPressed()
   {
     Close();
-    OnCancel?.Invoke();
-    OnRemoveSub?.Invoke();
+    m_Task.TrySetResult(DialogResult.Cancel);
   }
 }

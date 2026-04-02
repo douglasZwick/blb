@@ -72,28 +72,13 @@ public static class DialogManager
       return Task.FromResult(ModalDialog.DialogResult.Cancel);
 
     TaskCompletionSource<ModalDialog.DialogResult> tcs = new();
-    void onConfirm() => tcs.TrySetResult(ModalDialog.DialogResult.Confirm);
-    void onDeny() => tcs.TrySetResult(ModalDialog.DialogResult.Deny);
-    void onCancel() => tcs.TrySetResult(ModalDialog.DialogResult.Cancel);
-    void removeHandler()
-    {
-      UiGenericModalDialog.OnConfirm -= onConfirm;
-      UiGenericModalDialog.OnDeny -= onDeny;
-      UiGenericModalDialog.OnCancel -= onCancel;
-      UiGenericModalDialog.OnRemoveSub -= removeHandler;
-    }
-
-    UiGenericModalDialog.OnConfirm += onConfirm;
-    UiGenericModalDialog.OnDeny += onDeny;
-    UiGenericModalDialog.OnCancel += onCancel;
-    UiGenericModalDialog.OnRemoveSub += removeHandler;
 
     var x = Screen.width / 2f;
     var y = Screen.height / 2f;
     var rectPoint = new Vector2(x, y);
 
     var dialog = Object.Instantiate(s_GenericDialogPrefab);
-    dialog.SetButtonOptions(buttonOptions);
+    dialog.SetUpGeneric(buttonOptions, tcs);
     dialog.Setup(s_ModalDialogMaster, rectPoint, new string[] { message });
     dialog.Open();
 
