@@ -1317,7 +1317,7 @@ public class FileSystemInternal : MonoBehaviour
     ModalDialog.DialogResult result = ModalDialog.DialogResult.Deny;
     // Check if we have unsaved changes, then ask to save if so
     bool hasUnsavedChanges = IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary());
-    bool hasNoFileChanges = m_TileGrid.GetGridDictionary().Count != 0;
+    bool hasNoFileChanges = !IsFileMounted() && m_TileGrid.GetGridDictionary().Count != 0;
     if (hasUnsavedChanges || hasNoFileChanges)
     {
 
