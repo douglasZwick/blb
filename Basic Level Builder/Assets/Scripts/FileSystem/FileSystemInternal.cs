@@ -275,32 +275,9 @@ public class FileSystemInternal : MonoBehaviour
     if (result != ModalDialog.DialogResult.Confirm)
       return;
 
-    // Check if we have unsaved changes, then ask to save if so
-    bool hasUnsavedChanges = IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary());
-    bool hasNoFileChanges = m_TileGrid.GetGridDictionary().Count != 0;
-    if (hasUnsavedChanges || hasNoFileChanges)
-    {
-      if (hasNoFileChanges)
-      {
-        string dialogMessage = $"You have unsaved changes.{Environment.NewLine}Would you like to save to a new level?";
-        result = await DialogManager.ShowGenericDialog(UiGenericModalDialog.ButtonOptions.ConfirmDenyCancel, dialogMessage);
-      }
-      else
-      {
-        string levelName = Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath);
-        result = await DialogManager.ShowAskToSaveDialog(levelName);
-      }
-      
-      if (result == ModalDialog.DialogResult.Confirm)
-      {
-        await CreateManualSave();
-        // If we have a saving thread running, wait for it to finish before closing the program
-        m_SavingThread?.Wait();
-      }
-      // If we cancle the save we are also canceling the quit, so return to stop the quit
-      else if (result == ModalDialog.DialogResult.Cancel)
-        return;
-    }
+    // If the user canceled when asked to save, stop the quit
+    if (await AskToSaveIfChanges() == ModalDialog.DialogResult.Cancel)
+      return;
 
     // No unsaved changes, or fall through to quit
     m_IsAppQuitting = true;
@@ -309,18 +286,9 @@ public class FileSystemInternal : MonoBehaviour
 
   protected async Task TryCreateNewLevel()
   {
-    // Check if we have unsaved changes, then ask to save if so
-    if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
-    {
-      string levelName = Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath);
-      var result = await DialogManager.ShowAskToSaveDialog(levelName);
-      if (result == ModalDialog.DialogResult.Confirm)
-      {
-        await CreateManualSave();
-      }
-      else if (result == ModalDialog.DialogResult.Cancel)
-        return;
-    }
+    // If the user canceled when asked to save, stop tring to create a level
+    if (await AskToSaveIfChanges() == ModalDialog.DialogResult.Cancel)
+      return;
 
     // Level is created when fall through for both confirm/deny returns of dialog or if there are no changes
     PerformCreateNewLevel();
@@ -1141,16 +1109,9 @@ public class FileSystemInternal : MonoBehaviour
         return;
     }
 
-    // Check if we have unsaved changes, then ask to save if so
-    if (IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary()))
-    {
-      string levelName = Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath);
-      var result = await DialogManager.ShowAskToSaveDialog(levelName);
-      if (result == ModalDialog.DialogResult.Confirm)
-        await CreateManualSave();
-      else if (result == ModalDialog.DialogResult.Cancel)
-        return;
-    }
+    // If the user canceled when asked to save, stop the load
+    if (await AskToSaveIfChanges() == ModalDialog.DialogResult.Cancel)
+      return;
 
     // Fall through to load file if we saved or if we chose to not save, or if we have no changes to save
     LoadFromFullFilePathEx(fullFilePath, version);
@@ -1346,6 +1307,43 @@ public class FileSystemInternal : MonoBehaviour
     m_FileDirUtilities.MoveFileItemToTop(fileInfo.m_SaveFilePath);
 
     StatusBar.SilentPrint($"Successfully deleted {versionDescription} from \"{Path.GetFileName(fileInfo.m_SaveFilePath)}\".");
+  }
+
+  // Helper function to ask to save if there are changes to the level
+  // Makes a save if we responed yes to the prompt
+  // Returns deny if nothing changed
+  private async Task<ModalDialog.DialogResult> AskToSaveIfChanges()
+  {
+    ModalDialog.DialogResult result = ModalDialog.DialogResult.Deny;
+    // Check if we have unsaved changes, then ask to save if so
+    bool hasUnsavedChanges = IsFileMounted() && GetDifferences(out LevelData _, m_MountedFileInfo, m_TileGrid.GetGridDictionary());
+    bool hasNoFileChanges = m_TileGrid.GetGridDictionary().Count != 0;
+    if (hasUnsavedChanges || hasNoFileChanges)
+    {
+
+      if (hasNoFileChanges)
+      {
+        string dialogMessage = $"You have unsaved changes.{Environment.NewLine}Would you like to save to a new level?";
+        result = await DialogManager.ShowGenericDialog(UiGenericModalDialog.ButtonOptions.ConfirmDenyCancel, dialogMessage);
+      }
+      else
+      {
+        string levelName = Path.GetFileNameWithoutExtension(m_MountedFileInfo.m_SaveFilePath);
+        result = await DialogManager.ShowAskToSaveDialog(levelName);
+      }
+    }
+
+    if (result == ModalDialog.DialogResult.Confirm)
+    {
+      await CreateManualSave();
+      // TODO
+      // Return cancel (for now) because the save as dialog promt is not async so the code will continue past
+      // here if we returned confim like before and there will be issues if we do other stuff while prompting to save
+      if (hasNoFileChanges)
+        return ModalDialog.DialogResult.Cancel;
+    }
+
+    return result;
   }
 
   /// <summary>
