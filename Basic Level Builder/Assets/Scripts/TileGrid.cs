@@ -295,13 +295,10 @@ public class TileGrid : MonoBehaviour
 
     ForceClearGrid();
 
-    // Create a shallow copy of the dictonary
-    m_Grid = grid;
-
     var successes = 0;
     var failures = 0;
 
-    foreach (var element in m_Grid)
+    foreach (var element in grid)
     {
       // Create this tile for the new grid.
       try
