@@ -269,12 +269,9 @@ public class FileSystemInternal : MonoBehaviour
 
   private async Task PromptExitAsync()
   {
-    string exitMessage = "Are you sure you want to exit the application?";
-    var result = await DialogManager.ShowGenericDialog(UiGenericModalDialog.ButtonOptions.ConfirmAndDeny, exitMessage);
-    // If we don't confirm to quit return to cancle the quit
-    if (result != ModalDialog.DialogResult.Confirm)
-      return;
-
+    if (GlobalData.IsInPlayMode())
+      GlobalData.DisablePlayMode();
+    
     // If the user canceled when asked to save, stop the quit
     if (await AskToSaveIfChanges() == ModalDialog.DialogResult.Cancel)
       return;

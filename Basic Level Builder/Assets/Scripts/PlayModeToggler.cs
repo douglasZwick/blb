@@ -26,4 +26,10 @@ public class PlayModeToggler : MonoBehaviour
   {
     GlobalData.TogglePlayMode();
   }
+
+  private void Update()
+  {
+    if (GlobalData.IsInPlayMode() && Input.GetButtonUp("Cancel"))
+      GlobalData.DisablePlayMode();
+  }
 }
