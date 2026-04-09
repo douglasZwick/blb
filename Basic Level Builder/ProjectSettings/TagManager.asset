@@ -22,6 +22,8 @@ TagManager:
   - Clipboard
   - EditorCanvas
   - GoalFX
+  - TooltipRoot
+  - FileInfoRoot
   layers:
   - Default
   - TransparentFX

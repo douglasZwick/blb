@@ -1,21 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GhostToggler : MonoBehaviour
 {
   public static bool s_IsInGhostMode { get; private set; }
-
-
-  private void Update()
-  {
-    if (!HotkeyMaster.s_HotkeysEnabled)
-      return;
-
-    if (HotkeyMaster.IsPrimaryModifierHeld() && Input.GetKeyDown(KeyCode.G))
-      ToggleGhostMode();
-  }
-
 
   void EnableGhostMode()
   {

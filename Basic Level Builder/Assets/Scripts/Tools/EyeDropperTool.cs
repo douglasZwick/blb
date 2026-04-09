@@ -10,9 +10,6 @@ Description:
 Copyright 2018-2019, DigiPen Institute of Technology
 ***************************************************/
 
-using UnityEngine.UI; //Update UI images.
-using UnityEngine;
-
 public class EyeDropperTool : BlbTool
 {
   /**

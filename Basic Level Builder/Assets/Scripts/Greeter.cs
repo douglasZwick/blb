@@ -39,7 +39,7 @@ public class Greeter : MonoBehaviour
   void PrintOrdinaryGreeting()
   {
     var ordinaryGreeting = m_Message + " v" + Application.version;
-    StatusBar.Print(ordinaryGreeting);
+    StatusBar.SilentPrint(ordinaryGreeting);
   }
 
 
@@ -47,7 +47,7 @@ public class Greeter : MonoBehaviour
   {
     var systemInfo = $"Device type: {SystemInfo.deviceType} | Device name: {SystemInfo.deviceName} | " +
       $"Device model: {SystemInfo.deviceModel}";
-    StatusBar.Print(systemInfo);
+    StatusBar.SilentPrint(systemInfo);
   }
 
 
@@ -64,6 +64,6 @@ public class Greeter : MonoBehaviour
 
     var url = GetUrl();
     var urlMessage = $"Current page URL: {url}";
-    StatusBar.Print(urlMessage);
+    StatusBar.SilentPrint(urlMessage);
   }
 }

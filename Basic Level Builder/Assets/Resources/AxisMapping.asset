@@ -1,0 +1,120 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 421ac4485a2df7d498a239b08a3b4e7a, type: 3}
+  m_Name: AxisMapping
+  m_EditorClassIdentifier: 
+  m_entries:
+  - m_axisName: Horizontal
+    m_buttons:
+    - Right
+    - D
+  - m_axisName: Vertical
+    m_buttons:
+    - Up
+    - W
+  - m_axisName: Jump
+    m_buttons:
+    - Space
+    - Z
+    - Joystick Button 3
+    - K
+    - W
+    - Up
+  - m_axisName: Mouse X
+    m_buttons: []
+  - m_axisName: Mouse Y
+    m_buttons: []
+  - m_axisName: Mouse ScrollWheel
+    m_buttons: []
+  - m_axisName: Redo
+    m_buttons:
+    - Y
+  - m_axisName: Undo
+    m_buttons:
+    - Z
+  - m_axisName: Submit
+    m_buttons:
+    - Enter
+    - Space
+  - m_axisName: Cancel
+    m_buttons:
+    - Escape
+    - Joystick Button 1
+  - m_axisName: PrimaryTile
+    m_buttons:
+    - Mouse 0
+  - m_axisName: SecondaryTile
+    m_buttons:
+    - Mouse 1
+  - m_axisName: ResetCamera
+    m_buttons:
+    - R
+  - m_axisName: Play
+    m_buttons:
+    - Enter
+    - Tab
+  - m_axisName: Select Brush Tool
+    m_buttons:
+    - 1
+    - B
+  - m_axisName: Select Box Tool
+    m_buttons:
+    - 2
+    - V
+  - m_axisName: Select Dropper Tool
+    m_buttons:
+    - 3
+    - I
+  - m_axisName: Select Selector Tool
+    m_buttons:
+    - 4
+    - M
+    - L
+  - m_axisName: Select Hand Tool
+    m_buttons:
+    - 5
+    - H
+  - m_axisName: Quit
+    m_buttons:
+    - Q
+  - m_axisName: Save
+    m_buttons:
+    - S
+  - m_axisName: Open Directory
+    m_buttons:
+    - F
+  - m_axisName: Select Path Tool
+    m_buttons:
+    - 6
+    - P
+  - m_axisName: Delete
+    m_buttons:
+    - Delete
+    - Backspace
+  - m_axisName: Ghost Mode
+    m_buttons:
+    - G
+  - m_axisName: Colorblind Mode
+    m_buttons:
+    - I
+  - m_axisName: Copy
+    m_buttons:
+    - C
+  - m_axisName: Cut
+    m_buttons:
+    - X
+  - m_axisName: Paste
+    m_buttons:
+    - V
+  - m_axisName: CreateNewLevel
+    m_buttons:
+    - N

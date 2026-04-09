@@ -210,6 +210,6 @@ public class BoxTool : BlbTool
     var diagonalString = diagonal.ToString("f2");
     var message = $"Box size: <b>{width}</b> wide x <b>{height}</b> high, " +
       $"<b>{diagonalString}</b> diagonal";
-    StatusBar.Print(message);
+    StatusBar.SilentPrint(message);
   }
 }

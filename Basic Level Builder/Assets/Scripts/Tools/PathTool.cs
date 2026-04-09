@@ -1,4 +1,14 @@
-﻿using System.Collections;
+﻿/***************************************************
+File:           PathTool.cs
+Authors:        ?
+Last Updated:   7/10/2025
+
+Description:
+  Script for path tool control.
+
+Copyright 2018-2025, DigiPen Institute of Technology
+***************************************************/
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -59,26 +69,30 @@ public class PathTool : BlbTool
       EnterIdle();
   }
 
-
-  private void Update()
+  public void Cancel()
   {
-    if (Input.GetButtonDown("Cancel") && m_State != State.Idle)
+    if (m_State != State.Idle)
     {
       EnterIdle();
     }
-    else if (Input.GetButtonDown("Submit") &&
-      (m_State == State.PlacingPathPoints || m_State == State.ReadyToModify))
+  }
+  public void Submit()
+  {
+    if (m_State == State.PlacingPathPoints || m_State == State.ReadyToModify)
     {
       AssignPathPoints();
       EnterIdle();
     }
-    else if (Input.GetButtonDown("Delete") && m_State == State.PlacingAnchorPoint)
+  }
+
+  public void Delete()
+  {
+    if (m_State == State.PlacingAnchorPoint)
     {
       DeletePath();
       EnterIdle();
     }
   }
-
 
   public override void LeftPointerDown(ToolEvent te)
   {
@@ -354,10 +368,10 @@ public class PathTool : BlbTool
     var message = "Move path points with the <b>left mouse button</b>, " +
       "or move the anchor point with the <b>right mouse button</b>. " +
       "Press <b>Space</b> to finish.";
-    StatusBar.Print(message);
+    StatusBar.SilentPrint(message);
   }
 
-  
+
   //void EnterModifyingPathPoint()
   //{
   //  m_State = State.ModifyingPathPoint;
@@ -455,9 +469,9 @@ public class PathTool : BlbTool
 
   void AddNewPathPoint(Vector2Int gridIndex)
   {
-    if(m_Path.Count == 0 && m_AnchorIndex == gridIndex)
+    if (m_Path.Count == 0 && m_AnchorIndex == gridIndex)
     {
-      StatusBar.Print("You cannot make the first point of a path the same as the Anchor point.");
+      StatusBar.Print("You cannot make the first point of a path the same as the anchor point.");
       return;
     }
 
@@ -652,17 +666,17 @@ public class PathTool : BlbTool
     var difference = m_PointerDragEndPosition - m_PointerDownPosition;
     var width = Mathf.Abs(difference.x) + 1;
     var height = Mathf.Abs(difference.y) + 1;
-    var diagonal = Mathf.Sqrt(width * width + height * height);
+    var diagonal = Mathf.Sqrt((width * width) + (height * height));
     var diagonalString = diagonal.ToString("f2");
     var message = $"Selection size: <b>{width}</b> wide x <b>{height}</b> high, " +
       $"<b>{diagonalString}</b> diagonal";
-    StatusBar.Print(message);
+    StatusBar.SilentPrint(message);
   }
 
 
   void PrintAnchorPointMessage()
   {
-    StatusBar.Print("Next, <b>left-click</b> to place the path's <b>anchor point</b>, or press <b>Delete</b> to delete the selected path");
+    StatusBar.SilentPrint("Next, <b>left-click</b> to place the path's <b>anchor point</b>, or press <b>Delete</b> to delete the selected path");
   }
 
 
@@ -671,13 +685,13 @@ public class PathTool : BlbTool
     var x = m_AnchorIndex.x;
     var y = m_AnchorIndex.y;
     var message = $"Anchor point at <color=#FFFF00><b>({x}, {y})</b></color>";
-    StatusBar.Print(message);
+    StatusBar.SilentPrint(message);
   }
 
 
   void PrintPathPointMessage()
   {
-    StatusBar.Print("Next, <b>left-click</b> to place <b>path points</b> relative to the anchor point. Press <b>Space</b> to finish");
+    StatusBar.SilentPrint("Next, <b>left-click</b> to place <b>path points</b> relative to the anchor point. Press <b>Space</b> to finish");
   }
 
 
@@ -689,15 +703,15 @@ public class PathTool : BlbTool
 
     if (count == 1)
     {
-      message += $"{m_Path[0].ToString()}</b></color>";
+      message += $"{m_Path[0]}</b></color>";
     }
     else if (count <= 6)
     {
-      message += $"{m_Path[0].ToString()}</b></color>";
+      message += $"{m_Path[0]}</b></color>";
 
       for (var i = 1; i < count; ++i)
       {
-        message += $" > <color=#FFFF00><b>{m_Path[i].ToString()}</b></color>";
+        message += $" > <color=#FFFF00><b>{m_Path[i]}</b></color>";
       }
     }
     else
@@ -719,7 +733,7 @@ public class PathTool : BlbTool
 
     message += " | Press <b>Space</b> to finish";
 
-    StatusBar.Print(message);
+    StatusBar.SilentPrint(message);
   }
 
 

@@ -472,6 +472,54 @@ public abstract class ActionFloat : Action
   protected virtual void Set(float value) { }
 }
 
+public abstract class ActionQuaternion : Action
+{
+  public Quaternion Start;
+  public Quaternion End;
+  public Ease Easer = new();
+
+  public ActionQuaternion(GameObject go, Quaternion end, float duration, Ease ease = null)
+  {
+    Name = "Float";
+    GO = go;
+    End = end;
+    Remaining = Duration = duration;
+
+    if (ease != null)
+      Easer = ease;
+  }
+
+  public override ActionState Update(float dt)
+  {
+    if (GO == null)
+      return ActionState.Completed;
+
+    if (!Started)
+    {
+      Initialize();
+      Started = true;
+    }
+
+    Remaining -= dt;
+    var t = Mathf.Clamp01(Completion);
+
+    if (t == 0)
+      Set(Start);
+    else if (t == 1)
+      Set(End);
+    else
+      Set(Easer.Go(Start, End, t));
+
+    if (Remaining > 0)
+      return ActionState.Running;
+    else
+      return ActionState.Completed;
+  }
+
+  protected virtual void Initialize() { }
+  protected virtual void Set(Quaternion value) { }
+}
+
 public abstract class ActionVector2 : Action
 {
   public Vector2 Start;
@@ -692,43 +740,37 @@ public class ActionMoveRTY : ActionFloat
   }
 }
 
-public class ActionRotate2D : ActionFloat
+public class ActionRotate2D : ActionQuaternion
 {
   private Transform Tf;
 
   public ActionRotate2D(GameObject go, float end, float duration, Ease ease = null)
-    : base(go, end, duration, ease)
+    : base(go, Quaternion.Euler(0, 0, end), duration, ease)
   {
     Name = "Rotate2D";
     Tf = go?.transform;
   }
 
-  protected override void Initialize() { Start = Tf.localEulerAngles.z; }
-  protected override void Set(float value)
-  {
-    var eulerAngles = Tf.localEulerAngles;
-    eulerAngles.z = value;
-    Tf.localEulerAngles = eulerAngles;
-  }
+  protected override void Initialize() { Start = Tf.localRotation; }
+  protected override void Set(Quaternion value)
+  { Tf.localRotation = value; }
 }
 
-public class ActionRotate2DRT : ActionFloat
+public class ActionRotate2DRT : ActionQuaternion
 {
   private RectTransform RT;
 
   public ActionRotate2DRT(GameObject go, float end, float duration, Ease ease = null)
-    : base(go, end, duration, ease)
+    : base(go, Quaternion.Euler(0,0,end), duration, ease)
   {
     Name = "Rotate2DRT";
     RT = go?.GetComponent<RectTransform>();
   }
 
-  protected override void Initialize() { Start = RT.eulerAngles.z; }
-  protected override void Set(float value)
+  protected override void Initialize() { Start = RT.rotation; }
+  protected override void Set(Quaternion value)
   {
-    var eulerAngles = RT.eulerAngles;
-    eulerAngles.z = value;
-    RT.eulerAngles = eulerAngles;
+    RT.rotation = value;
   }
 }
 

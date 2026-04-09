@@ -38,7 +38,8 @@ public class TileDirection : MonoBehaviour
   void SetHelper(Direction direction, bool initialize = false)
   {
     m_Direction = direction;
-    m_Element.m_Direction = direction;
+    if (m_Element != null)
+      m_Element.m_Direction = direction;
 
     DirectionSet?.Invoke(direction);
 

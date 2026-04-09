@@ -37,7 +37,7 @@ public class SelectorTool : BlbTool
   bool m_bCanPaste = false;
 
   //List of tile elements to cache.
-  List<TileGrid.Element> m_ClipboardElements = new List<TileGrid.Element>();
+  List<TileGrid.Element> m_ClipboardElements = new();
 
   // THE CURSOR!!!!
   Transform m_Cursor;
@@ -121,16 +121,12 @@ public class SelectorTool : BlbTool
 
     if (delta.x < 0)
     {
-      var temp = min.x;
-      min.x = max.x;
-      max.x = temp;
+      (max.x, min.x) = (min.x, max.x);
     }
 
     if (delta.y < 0)
     {
-      var temp = min.y;
-      min.y = max.y;
-      max.y = temp;
+      (max.y, min.y) = (min.y, max.y);
     }
 
     var minBounds = new Vector3(min.x, min.y);
@@ -150,40 +146,19 @@ public class SelectorTool : BlbTool
     base.Deactivate();
   }
 
-
-  /**
-  * FUNCTION NAME: Update
-  * DESCRIPTION  : Gets keyboard input for copy/cut/paste.
-  * INPUTS       : None
-  * OUTPUTS      : None
-  **/
-  private void Update()
+  public void Cut()
   {
-    if (!HotkeyMaster.s_HotkeysEnabled || GlobalData.IsInPlayMode())
-      return;
+    CreateClipboard(cutting: true);
+  }
 
-    if (!m_ToolsPalette.IsSelectorActive())
-    {
-      if (Input.GetButtonDown(m_KeyboardShortcut))
-        RequestActivate();
+  public void Copy()
+  {
+    CreateClipboard(cutting: false);
+  }
 
-      return;
-    }
-
-    var modifierKeyHeld = HotkeyMaster.IsPrimaryModifierHeld();
-
-    //Copy.
-    if (modifierKeyHeld && Input.GetKeyDown(KeyCode.C))
-      CreateClipboard(cutting: false);
-
-    //Cut.
-    else if (modifierKeyHeld && Input.GetKeyDown(KeyCode.X))
-    {
-      CreateClipboard(cutting: true);
-    }
-
-    //Paste.
-    else if (modifierKeyHeld && Input.GetKeyDown(KeyCode.V) && m_bCanPaste)
+  public void Paste()
+  {
+    if (m_bCanPaste)
       CreateSavedTiles();
   }
 
@@ -301,11 +276,11 @@ public class SelectorTool : BlbTool
     var difference = m_vecPointerDragEndPosition - m_vecPointerDownPosition;
     var width = Mathf.Abs(difference.x) + 1;
     var height = Mathf.Abs(difference.y) + 1;
-    var diagonal = Mathf.Sqrt(width * width + height * height);
+    var diagonal = Mathf.Sqrt((width * width) + (height * height));
     var diagonalString = diagonal.ToString("f2");
     var message = $"Selection size: <b>{width}</b> wide x <b>{height}</b> high, " +
       $"<b>{diagonalString}</b> diagonal";
-    StatusBar.Print(message);
+    StatusBar.SilentPrint(message);
   }
 
 

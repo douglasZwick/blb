@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class OperationSystem : MonoBehaviour
@@ -8,21 +7,27 @@ public class OperationSystem : MonoBehaviour
   static bool s_UseAutosaving;
   static int s_AutosaveInterval;
   static int s_OperationCounter = 0;
-  static List<Operation> s_Operations = new List<Operation>();
+  static List<Operation> s_Operations = new();
   static int s_StackIndex = 0;  // distance from the right side of the stack
 
   public static Operation s_CurrentOperation;
   public static bool s_Frozen { get; private set; } = false;
   public static Operation s_MostRecentlyPerformedOperation
   {
-    get { return s_Operations[s_Operations.Count - 1]; }
+    get { return s_Operations[^1]; }
   }
 
-  public FileSystem m_FileSystem;
+  public static int s_OperationCounterPublic
+  {
+    get { return s_OperationCounter; }
+  }
+
   public TileGrid m_TileGrid;
   public int m_UndoDepth = 64;
   public bool m_UseAutosaving = true;
-  public int m_AutosaveInterval = 4;
+
+  [SerializeField]
+  private int m_AutosaveInterval = 10;
 
 
   private void Awake()
@@ -43,32 +48,25 @@ public class OperationSystem : MonoBehaviour
     s_AutosaveInterval = m_AutosaveInterval;
   }
 
-
-  private void Update()
+  public static void ClearOperations()
   {
-    if (GlobalData.IsInPlayMode() || !HotkeyMaster.s_HotkeysEnabled)
-      return;
+    s_Operations.Clear();
 
-    var modifierKeyHeld = HotkeyMaster.IsPrimaryModifierHeld();
-    var undoKeyDown = Input.GetKeyDown(KeyCode.Z);
-    var redoKeyDown = Input.GetKeyDown(KeyCode.Y);
-
-    if (modifierKeyHeld)
-    {
-      if (undoKeyDown)
-        AttemptUndo();
-      else if (redoKeyDown)
-        AttemptRedo();
-    }
+    // reset the index
+    s_StackIndex = 0;
   }
 
+  public static void ResetOperationCounter()
+  {
+    s_OperationCounter = 0;
+  }
 
   public void SetAutosaving(bool value)
   {
     s_UseAutosaving = m_UseAutosaving = value;
 
     var enabledString = value ? "enabled" : "disabled";
-    StatusBar.Print($"Autosaving {enabledString}");
+    StatusBar.SilentPrint($"Autosaving {enabledString}");
   }
 
 
@@ -90,7 +88,7 @@ public class OperationSystem : MonoBehaviour
 
     if (s_UseAutosaving && s_OperationCounter >= s_AutosaveInterval)
     {
-      Instance.m_FileSystem.Autosave();
+      FileSystem.Instance.Autosave();
       s_OperationCounter = 0;
     }
   }
@@ -163,7 +161,7 @@ public class OperationSystem : MonoBehaviour
     if (s_StackIndex > s_Operations.Count - 1)
     {
       // nothing to undo
-      StatusBar.Print("Nothing to undo.", highPriority: false, duration: 5);
+      StatusBar.SilentPrint("Nothing to undo.", highPriority: false, duration: 5);
     }
     else
     {
@@ -177,7 +175,7 @@ public class OperationSystem : MonoBehaviour
     var indexToUndo = (s_Operations.Count - s_StackIndex) - 1;
     var operationToUndo = s_Operations[indexToUndo];
 
-    StatusBar.Print("Undoing " + operationToUndo.m_Name + "...");
+    StatusBar.SilentPrint("Undoing " + operationToUndo.m_Name + "...");
 
     foreach (var delta in operationToUndo.m_Deltas)
     {
@@ -201,7 +199,7 @@ public class OperationSystem : MonoBehaviour
     if (s_StackIndex <= 0)
     {
       // nothing to redo
-      StatusBar.Print("Nothing to redo.", highPriority: false, duration: 5);
+      StatusBar.SilentPrint("Nothing to redo.", highPriority: false, duration: 5);
     }
     else
     {
@@ -215,7 +213,7 @@ public class OperationSystem : MonoBehaviour
     var indexToRedo = s_Operations.Count - s_StackIndex;
     var operationToRedo = s_Operations[indexToRedo];
 
-    StatusBar.Print("Redoing " + operationToRedo.m_Name + "...");
+    StatusBar.SilentPrint("Redoing " + operationToRedo.m_Name + "...");
 
     foreach (var delta in operationToRedo.m_Deltas)
     {

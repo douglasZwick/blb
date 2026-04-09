@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Ease
 {
@@ -42,6 +40,11 @@ public class Ease
   public Color Go(Color start, Color end, float t)
   {
     return Color.LerpUnclamped(start, end, EasingFunction(t, Parameter));
+  }
+
+  public Quaternion Go(Quaternion start, Quaternion end, float t)
+  {
+    return Quaternion.LerpUnclamped(start, end, EasingFunction(t, Parameter));
   }
 
   public static float Linear(float t, float parameter)

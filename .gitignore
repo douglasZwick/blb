@@ -8,6 +8,14 @@
 [Bb]uild/
 [Bb]uilds/
 [Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# MemoryCaptures can get excessive in size.
+# They also could contain extremely sensitive data
+[Mm]emoryCaptures/
+
+# Recordings can get excessive in size
+[Rr]ecordings/
 
 # Never ignore Asset meta data
 ![Aa]ssets/**/*.meta
@@ -23,7 +31,7 @@
 # Same but for VS Code
 .vscode/
 # I guess this should be in here too but idk for sure
-.vsconfig/
+*.vsconfig
 
 # Gradle cache directory
 .gradle/
@@ -58,15 +66,20 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+*.unitypackage
+*.app
 
 # Crashlytics generated file
 crashlytics-build.properties
 
-# I figure User Settings should be ignored too but idk
-UserSettings/
+# Packed Addressables
+[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+
+# Temporary auto-generated Android Assets
+[Aa]ssets/[Ss]treamingAssets/aa.meta
+[Aa]ssets/[Ss]treamingAssets/aa/*
 
 # FamiTracker backups
 *.ftm.bak
 *.0cc.bak
 
-# End of https://www.gitignore.io/api/unity
