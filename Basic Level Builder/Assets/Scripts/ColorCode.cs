@@ -82,7 +82,8 @@ public class ColorCode : MonoBehaviour
   public void Set(TileColor _tileColor)
   {
     m_TileColor = _tileColor;
-    m_Element.m_TileColor = _tileColor;
+    if (m_Element != null)
+      m_Element.m_TileColor = _tileColor;
 
     ColorSet?.Invoke(_tileColor);
 
