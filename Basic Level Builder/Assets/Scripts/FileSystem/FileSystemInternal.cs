@@ -33,7 +33,6 @@ public class FileSystemInternal : MonoBehaviour
 
   static Version s_EditorVersion; // major, minor, build, and revision number
 
-  public string m_DefaultDirectoryName = "Default Project";
   public TileGrid m_TileGrid;
   public FileDirUtilities m_FileDirUtilities;
 
@@ -183,7 +182,7 @@ public class FileSystemInternal : MonoBehaviour
     s_EditorVersion = new(Application.version);
     m_ModalDialogMaster = FindObjectOfType<ModalDialogMaster>();
 
-    m_FileDirUtilities.SetDirectoryName(m_DefaultDirectoryName);
+    m_FileDirUtilities.InitSavesDirectory();
 
     // Thumbnail generation init
     var tileHeight = (int)m_ThumbnailTileAtlas.rect.height;
@@ -246,7 +245,7 @@ public class FileSystemInternal : MonoBehaviour
       }
 
       // Update file list incase files were added or removed
-      m_FileDirUtilities.SetDirectoryName(m_DefaultDirectoryName);
+      m_FileDirUtilities.InitSavesDirectory();
     }
   }
 
@@ -1250,6 +1249,98 @@ public class FileSystemInternal : MonoBehaviour
     }
 
     m_FileDirUtilities.UpdateFilesList();
+  }
+
+  // Returns the file path to the new converted file
+  protected void ConvertV0FileToV1FileEx(string filePathToConvert)
+  {
+    try
+    {
+      string[] jsonStrings = File.ReadAllLines(filePathToConvert);
+
+      int failedLines = TryCreateDictonaryFromJsonStrings(jsonStrings, out Dictionary<Vector2Int, TileGrid.Element> gridDictionary);
+
+      if (failedLines <= -1)
+      {
+        StatusBar.Print($"This level seems to be invalid and can not be converted.");
+      }
+      else if (failedLines > 0)
+      {
+        StatusBar.Print($"File converted with {failedLines} read failures");
+      }
+
+      bool autosave = false;
+      bool isSaveAs = true;
+      bool updateCameraPosButtonPressed = false;
+      bool shouldPrintElapsedTime = true;
+      string newFilePath = Path.Combine(m_FileDirUtilities.GetCurrentDirectoryPath(), Path.GetFileName(filePathToConvert));
+      StartSavingThread(newFilePath, gridDictionary, autosave, isSaveAs, updateCameraPosButtonPressed, shouldPrintElapsedTime);
+    }
+    catch (Exception e)
+    {
+      Debug.LogError($"Error while loading. {e.Message} ({e.GetType()})");
+    }
+  }
+
+  // Creates a grid of tiles from JSON strings from BLB V0
+  // Returns the number of failures. If there were no sucesses, returns -1.
+  private int TryCreateDictonaryFromJsonStrings(string[] jsonStrings, out Dictionary<Vector2Int, TileGrid.Element> gridDictionary)
+  {
+    int successes = 0;
+    int failures = 0;
+
+    bool startTileFound = false;
+    Vector2 camPos = Vector2.zero;
+    Vector2 minBounds = Vector2.zero;
+    Vector2 maxBounds = Vector2.zero;
+
+    gridDictionary = new();
+    foreach (var jsonString in jsonStrings)
+    {
+      try
+      {
+        TileGrid.Element element = JsonUtility.FromJson<TileGrid.Element>(jsonString);
+        Vector2Int index = element.m_GridIndex;
+        gridDictionary.Add(index, element);
+
+        if (!startTileFound)
+        {
+          if (element.m_Type == TileType.START)
+          {
+            camPos = index;
+            startTileFound = true;
+          }
+
+          if (index.x < minBounds.x)
+            minBounds.x = index.x;
+          if (index.x > maxBounds.x)
+            maxBounds.x = index.x;
+          if (index.y < minBounds.y)
+            minBounds.y = index.y;
+          if (index.y > maxBounds.y)
+            maxBounds.y = index.y;
+        }
+
+        ++successes;
+      }
+      catch (System.ArgumentException e)
+      {
+        Debug.LogError($"Failed to parse the line \"{jsonString}\" " +
+          $"as a grid element. {e.Message} ({e.GetType()})");
+
+        ++failures;
+      }
+    }
+
+    if (successes > 0)
+    {
+      if (!startTileFound)
+        camPos = maxBounds - minBounds;
+
+      Camera.main.transform.position = new Vector3(camPos.x, camPos.y, Camera.main.transform.position.z);
+      return failures;
+    }
+    return -1;
   }
 
   protected void UpdateLoadedVersionIfDeleted(FileInfo fileInfo, LevelVersion version)

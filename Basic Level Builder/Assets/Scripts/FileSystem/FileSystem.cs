@@ -46,6 +46,23 @@ public class FileSystem : FileSystemInternal
     return m_MountedFileInfo.m_SaveFilePath;
   }
 
+  // Returns the files version, or 0 value if unknown
+  static public Version GetFileVersion(string fullFilePath)
+  {
+    // TODO
+    // if can't get header
+    //    return new version
+    // return new Version(header.m_BlbVersion);
+    return new Version();
+  }
+
+  // Converts a file and saves it to the default saves directory
+  // Will overwite file if it is in the same directory
+  public void ConvertV0FileToV1File(string filePathToConvert)
+  {
+    ConvertV0FileToV1FileEx(filePathToConvert);
+  }
+
   /// <summary>
   /// Performs a manual save of the current level.
   /// </summary>
