@@ -331,7 +331,7 @@ public class FileDirUtilities : MonoBehaviour
       return true;
   }
 
-  private string GetDocumentsPath()
+  static public string GetDocumentsPath()
   {
     try
     {

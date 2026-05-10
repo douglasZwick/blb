@@ -42,17 +42,20 @@ public class FileBackwardsConversion : MonoBehaviour
   public void MoveAndConvertOldFiles()
   {
     List<string> movedFiles = MoveOldFiles(FindAllOldFiles());
+    List<string> corruptedFiles = new();
 
     foreach (string filePath in movedFiles)
     {
       if (FileSystem.GetFileVersion(filePath) < s_LatestFileVersionPerConversion[0])
       {
-        FileSystem.Instance.ConvertV0FileToV1File(filePath);
+        if (FileSystem.Instance.TryConvertV0FileToV1File(filePath) == false)
+          corruptedFiles.Add(filePath);
       }
     }
 
     // TODO create ui to show all converted files
     // ALSO TEST
+    // TODO add coda to see if use wants to delete corrupted files
   }
 
   private List<string> MoveOldFiles(IEnumerable<string> oldFiles)
@@ -83,6 +86,7 @@ public class FileBackwardsConversion : MonoBehaviour
     return oldFiles;
   }
 
+  // Gets old files or files that can't be read
   private static IEnumerable<string> GetOldFilesFromDirectory(string directoryPath)
   {
     return Directory.GetFiles(directoryPath)

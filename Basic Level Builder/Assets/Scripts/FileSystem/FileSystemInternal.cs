@@ -270,7 +270,7 @@ public class FileSystemInternal : MonoBehaviour
   {
     if (GlobalData.IsInPlayMode())
       GlobalData.DisablePlayMode();
-    
+
     // If the user canceled when asked to save, stop the quit
     if (await AskToSaveIfChanges() == ModalDialog.DialogResult.Cancel)
       return;
@@ -1178,7 +1178,7 @@ public class FileSystemInternal : MonoBehaviour
     m_TileGrid.LoadFromDictonary(GetGridDictionaryFromFileData(m_MountedFileInfo, version));
   }
 
-  private void ReadBinaryStream(BinaryReader reader, ref FileInfo fileInfo)
+  static private void ReadBinaryStream(BinaryReader reader, ref FileInfo fileInfo)
   {
     // Write file version first so we can later check for future file changes and adapt
     fileInfo.m_FileHeader.m_BlbVersion = new(reader.ReadString());
@@ -1208,7 +1208,7 @@ public class FileSystemInternal : MonoBehaviour
     fileInfo.m_FileData.m_LastId = id + (uint)fileInfo.m_FileData.m_AutoSaves.Count - 1;
   }
 
-  private LevelData ReadLevelDataBinarySteam(BinaryReader reader)
+  static private LevelData ReadLevelDataBinarySteam(BinaryReader reader)
   {
     LevelData levelData = new()
     {
@@ -1251,8 +1251,27 @@ public class FileSystemInternal : MonoBehaviour
     m_FileDirUtilities.UpdateFilesList();
   }
 
-  // Returns the file path to the new converted file
-  protected void ConvertV0FileToV1FileEx(string filePathToConvert)
+  // Trys to get the file header from a file, returns false if an error occurs
+  static protected bool TryGetFileHeaderFromFilePath(string fullFilePath, out FileHeader header)
+  {
+    using FileStream stream = new(fullFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+    using BinaryReader reader = new(stream);
+    CreateFileInfo(out FileInfo mountedFileInfo);
+
+    try
+    {
+      ReadBinaryStream(reader, ref mountedFileInfo);
+      header = mountedFileInfo.m_FileHeader;
+      return true;
+    }
+    catch (Exception) { }
+
+    header = mountedFileInfo.m_FileHeader;
+    return false;
+  }
+
+  // Returns true if the conversion was sucessful
+  protected bool TryConvertV0FileToV1FileEx(string filePathToConvert)
   {
     try
     {
@@ -1279,7 +1298,9 @@ public class FileSystemInternal : MonoBehaviour
     catch (Exception e)
     {
       Debug.LogError($"Error while loading. {e.Message} ({e.GetType()})");
+      return false;
     }
+    return true;
   }
 
   // Creates a grid of tiles from JSON strings from BLB V0
