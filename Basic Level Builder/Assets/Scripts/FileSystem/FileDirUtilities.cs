@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
@@ -20,6 +19,8 @@ public class FileDirUtilities : MonoBehaviour
   readonly static public string s_DefaultDirectoryName = "Saves";
   readonly static public string s_FilenameExtension = ".blb";
   readonly static public string s_TempFilePrefix = "backup_file_";
+  // The oldest file version the current save file format can support (read/write)
+  readonly static public Version s_OldestSupportedSaveFileVersion = new(1,0,0,0);
 
   public GameObject m_FileItemPrefab;
   public UiListView m_SaveList;
@@ -61,7 +62,7 @@ public class FileDirUtilities : MonoBehaviour
 
     UpdateFilesList();
   }
-
+  
   public void UpdateFilesList()
   {
     if (GlobalData.AreEffectsUnderway())
@@ -275,6 +276,12 @@ public class FileDirUtilities : MonoBehaviour
 
   static public bool IsSupportedVersion(string fullFilePath)
   {
+    return GetFileVersion(fullFilePath) > s_OldestSupportedSaveFileVersion;
+  }
+
+  // Returns version 0 if not found
+  static public Version GetFileVersion(string fullFilePath)
+  {
     Version fileVersion;
     try
     {
@@ -286,10 +293,10 @@ public class FileDirUtilities : MonoBehaviour
     {
       string errorStr = $"Error checking save file version: {Path.GetFileName(fullFilePath)}. {e.Message} ({e.GetType()})";
       Debug.Log(errorStr);
-      return false;
+      fileVersion = new(0,0);
     }
 
-    return fileVersion > new Version(1,2);
+    return fileVersion;
   }
 
   // Skips rename if the file already exists

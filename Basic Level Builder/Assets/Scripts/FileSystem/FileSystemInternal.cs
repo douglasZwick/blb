@@ -189,6 +189,7 @@ public class FileSystemInternal : MonoBehaviour
     m_ThumbnailTileSize = new Vector2Int(tileHeight, tileHeight);
     GenerateThumbnailTiles();
 
+    FileBackwardsConversion.ConvertAndMoveAllFiles(m_FileDirUtilities.GetCurrentDirectoryPath());
     CheckForTempFiles();
   }
 
@@ -1178,7 +1179,7 @@ public class FileSystemInternal : MonoBehaviour
     m_TileGrid.LoadFromDictonary(GetGridDictionaryFromFileData(m_MountedFileInfo, version));
   }
 
-  static private void ReadBinaryStream(BinaryReader reader, ref FileInfo fileInfo)
+  private void ReadBinaryStream(BinaryReader reader, ref FileInfo fileInfo)
   {
     // Write file version first so we can later check for future file changes and adapt
     fileInfo.m_FileHeader.m_BlbVersion = new(reader.ReadString());
@@ -1208,7 +1209,7 @@ public class FileSystemInternal : MonoBehaviour
     fileInfo.m_FileData.m_LastId = id + (uint)fileInfo.m_FileData.m_AutoSaves.Count - 1;
   }
 
-  static private LevelData ReadLevelDataBinarySteam(BinaryReader reader)
+  private LevelData ReadLevelDataBinarySteam(BinaryReader reader)
   {
     LevelData levelData = new()
     {
@@ -1251,25 +1252,6 @@ public class FileSystemInternal : MonoBehaviour
     m_FileDirUtilities.UpdateFilesList();
   }
 
-  // Trys to get the file header from a file, returns false if an error occurs
-  static protected bool TryGetFileHeaderFromFilePath(string fullFilePath, out FileHeader header)
-  {
-    using FileStream stream = new(fullFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-    using BinaryReader reader = new(stream);
-    CreateFileInfo(out FileInfo mountedFileInfo);
-
-    try
-    {
-      ReadBinaryStream(reader, ref mountedFileInfo);
-      header = mountedFileInfo.m_FileHeader;
-      return true;
-    }
-    catch (Exception) { }
-
-    header = mountedFileInfo.m_FileHeader;
-    return false;
-  }
-
   // Returns true if the conversion was sucessful
   protected bool TryConvertV0FileToV1FileEx(string filePathToConvert)
   {
@@ -1293,6 +1275,7 @@ public class FileSystemInternal : MonoBehaviour
       bool updateCameraPosButtonPressed = false;
       bool shouldPrintElapsedTime = true;
       string newFilePath = Path.Combine(m_FileDirUtilities.GetCurrentDirectoryPath(), Path.GetFileName(filePathToConvert));
+      CreateFileInfo(out m_MountedFileInfo, newFilePath);
       StartSavingThread(newFilePath, gridDictionary, autosave, isSaveAs, updateCameraPosButtonPressed, shouldPrintElapsedTime);
     }
     catch (Exception e)

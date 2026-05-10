@@ -9,15 +9,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEngine;
 
-public class FileBackwardsConversion : MonoBehaviour
-{
+public class FileBackwardsConversion
+{  
   readonly static public string s_Version0DirectoryName = "Default Project";
   readonly static public string s_OldFileDirectoryName = "Old Saves";
-
-  // The oldest file version the current save file format can support (read/write)
-  readonly static public Version s_OldestSupportedSaveFileVersion = new(1, 0, 0, 0);
 
   // Latest version handled by each conversion step
   readonly static public Version[] s_LatestFileVersionPerConversion =
@@ -25,28 +21,44 @@ public class FileBackwardsConversion : MonoBehaviour
     new(1,0,0,0),
   };
 
-  protected string m_OldFileDirectoryPath;
-
-  // Start is called before the first frame update
-  void Start()
+  static public void ConvertAndMoveAllFiles(string currentDirectoryPath)
   {
-    InitializeOldFileDirectoryPath();
+    MoveV0FilesToNewDirectory(currentDirectoryPath);
+    MoveAndConvertOldFiles(currentDirectoryPath);
   }
 
-  private void InitializeOldFileDirectoryPath()
+  static private string GetOldFileDirectoryPath()
   {
     string documentsPath = FileDirUtilities.GetDocumentsPath();
-    m_OldFileDirectoryPath = Path.Combine(documentsPath, FileDirUtilities.s_RootDirectoryName, s_OldFileDirectoryName);
+    return Path.Combine(documentsPath, FileDirUtilities.s_RootDirectoryName, s_OldFileDirectoryName);
   }
 
-  public void MoveAndConvertOldFiles()
+  // Moves all files from "Default Project" to "Saves" and removes the old directory
+  static private void MoveV0FilesToNewDirectory(string currentDirectoryPath)
   {
-    List<string> movedFiles = MoveOldFiles(FindAllOldFiles());
+    string documentsPath = FileDirUtilities.GetDocumentsPath();
+    string rootPath = Path.Combine(documentsPath, FileDirUtilities.s_RootDirectoryName);
+    string v0FilePath = Path.Combine(rootPath, s_Version0DirectoryName);
+    if (!Directory.Exists(v0FilePath))
+      return;
+
+    foreach (string file in Directory.GetFiles(v0FilePath))
+    {
+      string newPath = Path.Combine(currentDirectoryPath, Path.GetFileName(file));
+      File.Move(file, newPath);
+    }
+
+    Directory.Delete(v0FilePath);
+  }
+
+  static private void MoveAndConvertOldFiles(string currentDirectoryPath)
+  {
+    List<string> movedFiles = MoveInvalidFiles(FindAllInvalidFiles(currentDirectoryPath));
     List<string> corruptedFiles = new();
 
     foreach (string filePath in movedFiles)
     {
-      if (FileSystem.GetFileVersion(filePath) < s_LatestFileVersionPerConversion[0])
+      if (FileDirUtilities.GetFileVersion(filePath) < s_LatestFileVersionPerConversion[0])
       {
         if (FileSystem.Instance.TryConvertV0FileToV1File(filePath) == false)
           corruptedFiles.Add(filePath);
@@ -58,13 +70,20 @@ public class FileBackwardsConversion : MonoBehaviour
     // TODO add coda to see if use wants to delete corrupted files
   }
 
-  private List<string> MoveOldFiles(IEnumerable<string> oldFiles)
+  static private List<string> MoveInvalidFiles(IEnumerable<string> oldFiles)
   {
     var movedFilePaths = new List<string>();
+    
+    if (oldFiles.Count() <= 0)
+      return movedFilePaths;
+    
+    string oldFileDirectoryPath = GetOldFileDirectoryPath();
+    if (!Directory.Exists(oldFileDirectoryPath))
+      Directory.CreateDirectory(oldFileDirectoryPath);
 
     foreach (string file in oldFiles)
     {
-      string newPath = Path.Combine(m_OldFileDirectoryPath, Path.GetFileName(file));
+      string newPath = Path.Combine(oldFileDirectoryPath, Path.GetFileName(file));
       File.Move(file, newPath);
       movedFilePaths.Add(newPath);
     }
@@ -72,24 +91,15 @@ public class FileBackwardsConversion : MonoBehaviour
     return movedFilePaths;
   }
 
-  private List<string> FindAllOldFiles()
+  static private List<string> FindAllInvalidFiles(string currentDirectoryPath)
   {
-    string documentsPath = FileDirUtilities.GetDocumentsPath();
-    string rootPath = Path.Combine(documentsPath, FileDirUtilities.s_RootDirectoryName);
-
-    var oldFiles = new List<string>();
-
-    oldFiles.AddRange(GetOldFilesFromDirectory(Path.Combine(rootPath, s_Version0DirectoryName)));
-
-    oldFiles.AddRange(GetOldFilesFromDirectory(Path.Combine(rootPath, FileDirUtilities.s_DefaultDirectoryName)));
-
-    return oldFiles;
+    return new List<string>(GetInvalidFilesFromDirectory(currentDirectoryPath));
   }
 
   // Gets old files or files that can't be read
-  private static IEnumerable<string> GetOldFilesFromDirectory(string directoryPath)
+  private static IEnumerable<string> GetInvalidFilesFromDirectory(string directoryPath)
   {
     return Directory.GetFiles(directoryPath)
-      .Where(path => FileSystem.GetFileVersion(path) < s_OldestSupportedSaveFileVersion);
+      .Where(path => FileDirUtilities.IsValidExtension(path) && (FileDirUtilities.GetFileVersion(path) < FileDirUtilities.s_OldestSupportedSaveFileVersion));
   }
 }
