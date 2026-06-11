@@ -19,8 +19,6 @@ public class FileDirUtilities : MonoBehaviour
   readonly static public string s_DefaultDirectoryName = "Levels";
   readonly static public string s_FilenameExtension = ".blb";
   readonly static public string s_TempFilePrefix = "backup_file_";
-  // The oldest file version the current save file format can support (read/write)
-  readonly static public Version s_OldestSupportedSaveFileVersion = new(1,2,1,0);
 
   public GameObject m_FileItemPrefab;
   public UiListView m_SaveList;
@@ -276,7 +274,7 @@ public class FileDirUtilities : MonoBehaviour
 
   static public bool IsSupportedVersion(string fullFilePath)
   {
-    return GetFileVersion(fullFilePath) > s_OldestSupportedSaveFileVersion;
+    return GetFileVersion(fullFilePath) > FileBackwardsConversion.s_LatestFileVersionPerConversion[^1];
   }
 
   // Returns version 0 if not found

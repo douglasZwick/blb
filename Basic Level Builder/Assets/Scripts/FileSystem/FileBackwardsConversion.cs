@@ -105,6 +105,6 @@ public class FileBackwardsConversion
   private static IEnumerable<string> GetInvalidFilesFromDirectory(string directoryPath)
   {
     return Directory.GetFiles(directoryPath)
-      .Where(path => FileDirUtilities.IsValidExtension(path) && (FileDirUtilities.GetFileVersion(path) < FileDirUtilities.s_OldestSupportedSaveFileVersion));
+      .Where(path => FileDirUtilities.IsValidExtension(path) && (FileDirUtilities.GetFileVersion(path) < s_LatestFileVersionPerConversion[^1]));
   }
 }
