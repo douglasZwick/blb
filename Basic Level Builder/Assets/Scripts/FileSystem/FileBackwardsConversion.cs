@@ -18,7 +18,8 @@ public class FileBackwardsConversion
   // Latest version handled by each conversion step
   readonly static public Version[] s_LatestFileVersionPerConversion =
   {
-    new(1,0,0,0),
+    new(1,0,0,0), // Ignore versions between 1.0.0.0 and 1.2.1.0 as they were alpha builds with diffrent save files that we never released
+    new(1,2,1,0),
   };
 
   static public void ConvertAndMoveAllFiles(string currentDirectoryPath)
@@ -58,11 +59,15 @@ public class FileBackwardsConversion
 
     foreach (string filePath in movedFiles)
     {
-      if (FileDirUtilities.GetFileVersion(filePath) < s_LatestFileVersionPerConversion[0])
+      Version fileVersion = FileDirUtilities.GetFileVersion(filePath);
+      if (fileVersion < s_LatestFileVersionPerConversion[0])
       {
         if (FileSystem.Instance.TryConvertV0FileToV1File(filePath) == false)
           corruptedFiles.Add(filePath);
       }
+      // Explicity ignore the alpha versions that we don't support
+      else if (fileVersion < s_LatestFileVersionPerConversion[1])
+        continue;
     }
 
     // TODO create ui to show all converted files
@@ -70,18 +75,18 @@ public class FileBackwardsConversion
     // TODO add coda to see if use wants to delete corrupted files
   }
 
-  static private List<string> MoveInvalidFiles(IEnumerable<string> oldFiles)
+  static private List<string> MoveInvalidFiles(IEnumerable<string> invalidFiles)
   {
     var movedFilePaths = new List<string>();
     
-    if (oldFiles.Count() <= 0)
+    if (invalidFiles.Count() <= 0)
       return movedFilePaths;
     
     string oldFileDirectoryPath = GetOldFileDirectoryPath();
     if (!Directory.Exists(oldFileDirectoryPath))
       Directory.CreateDirectory(oldFileDirectoryPath);
 
-    foreach (string file in oldFiles)
+    foreach (string file in invalidFiles)
     {
       string newPath = Path.Combine(oldFileDirectoryPath, Path.GetFileName(file));
       File.Move(file, newPath);
