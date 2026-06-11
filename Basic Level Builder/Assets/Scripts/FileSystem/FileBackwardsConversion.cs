@@ -13,7 +13,7 @@ using System.Linq;
 public class FileBackwardsConversion
 {  
   readonly static public string s_Version0DirectoryName = "Default Project";
-  readonly static public string s_OldFileDirectoryName = "Old Saves";
+  readonly static public string s_OldFileDirectoryName = "Old Version Level";
 
   // Latest version handled by each conversion step
   readonly static public Version[] s_LatestFileVersionPerConversion =

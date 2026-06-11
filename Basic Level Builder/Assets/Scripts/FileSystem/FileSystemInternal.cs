@@ -1295,8 +1295,8 @@ public class FileSystemInternal : MonoBehaviour
 
     bool startTileFound = false;
     Vector2 camPos = Vector2.zero;
-    Vector2 minBounds = Vector2.zero;
-    Vector2 maxBounds = Vector2.zero;
+    Vector2 minBounds = new(float.MaxValue, float.MaxValue);
+    Vector2 maxBounds = new(float.MinValue, float.MinValue);
 
     gridDictionary = new();
     foreach (var jsonString in jsonStrings)

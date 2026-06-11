@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 public class FileDirUtilities : MonoBehaviour
 {
   readonly static public string s_RootDirectoryName = "Basic Level Builder";
-  readonly static public string s_DefaultDirectoryName = "Saves";
+  readonly static public string s_DefaultDirectoryName = "Levels";
   readonly static public string s_FilenameExtension = ".blb";
   readonly static public string s_TempFilePrefix = "backup_file_";
   // The oldest file version the current save file format can support (read/write)
