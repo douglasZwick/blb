@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -11,6 +9,7 @@ public class PlatformerMover : MonoBehaviour
   public float m_StompBounceSpeed = 10;
   public float m_TerminalVelocity = 15;
   public Collider2D m_FeetCollider;
+  public LayerMask m_SlopeCheckLayerMask;
 
   [System.Serializable]
   public class Events
@@ -22,9 +21,12 @@ public class PlatformerMover : MonoBehaviour
     public UnityEvent ReachedApex;
     public UnityEvent Landed;
     public UnityEvent Boosted;
+    public MovementEvent ChangedSlopeNormal;
   }
 
   public Events m_Events;
+
+  static readonly Vector2 s_DefaultSlopeNormal = Vector2.up;
 
   Transform m_Transform;
   Rigidbody2D m_Rigidbody;
@@ -36,6 +38,7 @@ public class PlatformerMover : MonoBehaviour
   float m_LatestBoostDelay;
   float m_LatestBoostFullDuration;
   readonly float m_BoostWallDetectionEpsilon = 0.001f;
+  Vector2 m_SlopeNormal = s_DefaultSlopeNormal;
 
 
   private void Awake()
@@ -121,6 +124,8 @@ public class PlatformerMover : MonoBehaviour
     if (!enabled)
       return;
 
+    SlopeCheck();
+
     if (m_Boosting)
     {
       if (m_BoostTimer >= m_LatestBoostDelay)
@@ -136,9 +141,28 @@ public class PlatformerMover : MonoBehaviour
     }
     else  // if not boosting
     {
-      var velocity = m_Rigidbody.velocity;
-      velocity.x = input * m_MovementSpeed;
-      m_Rigidbody.velocity = velocity;
+      // TODO:
+      //   If this doesn't work, maybe try the following:
+      //   1. Assume the character is on a slope.
+      //      COUNTER-rotate their velocity to accommodate the slope normal.
+      //   2. Overwrite the x component of the counter-rotated velocity with the input vector.
+      //   3. Rotate the velocity back to undo the counter-rotation.
+      //   4. Put the new velocity back in the rigid body.
+
+      if (m_Grounded && !m_Rising)
+      {
+        var slopeAngle = Vector2.SignedAngle(s_DefaultSlopeNormal, m_SlopeNormal);
+        var slopeQuat = Quaternion.AngleAxis(slopeAngle, Vector3.forward);
+        var direction = slopeQuat * (input * Vector3.right);
+        var newVelocity = direction * m_MovementSpeed;
+        m_Rigidbody.velocity = newVelocity;
+      }
+      else
+      {
+        var velocity = m_Rigidbody.velocity;
+        velocity.x = input * m_MovementSpeed;
+        m_Rigidbody.velocity = velocity;
+      }
 
       if (Mathf.Abs(input) > 0)
       {
@@ -193,6 +217,7 @@ public class PlatformerMover : MonoBehaviour
   void LeaveGround()
   {
     m_Events.LeftGround.Invoke();
+    SetSlopeNormal(s_DefaultSlopeNormal);
   }
 
 
@@ -265,6 +290,45 @@ public class PlatformerMover : MonoBehaviour
   }
 
 
+  void SlopeCheck()
+  {
+    var rayStart = m_Transform.position;
+    var rayDirection = -m_SlopeNormal;
+    var distance = 1.0f;
+    var raycastResult = Physics2D.Raycast(rayStart, rayDirection, distance, ~m_SlopeCheckLayerMask);
+    
+    if (raycastResult.collider == null) return;
+
+    SetSlopeNormal(raycastResult.normal);
+  }
+
+
+  void SetSlopeNormal(Vector2 newNormal)
+  {
+    if (m_SlopeNormal == newNormal) return;  // operator == uses approximation! :o
+
+    var movementEventData = new MovementEventData
+    {
+      m_OldNormal = m_SlopeNormal,
+      m_NewNormal = newNormal
+    };
+
+    m_SlopeNormal = newNormal;
+
+    m_Events.ChangedSlopeNormal.Invoke(movementEventData);
+  }
+
+
+  void OnChangedSlopeNormal(MovementEventData movementEventData)
+  {
+    // TODO:
+    //   Move this to a new component maybe? Probably?
+
+    // TODO:
+    //   Hook this event up. Then implement this callback to rotate the graphicals
+  }
+  
+
   private void OnDestroy()
   {
     GlobalData.ModeStarted -= OnModeStarted;
@@ -278,4 +342,6 @@ public class MovementEvent : UnityEvent<MovementEventData> { }
 public class MovementEventData
 {
   public float m_NormalizedDelta;
+  public Vector2 m_OldNormal;
+  public Vector2 m_NewNormal;
 }

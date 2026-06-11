@@ -1841,6 +1841,9 @@ MonoBehaviour:
   m_StompBounceSpeed: 25
   m_TerminalVelocity: 15
   m_FeetCollider: {fileID: 6481017040171128904}
+  m_SlopeCheckLayerMask:
+    serializedVersion: 2
+    m_Bits: 768
   m_Events:
     Moved:
       m_PersistentCalls:
@@ -1959,6 +1962,9 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+    ChangedSlopeNormal:
+      m_PersistentCalls:
+        m_Calls: []
 --- !u!114 &4889489225552882172
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2046,12 +2052,6 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
   m_Direction: 0
-  m_Element:
-    m_GridIndex: {x: 0, y: 0}
-    m_Type: 0
-    m_TileColor: 0
-    m_Direction: 0
-    m_Path: []
 --- !u!114 &-8656358901731430110
 MonoBehaviour:
   m_ObjectHideFlags: 0
