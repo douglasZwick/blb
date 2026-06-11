@@ -189,7 +189,7 @@ public class FileSystemInternal : MonoBehaviour
     m_ThumbnailTileSize = new Vector2Int(tileHeight, tileHeight);
     GenerateThumbnailTiles();
 
-    FileBackwardsConversion.ConvertAndMoveAllFiles(m_FileDirUtilities.GetCurrentDirectoryPath());
+    FileBackwardsConversion.ConvertAllOldFiles();
     CheckForTempFiles();
   }
 
