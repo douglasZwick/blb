@@ -58,7 +58,8 @@ public class FileDirUtilities : MonoBehaviour
 
     m_CurrentDirectoryPath = newDirectoryPath;
 
-    UpdateFilesList();
+    if (!Directory.Exists(m_CurrentDirectoryPath))
+      Directory.CreateDirectory(m_CurrentDirectoryPath);
   }
   
   public void UpdateFilesList()
@@ -241,6 +242,8 @@ public class FileDirUtilities : MonoBehaviour
   {
     if (!IsValidExtension(fullFilePath))
       return false;
+    if (FileBackwardsConversion.IsFileConverted(fullFilePath))
+      return false;
     if (!IsSupportedVersion(fullFilePath))
       return false;
     if (IsTempFile(fullFilePath))
@@ -274,7 +277,7 @@ public class FileDirUtilities : MonoBehaviour
 
   static public bool IsSupportedVersion(string fullFilePath)
   {
-    return GetFileVersion(fullFilePath) > FileBackwardsConversion.s_LatestFileVersionPerConversion[^1];
+    return GetFileVersion(fullFilePath) >= FileBackwardsConversion.s_LatestFileVersionPerConversion[^1];
   }
 
   // Returns version 0 if not found

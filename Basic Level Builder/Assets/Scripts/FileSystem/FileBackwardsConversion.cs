@@ -18,7 +18,7 @@ public class FileBackwardsConversion
   readonly static public Version[] s_LatestFileVersionPerConversion =
   {
     new(1,0,0,0), // Ignore versions between 1.0.0.0 and 1.2.1.0 as they were alpha builds with diffrent save files that we never released
-    new(1,2,1,0),
+    new(1,2,0,0),
   };
 
     static public void ConvertAllOldFiles()
@@ -59,6 +59,11 @@ public class FileBackwardsConversion
     // TODO create ui to show all converted files
     // TODO add coda to see if use wants to delete corrupted files
     WriteConvertedFilesMeta(previouslyConvertedFiles);
+  }
+
+  static public bool IsFileConverted(string fullFilePath)
+  {
+    return File.Exists(fullFilePath) && GetConvertedFilesList().Any(f => f == fullFilePath);
   }
 
   // Moves all files from "Default Project" to "Saves" and removes the old directory
@@ -112,7 +117,8 @@ public class FileBackwardsConversion
   // Gets old files or files that can't be read
   private static IEnumerable<string> GetInvalidFilesFromDirectory(string directoryPath)
   {
-    return Directory.GetFiles(directoryPath)
+    // Recursively get all invalid files from the directory and its subdirectories
+    return Directory.GetFiles(directoryPath, "*", SearchOption.AllDirectories)
       .Where(path => FileDirUtilities.IsValidExtension(path) && (FileDirUtilities.GetFileVersion(path) < s_LatestFileVersionPerConversion[^1]));
   }
 }
