@@ -67,6 +67,9 @@ public class FileDirUtilities : MonoBehaviour
     if (GlobalData.AreEffectsUnderway())
       return;
 
+    if (m_CurrentDirectoryPath == null)
+      InitSavesDirectory();
+
     if (!Directory.Exists(m_CurrentDirectoryPath))
       Directory.CreateDirectory(m_CurrentDirectoryPath);
 

@@ -21,7 +21,7 @@ public class FileBackwardsConversion
     new(1,2,0,0),
   };
 
-    static public void ConvertAllOldFiles()
+  static public void ConvertAllOldFiles()
   {
     string documentsPath = FileDirUtilities.GetDocumentsPath();
     string rootPath = Path.Combine(documentsPath, FileDirUtilities.s_RootDirectoryName);
@@ -44,7 +44,7 @@ public class FileBackwardsConversion
         {
           convertedFiles.Add(filePath);
 
-          string oldFilePath = Path.ChangeExtension(filePath, ".old" + Path.GetExtension(filePath));
+          string oldFilePath = AddOldExtension(filePath);
           File.Move(filePath, oldFilePath);
           previouslyConvertedFiles.Add(oldFilePath);
         }
@@ -86,12 +86,22 @@ public class FileBackwardsConversion
     bool listChanged = false;
     for (int i = previouslyConvertedFiles.Count - 1; i >= 0; i--)
     {
-      string convertedFile = previouslyConvertedFiles[i];
+      string oldFile = previouslyConvertedFiles[i];
+      string convertedFileName = RemoveOldExtension(Path.GetFileName(oldFile));
+      string convertedFilePath = Path.Combine(rootPath, FileDirUtilities.s_DefaultDirectoryName) + convertedFileName;
+
       // If the old or converted file are missing, remove from the list
-      if (!File.Exists(convertedFile) || !File.Exists(Path.Combine(rootPath, Path.GetFileName(convertedFile))))
+      if (!File.Exists(oldFile) || !File.Exists(convertedFilePath))
       {
         previouslyConvertedFiles.RemoveAt(i);
         listChanged = true;
+
+        // If the converted file is missing, rename the old file to remove the ".old" extension
+        if (File.Exists(oldFile))
+        {
+          string newOldFile = RemoveOldExtension(oldFile);
+          File.Move(oldFile, newOldFile);
+        }
       }
     }
 
@@ -99,6 +109,16 @@ public class FileBackwardsConversion
       File.WriteAllLines(metaPath, previouslyConvertedFiles);
 
     return previouslyConvertedFiles;
+  }
+
+  static private string AddOldExtension(string filePath)
+  {
+    return Path.ChangeExtension(filePath, ".old" + FileDirUtilities.s_FilenameExtension);
+  }
+
+  static private string RemoveOldExtension(string filePath)
+  {
+    return Path.GetDirectoryName(filePath) + Path.DirectorySeparatorChar + System.Text.RegularExpressions.Regex.Replace(Path.GetFileName(filePath), @"\.old", "");
   }
 
   static private void WriteConvertedFilesMeta(List<string> convertedFiles)

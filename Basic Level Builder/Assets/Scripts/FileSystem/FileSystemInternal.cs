@@ -183,12 +183,13 @@ public class FileSystemInternal : MonoBehaviour
     m_ModalDialogMaster = FindObjectOfType<ModalDialogMaster>();
 
     m_FileDirUtilities.InitSavesDirectory();
-    FileBackwardsConversion.ConvertAllOldFiles();
 
     // Thumbnail generation init
     var tileHeight = (int)m_ThumbnailTileAtlas.rect.height;
     m_ThumbnailTileSize = new Vector2Int(tileHeight, tileHeight);
     GenerateThumbnailTiles();
+
+    FileBackwardsConversion.ConvertAllOldFiles();
 
     m_FileDirUtilities.UpdateFilesList();
     CheckForTempFiles();
