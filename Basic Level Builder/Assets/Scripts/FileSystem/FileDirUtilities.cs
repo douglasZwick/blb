@@ -74,7 +74,7 @@ public class FileDirUtilities : MonoBehaviour
     try
     {
       var filePaths = Directory.GetFiles(m_CurrentDirectoryPath);
-      var validFilePaths = filePaths.Where(path => IsFileValid(path)).ToArray();
+      var validFilePaths = filePaths.Where(path => IsFileValid(path) && !IsTempFile(path)).ToArray();
 
       if (filePaths.Length == 0)
       {
@@ -116,7 +116,7 @@ public class FileDirUtilities : MonoBehaviour
       var filePaths = Directory.GetFiles(m_CurrentDirectoryPath);
 
       var validFilePaths = filePaths
-          .Where(path => IsValidExtension(path))
+          .Where(path => IsFileValid(path))
           .ToArray();
 
       if (validFilePaths.Length == 0)
@@ -246,8 +246,6 @@ public class FileDirUtilities : MonoBehaviour
     if (FileBackwardsConversion.IsFileConverted(fullFilePath))
       return false;
     if (!IsSupportedVersion(fullFilePath))
-      return false;
-    if (IsTempFile(fullFilePath))
       return false;
     return true;
   }

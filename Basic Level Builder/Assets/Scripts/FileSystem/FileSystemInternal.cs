@@ -631,7 +631,7 @@ public class FileSystemInternal : MonoBehaviour
       }
     }
 
-    StartSavingThread(destFilePath, m_TileGrid.GetGridDictionary(), autosave, saveAsFileName != null, updateCameraPosButtonPressed, shouldPrintElapsedTime, shouldMountFile);
+    StartSavingThread(destFilePath, m_MountedFileInfo, m_TileGrid.GetGridDictionary(), autosave, saveAsFileName != null, updateCameraPosButtonPressed, shouldPrintElapsedTime, shouldMountFile);
   }
 
   private async Task CreateManualSave()
@@ -642,7 +642,7 @@ public class FileSystemInternal : MonoBehaviour
     await Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
   }
 
-  protected void StartSavingThread(string destFilePath, Dictionary<Vector2Int, TileGrid.Element> gridDictionary,
+  protected void StartSavingThread(string destFilePath, FileInfo sourceFileInfo, Dictionary<Vector2Int, TileGrid.Element> gridDictionary,
     bool autosave, bool isSaveAs, bool updateCameraPosButtonPressed, bool shouldPrintElapsedTime, bool shouldMountFile = true)
   {
     // Store camera position to the nearest tile
@@ -658,7 +658,7 @@ public class FileSystemInternal : MonoBehaviour
       m_SavingThread = Task.Run(() =>
       {
         SavingThreadFlatten(
-            m_MountedFileInfo,
+            sourceFileInfo,
             destFilePath,
             shouldPrintElapsedTime,
             gridDictionary,
@@ -672,7 +672,7 @@ public class FileSystemInternal : MonoBehaviour
       m_SavingThread = Task.Run(() =>
       {
         SavingThread(
-            m_MountedFileInfo,
+            sourceFileInfo,
             destFilePath,
             autosave,
             shouldPrintElapsedTime,
@@ -1255,7 +1255,7 @@ public class FileSystemInternal : MonoBehaviour
   }
 
   // Returns true if the conversion was sucessful
-  protected bool TryConvertV0FileToV1FileEx(string filePathToConvert, string newFilePath)
+  protected bool TryConvertV0FileToV1FileEx(string filePathToConvert, string newFileName)
   {
     try
     {
@@ -1275,9 +1275,11 @@ public class FileSystemInternal : MonoBehaviour
       bool autosave = false;
       bool isSaveAs = true;
       bool updateCameraPosButtonPressed = false;
-      bool shouldPrintElapsedTime = true;
-      CreateFileInfo(out m_MountedFileInfo, newFilePath);
-      StartSavingThread(newFilePath, gridDictionary, autosave, isSaveAs, updateCameraPosButtonPressed, shouldPrintElapsedTime);
+      bool shouldPrintElapsedTime = false;
+      bool shouldMountFile = false;
+      string newFilePath = Path.Combine(m_FileDirUtilities.GetCurrentDirectoryPath(), newFileName);
+      CreateFileInfo(out FileInfo sourceFileInfo, newFilePath);
+      StartSavingThread(newFilePath, sourceFileInfo, gridDictionary, autosave, isSaveAs, updateCameraPosButtonPressed, shouldPrintElapsedTime, shouldMountFile);
     }
     catch (Exception e)
     {

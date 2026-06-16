@@ -12,8 +12,9 @@ using System.Linq;
 
 public class FileBackwardsConversion
 {
-  readonly static private string s_ConvertedFilesMetaFile = "ConvertedFiles.meta";
-
+  // NOTE: calling Path.GetExtension on a file with the old extension will return only the part of the extension after the last dot.
+  readonly static private string s_ConvertedFileExtension = ".old" + FileDirUtilities.s_FilenameExtension;
+  
   // Latest version handled by each conversion step
   readonly static public Version[] s_LatestFileVersionPerConversion =
   {
@@ -26,32 +27,33 @@ public class FileBackwardsConversion
     string documentsPath = FileDirUtilities.GetDocumentsPath();
     string rootPath = Path.Combine(documentsPath, FileDirUtilities.s_RootDirectoryName);
     List<string> invalidFiles = FindAllInvalidFiles(rootPath);
-    List<string> corruptedFiles = new();
-    List<string> convertedFiles = new();
-
-    List<string> previouslyConvertedFiles = GetConvertedFilesList();
+    //List<string> corruptedFiles = new();
+    //List<string> convertedFiles = new();
 
     foreach (string filePath in invalidFiles)
     {
-      // Skip files that were converted before
-      if (previouslyConvertedFiles.Any(previouslyConvertedFile => previouslyConvertedFile == filePath))
-        continue;
+      string fileName = Path.GetFileName(filePath);
 
+      // If the file name has the old extension, it was already converted
+      if (fileName.EndsWith(s_ConvertedFileExtension))
+        continue;
+      
       Version fileVersion = FileDirUtilities.GetFileVersion(filePath);
       if (fileVersion < s_LatestFileVersionPerConversion[0])
       {
+        // Rename the file to indicate it's been converted
+        // We rename before conversion so we don't overwrite the original, as the converted file would have the same name
         string oldFilePath = AddOldExtension(filePath);
         File.Move(filePath, oldFilePath);
-        if (FileSystem.Instance.TryConvertV0FileToV1File(oldFilePath, Path.GetFileName(filePath)))
+        if (FileSystem.Instance.TryConvertV0FileToV1File(oldFilePath, fileName))
         {
-          convertedFiles.Add(filePath);
-          previouslyConvertedFiles.Add(oldFilePath);
+          //convertedFiles.Add(fileName);
         }
         else
         {
           // Undo the old file rename
           File.Move(oldFilePath, filePath);
-          corruptedFiles.Add(filePath);
+          //corruptedFiles.Add(fileName);
         }
       }
       // Explicity ignore the alpha versions that we don't support
@@ -61,75 +63,17 @@ public class FileBackwardsConversion
 
     // TODO create ui to show all converted files
     // TODO add coda to see if use wants to delete corrupted files
-    WriteConvertedFilesMeta(previouslyConvertedFiles);
   }
 
   static public bool IsFileConverted(string fullFilePath)
   {
-    return File.Exists(fullFilePath) && GetConvertedFilesList().Any(f => f == fullFilePath);
+    return File.Exists(fullFilePath) && fullFilePath.EndsWith(s_ConvertedFileExtension);
   }
 
-  // Moves all files from "Default Project" to "Saves" and removes the old directory
-  static private List<string> GetConvertedFilesList()
-  {
-    string documentsPath = FileDirUtilities.GetDocumentsPath();
-    string rootPath = Path.Combine(documentsPath, FileDirUtilities.s_RootDirectoryName);
-    string metaPath = Path.Combine(rootPath, s_ConvertedFilesMetaFile);
-    if (!File.Exists(metaPath))
-    {
-      File.Create(metaPath).Dispose();
-      return new List<string>();
-    }
-
-    List<string> previouslyConvertedFiles = File.ReadAllLines(metaPath)
-      .Where(line => !string.IsNullOrWhiteSpace(line))
-      .Select(line => line.Trim())
-      .ToList();
-
-    bool listChanged = false;
-    for (int i = previouslyConvertedFiles.Count - 1; i >= 0; i--)
-    {
-      string oldFile = previouslyConvertedFiles[i];
-      string convertedFileName = RemoveOldExtension(Path.GetFileName(oldFile));
-      string convertedFilePath = Path.Combine(rootPath, FileDirUtilities.s_DefaultDirectoryName) + convertedFileName;
-
-      // If the old or converted file are missing, remove from the list
-      if (!File.Exists(oldFile) || !File.Exists(convertedFilePath))
-      {
-        previouslyConvertedFiles.RemoveAt(i);
-        listChanged = true;
-
-        // If the converted file is missing, rename the old file to remove the ".old" extension
-        if (File.Exists(oldFile))
-        {
-          string newOldFile = RemoveOldExtension(oldFile);
-          File.Move(oldFile, newOldFile);
-        }
-      }
-    }
-
-    if (listChanged)
-      File.WriteAllLines(metaPath, previouslyConvertedFiles);
-
-    return previouslyConvertedFiles;
-  }
 
   static private string AddOldExtension(string filePath)
   {
-    return Path.ChangeExtension(filePath, ".old" + FileDirUtilities.s_FilenameExtension);
-  }
-
-  static private string RemoveOldExtension(string filePath)
-  {
-    return Path.GetDirectoryName(filePath) + Path.DirectorySeparatorChar + System.Text.RegularExpressions.Regex.Replace(Path.GetFileName(filePath), @"\.old", "");
-  }
-
-  static private void WriteConvertedFilesMeta(List<string> convertedFiles)
-  {
-    string documentsPath = FileDirUtilities.GetDocumentsPath();
-    string rootPath = Path.Combine(documentsPath, FileDirUtilities.s_RootDirectoryName);
-    string metaPath = Path.Combine(rootPath, s_ConvertedFilesMetaFile);
-    File.WriteAllLines(metaPath, convertedFiles);
+    return Path.ChangeExtension(filePath, s_ConvertedFileExtension);
   }
 
   static private List<string> FindAllInvalidFiles(string currentDirectoryPath)
