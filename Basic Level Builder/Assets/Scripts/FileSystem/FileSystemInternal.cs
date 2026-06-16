@@ -1255,7 +1255,7 @@ public class FileSystemInternal : MonoBehaviour
   }
 
   // Returns true if the conversion was sucessful
-  protected bool TryConvertV0FileToV1FileEx(string filePathToConvert)
+  protected bool TryConvertV0FileToV1FileEx(string filePathToConvert, string newFilePath)
   {
     try
     {
@@ -1276,7 +1276,6 @@ public class FileSystemInternal : MonoBehaviour
       bool isSaveAs = true;
       bool updateCameraPosButtonPressed = false;
       bool shouldPrintElapsedTime = true;
-      string newFilePath = Path.Combine(m_FileDirUtilities.GetCurrentDirectoryPath(), Path.GetFileName(filePathToConvert));
       CreateFileInfo(out m_MountedFileInfo, newFilePath);
       StartSavingThread(newFilePath, gridDictionary, autosave, isSaveAs, updateCameraPosButtonPressed, shouldPrintElapsedTime);
     }

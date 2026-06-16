@@ -54,9 +54,7 @@ public class FileDirUtilities : MonoBehaviour
 
     var documentsPath = GetDocumentsPath();
     // this will never throw as long as s_RootDirectoryName is valid
-    var newDirectoryPath = Path.Combine(documentsPath, s_RootDirectoryName, s_DefaultDirectoryName);
-
-    m_CurrentDirectoryPath = newDirectoryPath;
+    m_CurrentDirectoryPath = Path.Combine(documentsPath, s_RootDirectoryName, s_DefaultDirectoryName);
 
     if (!Directory.Exists(m_CurrentDirectoryPath))
       Directory.CreateDirectory(m_CurrentDirectoryPath);

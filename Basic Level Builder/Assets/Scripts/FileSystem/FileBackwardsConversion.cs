@@ -40,16 +40,19 @@ public class FileBackwardsConversion
       Version fileVersion = FileDirUtilities.GetFileVersion(filePath);
       if (fileVersion < s_LatestFileVersionPerConversion[0])
       {
-        if (FileSystem.Instance.TryConvertV0FileToV1File(filePath))
+        string oldFilePath = AddOldExtension(filePath);
+        File.Move(filePath, oldFilePath);
+        if (FileSystem.Instance.TryConvertV0FileToV1File(oldFilePath, Path.GetFileName(filePath)))
         {
           convertedFiles.Add(filePath);
-
-          string oldFilePath = AddOldExtension(filePath);
-          File.Move(filePath, oldFilePath);
           previouslyConvertedFiles.Add(oldFilePath);
         }
         else
+        {
+          // Undo the old file rename
+          File.Move(oldFilePath, filePath);
           corruptedFiles.Add(filePath);
+        }
       }
       // Explicity ignore the alpha versions that we don't support
       else if (fileVersion < s_LatestFileVersionPerConversion[1])

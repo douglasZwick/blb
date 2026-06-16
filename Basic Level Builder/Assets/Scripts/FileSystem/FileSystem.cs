@@ -48,9 +48,9 @@ public class FileSystem : FileSystemInternal
 
   // Converts a file and saves it to the default saves directory
   // Will overwite file if it is in the same directory
-  public bool TryConvertV0FileToV1File(string filePathToConvert)
+  public bool TryConvertV0FileToV1File(string filePathToConvert, string newFileName)
   {
-    return TryConvertV0FileToV1FileEx(filePathToConvert);
+    return TryConvertV0FileToV1FileEx(filePathToConvert, newFileName);
   }
 
   /// <summary>
