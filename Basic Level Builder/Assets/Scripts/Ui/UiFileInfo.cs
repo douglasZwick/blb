@@ -7,7 +7,6 @@ Copyright 2018-2025, DigiPen Institute of Technology
 
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 

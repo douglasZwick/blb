@@ -27,8 +27,8 @@ public class FileBackwardsConversion
     string documentsPath = FileDirUtilities.GetDocumentsPath();
     string rootPath = Path.Combine(documentsPath, FileDirUtilities.s_RootDirectoryName);
     List<string> invalidFiles = FindAllInvalidFiles(rootPath);
-    //List<string> corruptedFiles = new();
-    //List<string> convertedFiles = new();
+    List<string> corruptedFiles = new();
+    List<string> convertedFiles = new();
 
     foreach (string filePath in invalidFiles)
     {
@@ -39,21 +39,21 @@ public class FileBackwardsConversion
         continue;
       
       Version fileVersion = FileDirUtilities.GetFileVersion(filePath);
+
+      // Rename the file to indicate it's been converted
+      // We rename before conversion so we don't overwrite the original, as the converted file would have the same name
+      string oldFilePath = AddOldExtension(filePath);
+      File.Move(filePath, oldFilePath);
+
       if (fileVersion < s_LatestFileVersionPerConversion[0])
       {
-        // Rename the file to indicate it's been converted
-        // We rename before conversion so we don't overwrite the original, as the converted file would have the same name
-        string oldFilePath = AddOldExtension(filePath);
-        File.Move(filePath, oldFilePath);
-        if (FileSystem.Instance.TryConvertV0FileToV1File(oldFilePath, fileName))
+        if (FileSystem.Instance.TryConvertV0FileToV1File(oldFilePath, fileName, out string newFilePath))
         {
-          //convertedFiles.Add(fileName);
+          convertedFiles.Add(newFilePath);
         }
         else
         {
-          // Undo the old file rename
-          File.Move(oldFilePath, filePath);
-          //corruptedFiles.Add(fileName);
+          corruptedFiles.Add(fileName);
         }
       }
       // Explicity ignore the alpha versions that we don't support
@@ -61,8 +61,8 @@ public class FileBackwardsConversion
         continue;
     }
 
-    // TODO create ui to show all converted files
-    // TODO add coda to see if use wants to delete corrupted files
+    if (convertedFiles.Count + corruptedFiles.Count > 0)
+      DialogManager.ShowConvertedFilesDialog(convertedFiles, corruptedFiles);
   }
 
   static public bool IsFileConverted(string fullFilePath)

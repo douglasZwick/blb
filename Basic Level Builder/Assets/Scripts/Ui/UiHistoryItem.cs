@@ -136,7 +136,7 @@ public class UiHistoryItem : MonoBehaviour
 
   public string GetVersionTimeStamp()
   {
-    return ((DateTime)m_LevelData.m_TimeStamp).ToString("M/d/yy h:mm:sstt").ToLower();
+    return m_LevelData.m_TimeStamp.ToString("M/d/yy h:mm:sstt").ToLower();
   }
 
   public int GetAddedTilesCount()

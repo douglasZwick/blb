@@ -8,6 +8,7 @@ Description:    Global dialog manager providing easy access to modal dialogs
                 without requiring ModalDialogAdder components on every object.
 ***************************************************/
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -15,6 +16,7 @@ public static class DialogManager
 {
   private static ModalDialogMaster s_ModalDialogMaster;
   private static UiGenericModalDialog s_GenericDialogPrefab;
+  private static UiFileConvertedList s_ConvertedFilesDialogPrefab;
 
   /// <summary>
   /// Initialize the DialogManager with the required prefab.
@@ -24,6 +26,7 @@ public static class DialogManager
   {
     s_ModalDialogMaster = master;
     s_GenericDialogPrefab = Resources.Load<UiGenericModalDialog>("Prefabs/Ui/GenericModalDialogUi");
+    s_ConvertedFilesDialogPrefab = Resources.Load<UiFileConvertedList>("Prefabs/Ui/BackwardsCompatibilityUi/FilesConvertedUI");
   }
 
   /// <summary>
@@ -58,6 +61,23 @@ public static class DialogManager
       $"A file with this name already exists{System.Environment.NewLine}" +
       "Do you want to overwrite it?";
     return ShowGenericDialog(UiGenericModalDialog.ButtonOptions.ConfirmAndDeny, overwriteMessage);
+  }
+
+  /// <summary>
+  /// Shows a list of all the files attempted to be converted
+  /// </summary>
+  /// <param name="convertedFiles">List of file that were converted</param>
+  /// <param name="unconvertedFiles">List of files that had errors converting</param>
+  public static void ShowConvertedFilesDialog(List<string> convertedFiles, List<string> unconvertedFiles)
+  {
+    var x = Screen.width / 2f;
+    var y = Screen.height / 2f;
+    var rectPoint = new Vector2(x, y);
+
+    var dialog = Object.Instantiate(s_ConvertedFilesDialogPrefab);
+    dialog.InitializeConvertedFilesList(convertedFiles, unconvertedFiles);
+    dialog.Setup(s_ModalDialogMaster, rectPoint);
+    dialog.Open();
   }
 
   /// <summary>

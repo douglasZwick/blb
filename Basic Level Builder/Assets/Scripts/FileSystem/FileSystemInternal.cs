@@ -1255,8 +1255,9 @@ public class FileSystemInternal : MonoBehaviour
   }
 
   // Returns true if the conversion was sucessful
-  protected bool TryConvertV0FileToV1FileEx(string filePathToConvert, string newFileName)
+  protected bool TryConvertV0FileToV1FileEx(string filePathToConvert, string newFileName, out string newFilePath)
   {
+    newFilePath = "";
     try
     {
       string[] jsonStrings = File.ReadAllLines(filePathToConvert);
@@ -1266,6 +1267,8 @@ public class FileSystemInternal : MonoBehaviour
       if (failedLines <= -1)
       {
         StatusBar.Print($"This level seems to be invalid and can not be converted.");
+        Debug.Log($"File with path\"" + filePathToConvert + "\" was unable to be converted.");
+        return false;
       }
       else if (failedLines > 0)
       {
@@ -1277,7 +1280,7 @@ public class FileSystemInternal : MonoBehaviour
       bool updateCameraPosButtonPressed = false;
       bool shouldPrintElapsedTime = false;
       bool shouldMountFile = false;
-      string newFilePath = Path.Combine(m_FileDirUtilities.GetCurrentDirectoryPath(), newFileName);
+      newFilePath = Path.Combine(m_FileDirUtilities.GetCurrentDirectoryPath(), newFileName);
       CreateFileInfo(out FileInfo sourceFileInfo, newFilePath);
       StartSavingThread(newFilePath, sourceFileInfo, gridDictionary, autosave, isSaveAs, updateCameraPosButtonPressed, shouldPrintElapsedTime, shouldMountFile);
     }
@@ -1332,7 +1335,7 @@ public class FileSystemInternal : MonoBehaviour
       }
       catch (System.ArgumentException e)
       {
-        Debug.LogError($"Failed to parse the line \"{jsonString}\" " +
+        Debug.Log($"Failed to parse the line \"{jsonString}\" " +
           $"as a grid element. {e.Message} ({e.GetType()})");
 
         ++failures;
