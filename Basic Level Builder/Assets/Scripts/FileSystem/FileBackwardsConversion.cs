@@ -14,7 +14,7 @@ public class FileBackwardsConversion
 {
   // NOTE: calling Path.GetExtension on a file with the old extension will return only the part of the extension after the last dot.
   readonly static private string s_ConvertedFileExtension = ".old" + FileDirUtilities.s_FilenameExtension;
-  
+
   // Latest version handled by each conversion step
   readonly static public Version[] s_LatestFileVersionPerConversion =
   {
@@ -37,7 +37,7 @@ public class FileBackwardsConversion
       // If the file name has the old extension, it was already converted
       if (fileName.EndsWith(s_ConvertedFileExtension))
         continue;
-      
+
       Version fileVersion = FileDirUtilities.GetFileVersion(filePath);
 
       // Rename the file to indicate it's been converted
@@ -62,7 +62,10 @@ public class FileBackwardsConversion
     }
 
     if (convertedFiles.Count + corruptedFiles.Count > 0)
+    {
+      FileSystem.Instance.WaitForSavingToFinish();
       DialogManager.ShowConvertedFilesDialog(convertedFiles, corruptedFiles);
+    }
   }
 
   static public bool IsFileConverted(string fullFilePath)

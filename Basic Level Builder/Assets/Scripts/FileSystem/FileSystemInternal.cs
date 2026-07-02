@@ -191,6 +191,9 @@ public class FileSystemInternal : MonoBehaviour
 
     FileBackwardsConversion.ConvertAllOldFiles();
 
+    // Call any functions pushed to the main thread,
+    // as there might be ones added files to the file list which we don't want to do untill after the list is updated
+    m_MainThreadDispatcher.Update();
     m_FileDirUtilities.UpdateFilesList();
     CheckForTempFiles();
   }
@@ -549,6 +552,11 @@ public class FileSystemInternal : MonoBehaviour
     fileInfo.m_FileData.m_Description = desc;
 
     return fileInfo;
+  }
+
+  protected void WaitForSavingToFinishEx()
+  {
+    m_SavingThread?.Wait();
   }
 
   protected async Task Save(bool autosave, string saveAsFileName = null, bool updateCameraPosButtonPressed = false, bool shouldPrintElapsedTime = true, bool shouldMountFile = true)
