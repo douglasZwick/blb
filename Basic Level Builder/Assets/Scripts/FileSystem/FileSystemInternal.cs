@@ -1288,7 +1288,19 @@ public class FileSystemInternal : MonoBehaviour
       bool updateCameraPosButtonPressed = false;
       bool shouldPrintElapsedTime = false;
       bool shouldMountFile = false;
-      newFilePath = Path.Combine(m_FileDirUtilities.GetCurrentDirectoryPath(), newFileName);
+      var directoryPath = m_FileDirUtilities.GetCurrentDirectoryPath();
+      var baseFileName = Path.GetFileNameWithoutExtension(newFileName);
+      newFilePath = Path.Combine(directoryPath, newFileName);
+
+      // If a file already exists with the same name in the default directory, change the file name
+      int duplicateIndex = 1;
+      while (File.Exists(newFilePath))
+      {
+        newFileName = $"{baseFileName} ({duplicateIndex}){FileDirUtilities.s_FilenameExtension}";
+        newFilePath = Path.Combine(directoryPath, newFileName);
+        duplicateIndex++;
+      }
+
       CreateFileInfo(out FileInfo sourceFileInfo, newFilePath);
       StartSavingThread(newFilePath, sourceFileInfo, gridDictionary, autosave, isSaveAs, updateCameraPosButtonPressed, shouldPrintElapsedTime, shouldMountFile);
     }
