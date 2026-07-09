@@ -1,6 +1,6 @@
 /***************************************************
 Authors:        Brenden Epp
-Last Updated:   12/16/2025
+Last Updated:   6/10/2026
 
 Copyright 2018-2025, DigiPen Institute of Technology
 ***************************************************/
@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 public class FileDirUtilities : MonoBehaviour
 {
   readonly static public string s_RootDirectoryName = "Basic Level Builder";
+  readonly static public string s_DefaultDirectoryName = "Levels";
   readonly static public string s_FilenameExtension = ".blb";
   readonly static public string s_TempFilePrefix = "backup_file_";
 
@@ -41,12 +42,12 @@ public class FileDirUtilities : MonoBehaviour
 #endif
   }
 
-  public void SetDirectoryName(string name)
+  public void InitSavesDirectory()
   {
     if (GlobalData.AreEffectsUnderway())
       return;
 
-    if (!ValidateDirectoryName(name))
+    if (!ValidateDirectoryName(s_DefaultDirectoryName))
     {
       // modal: something's wrong with the file name
       return;
@@ -54,17 +55,19 @@ public class FileDirUtilities : MonoBehaviour
 
     var documentsPath = GetDocumentsPath();
     // this will never throw as long as s_RootDirectoryName is valid
-    var newDirectoryPath = Path.Combine(documentsPath, s_RootDirectoryName, name);
+    m_CurrentDirectoryPath = Path.Combine(documentsPath, s_RootDirectoryName, s_DefaultDirectoryName);
 
-    m_CurrentDirectoryPath = newDirectoryPath;
-
-    UpdateFilesList();
+    if (!Directory.Exists(m_CurrentDirectoryPath))
+      Directory.CreateDirectory(m_CurrentDirectoryPath);
   }
-
+  
   public void UpdateFilesList()
   {
     if (GlobalData.AreEffectsUnderway())
       return;
+
+    if (m_CurrentDirectoryPath == null)
+      InitSavesDirectory();
 
     if (!Directory.Exists(m_CurrentDirectoryPath))
       Directory.CreateDirectory(m_CurrentDirectoryPath);
@@ -72,7 +75,7 @@ public class FileDirUtilities : MonoBehaviour
     try
     {
       var filePaths = Directory.GetFiles(m_CurrentDirectoryPath);
-      var validFilePaths = filePaths.Where(path => IsFileValid(path)).ToArray();
+      var validFilePaths = filePaths.Where(path => IsFileValid(path) && !IsTempFile(path)).ToArray();
 
       if (filePaths.Length == 0)
       {
@@ -114,7 +117,7 @@ public class FileDirUtilities : MonoBehaviour
       var filePaths = Directory.GetFiles(m_CurrentDirectoryPath);
 
       var validFilePaths = filePaths
-          .Where(path => IsValidExtension(path))
+          .Where(path => IsFileValid(path))
           .ToArray();
 
       if (validFilePaths.Length == 0)
@@ -241,9 +244,9 @@ public class FileDirUtilities : MonoBehaviour
   {
     if (!IsValidExtension(fullFilePath))
       return false;
-    if (!IsSupportedVersion(fullFilePath))
+    if (FileBackwardsConversion.IsFileConverted(fullFilePath))
       return false;
-    if (IsTempFile(fullFilePath))
+    if (!IsSupportedVersion(fullFilePath))
       return false;
     return true;
   }
@@ -274,6 +277,12 @@ public class FileDirUtilities : MonoBehaviour
 
   static public bool IsSupportedVersion(string fullFilePath)
   {
+    return GetFileVersion(fullFilePath) >= FileBackwardsConversion.s_LatestFileVersionPerConversion[^1];
+  }
+
+  // Returns version 0 if not found
+  static public Version GetFileVersion(string fullFilePath)
+  {
     Version fileVersion;
     try
     {
@@ -285,10 +294,10 @@ public class FileDirUtilities : MonoBehaviour
     {
       string errorStr = $"Error checking save file version: {Path.GetFileName(fullFilePath)}. {e.Message} ({e.GetType()})";
       Debug.Log(errorStr);
-      return false;
+      fileVersion = new(0,0);
     }
 
-    return fileVersion > new Version(1,2);
+    return fileVersion;
   }
 
   // Skips rename if the file already exists
@@ -330,7 +339,7 @@ public class FileDirUtilities : MonoBehaviour
       return true;
   }
 
-  private string GetDocumentsPath()
+  static public string GetDocumentsPath()
   {
     try
     {

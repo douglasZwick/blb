@@ -1,6 +1,6 @@
 ﻿/***************************************************
 Authors:        Douglas Zwick, Brenden Epp
-Last Updated:   12/16/2025
+Last Updated:   6/10/2026
 
 Copyright 2018-2025, DigiPen Institute of Technology
 ***************************************************/
@@ -33,7 +33,6 @@ public class FileSystemInternal : MonoBehaviour
 
   static Version s_EditorVersion; // major, minor, build, and revision number
 
-  public string m_DefaultDirectoryName = "Default Project";
   public TileGrid m_TileGrid;
   public FileDirUtilities m_FileDirUtilities;
 
@@ -183,13 +182,19 @@ public class FileSystemInternal : MonoBehaviour
     s_EditorVersion = new(Application.version);
     m_ModalDialogMaster = FindObjectOfType<ModalDialogMaster>();
 
-    m_FileDirUtilities.SetDirectoryName(m_DefaultDirectoryName);
+    m_FileDirUtilities.InitSavesDirectory();
 
     // Thumbnail generation init
     var tileHeight = (int)m_ThumbnailTileAtlas.rect.height;
     m_ThumbnailTileSize = new Vector2Int(tileHeight, tileHeight);
     GenerateThumbnailTiles();
 
+    FileBackwardsConversion.ConvertAllOldFiles();
+
+    // Call any functions pushed to the main thread,
+    // as there might be ones added files to the file list which we don't want to do untill after the list is updated
+    m_MainThreadDispatcher.Update();
+    m_FileDirUtilities.UpdateFilesList();
     CheckForTempFiles();
   }
 
@@ -246,7 +251,7 @@ public class FileSystemInternal : MonoBehaviour
       }
 
       // Update file list incase files were added or removed
-      m_FileDirUtilities.SetDirectoryName(m_DefaultDirectoryName);
+      m_FileDirUtilities.UpdateFilesList();
     }
   }
 
@@ -271,7 +276,7 @@ public class FileSystemInternal : MonoBehaviour
   {
     if (GlobalData.IsInPlayMode())
       GlobalData.DisablePlayMode();
-    
+
     // If the user canceled when asked to save, stop the quit
     if (await AskToSaveIfChanges() == ModalDialog.DialogResult.Cancel)
       return;
@@ -549,6 +554,11 @@ public class FileSystemInternal : MonoBehaviour
     return fileInfo;
   }
 
+  protected void WaitForSavingToFinishEx()
+  {
+    m_SavingThread?.Wait();
+  }
+
   protected async Task Save(bool autosave, string saveAsFileName = null, bool updateCameraPosButtonPressed = false, bool shouldPrintElapsedTime = true, bool shouldMountFile = true)
   {
     if (GlobalData.AreEffectsUnderway())
@@ -629,7 +639,7 @@ public class FileSystemInternal : MonoBehaviour
       }
     }
 
-    StartSavingThread(destFilePath, m_TileGrid.GetGridDictionary(), autosave, saveAsFileName != null, updateCameraPosButtonPressed, shouldPrintElapsedTime, shouldMountFile);
+    StartSavingThread(destFilePath, m_MountedFileInfo, m_TileGrid.GetGridDictionary(), autosave, saveAsFileName != null, updateCameraPosButtonPressed, shouldPrintElapsedTime, shouldMountFile);
   }
 
   private async Task CreateManualSave()
@@ -640,7 +650,7 @@ public class FileSystemInternal : MonoBehaviour
     await Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
   }
 
-  protected void StartSavingThread(string destFilePath, Dictionary<Vector2Int, TileGrid.Element> gridDictionary,
+  protected void StartSavingThread(string destFilePath, FileInfo sourceFileInfo, Dictionary<Vector2Int, TileGrid.Element> gridDictionary,
     bool autosave, bool isSaveAs, bool updateCameraPosButtonPressed, bool shouldPrintElapsedTime, bool shouldMountFile = true)
   {
     // Store camera position to the nearest tile
@@ -656,7 +666,7 @@ public class FileSystemInternal : MonoBehaviour
       m_SavingThread = Task.Run(() =>
       {
         SavingThreadFlatten(
-            m_MountedFileInfo,
+            sourceFileInfo,
             destFilePath,
             shouldPrintElapsedTime,
             gridDictionary,
@@ -670,7 +680,7 @@ public class FileSystemInternal : MonoBehaviour
       m_SavingThread = Task.Run(() =>
       {
         SavingThread(
-            m_MountedFileInfo,
+            sourceFileInfo,
             destFilePath,
             autosave,
             shouldPrintElapsedTime,
@@ -1250,6 +1260,117 @@ public class FileSystemInternal : MonoBehaviour
     }
 
     m_FileDirUtilities.UpdateFilesList();
+  }
+
+  // Returns true if the conversion was sucessful
+  protected bool TryConvertV0FileToV1FileEx(string filePathToConvert, string newFileName, out string newFilePath)
+  {
+    newFilePath = "";
+    try
+    {
+      string[] jsonStrings = File.ReadAllLines(filePathToConvert);
+
+      int failedLines = TryCreateDictonaryFromJsonStrings(jsonStrings, out Dictionary<Vector2Int, TileGrid.Element> gridDictionary);
+
+      if (failedLines <= -1)
+      {
+        StatusBar.Print($"This level seems to be invalid and can not be converted.");
+        Debug.Log($"File with path\"" + filePathToConvert + "\" was unable to be converted.");
+        return false;
+      }
+      else if (failedLines > 0)
+      {
+        StatusBar.Print($"File converted with {failedLines} read failures");
+      }
+
+      bool autosave = false;
+      bool isSaveAs = true;
+      bool updateCameraPosButtonPressed = false;
+      bool shouldPrintElapsedTime = false;
+      bool shouldMountFile = false;
+      var directoryPath = m_FileDirUtilities.GetCurrentDirectoryPath();
+      var baseFileName = Path.GetFileNameWithoutExtension(newFileName);
+      newFilePath = Path.Combine(directoryPath, newFileName);
+
+      // If a file already exists with the same name in the default directory, change the file name
+      int duplicateIndex = 1;
+      while (File.Exists(newFilePath))
+      {
+        newFileName = $"{baseFileName} ({duplicateIndex}){FileDirUtilities.s_FilenameExtension}";
+        newFilePath = Path.Combine(directoryPath, newFileName);
+        duplicateIndex++;
+      }
+
+      CreateFileInfo(out FileInfo sourceFileInfo, newFilePath);
+      StartSavingThread(newFilePath, sourceFileInfo, gridDictionary, autosave, isSaveAs, updateCameraPosButtonPressed, shouldPrintElapsedTime, shouldMountFile);
+    }
+    catch (Exception e)
+    {
+      Debug.LogError($"Error while loading. {e.Message} ({e.GetType()})");
+      return false;
+    }
+    return true;
+  }
+
+  // Creates a grid of tiles from JSON strings from BLB V0
+  // Returns the number of failures. If there were no sucesses, returns -1.
+  private int TryCreateDictonaryFromJsonStrings(string[] jsonStrings, out Dictionary<Vector2Int, TileGrid.Element> gridDictionary)
+  {
+    int successes = 0;
+    int failures = 0;
+
+    bool startTileFound = false;
+    Vector2 camPos = Vector2.zero;
+    Vector2 minBounds = new(float.MaxValue, float.MaxValue);
+    Vector2 maxBounds = new(float.MinValue, float.MinValue);
+
+    gridDictionary = new();
+    foreach (var jsonString in jsonStrings)
+    {
+      try
+      {
+        TileGrid.Element element = JsonUtility.FromJson<TileGrid.Element>(jsonString);
+        Vector2Int index = element.m_GridIndex;
+        gridDictionary.Add(index, element);
+
+        if (!startTileFound)
+        {
+          if (element.m_Type == TileType.START)
+          {
+            camPos = index;
+            startTileFound = true;
+          }
+
+          if (index.x < minBounds.x)
+            minBounds.x = index.x;
+          if (index.x > maxBounds.x)
+            maxBounds.x = index.x;
+          if (index.y < minBounds.y)
+            minBounds.y = index.y;
+          if (index.y > maxBounds.y)
+            maxBounds.y = index.y;
+        }
+
+        ++successes;
+      }
+      catch (System.ArgumentException e)
+      {
+        Debug.Log($"Failed to parse the line \"{jsonString}\" " +
+          $"as a grid element. {e.Message} ({e.GetType()})");
+
+        ++failures;
+      }
+    }
+
+    if (successes > 0)
+    {
+      if (!startTileFound)
+        camPos = maxBounds - minBounds;
+
+      Camera.main.transform.position = new Vector3(camPos.x, camPos.y, Camera.main.transform.position.z);
+      return failures;
+    }
+    return -1;
   }
 
   protected void UpdateLoadedVersionIfDeleted(FileInfo fileInfo, LevelVersion version)

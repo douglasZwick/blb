@@ -1791,7 +1791,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IsAppQuitting: 0
-  m_DefaultDirectoryName: Default Project
   m_TileGrid: {fileID: 2031376952}
   m_FileDirUtilities: {fileID: 128438548}
   m_ThumbnailSize: {x: 100, y: 100}

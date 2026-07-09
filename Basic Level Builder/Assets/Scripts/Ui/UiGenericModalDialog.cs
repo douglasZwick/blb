@@ -81,9 +81,12 @@ public class UiGenericModalDialog : ModalDialog
     bool showDeny = (m_ButtonOptions & ButtonOptions.Deny) != 0;
     bool showCancel = (m_ButtonOptions & ButtonOptions.Cancel) != 0;
 
-    m_ConfirmButton.gameObject.SetActive(showConfirm);
-    m_DenyButton.gameObject.SetActive(showDeny);
-    m_CancelButton.gameObject.SetActive(showCancel);
+    if (m_ConfirmButton)
+      m_ConfirmButton.gameObject.SetActive(showConfirm);
+    if (m_DenyButton)
+      m_DenyButton.gameObject.SetActive(showDeny);
+    if (m_CancelButton)
+      m_CancelButton.gameObject.SetActive(showCancel);
   }
 
   public void ConfirmPressed()

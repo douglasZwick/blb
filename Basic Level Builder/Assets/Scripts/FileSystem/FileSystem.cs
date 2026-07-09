@@ -46,6 +46,18 @@ public class FileSystem : FileSystemInternal
     return m_MountedFileInfo.m_SaveFilePath;
   }
 
+  public void WaitForSavingToFinish()
+  {
+    WaitForSavingToFinishEx();
+  }
+
+  // Converts a file and saves it to the default saves directory
+  // Will overwite file if it is in the same directory
+  public bool TryConvertV0FileToV1File(string filePathToConvert, string newFileName, out string newFilePath)
+  {
+    return TryConvertV0FileToV1FileEx(filePathToConvert, newFileName, out newFilePath);
+  }
+
   /// <summary>
   /// Performs a manual save of the current level.
   /// </summary>
