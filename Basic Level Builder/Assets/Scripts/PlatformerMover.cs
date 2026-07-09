@@ -2,6 +2,7 @@
 using UnityEngine.Events;
 
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Collider2D))]
 public class PlatformerMover : MonoBehaviour
 {
   public float m_MovementSpeed = 8;
@@ -10,6 +11,7 @@ public class PlatformerMover : MonoBehaviour
   public float m_TerminalVelocity = 15;
   public Collider2D m_FeetCollider;
   public LayerMask m_SlopeCheckLayerMask;
+  public Vector2 m_LocalSnapOrigin = new(0, -0.5f);
 
   [System.Serializable]
   public class Events
@@ -30,6 +32,7 @@ public class PlatformerMover : MonoBehaviour
 
   Transform m_Transform;
   Rigidbody2D m_Rigidbody;
+  Collider2D m_Collider;
   float m_PreviousX;
   bool m_Grounded = true;
   bool m_Rising = false;
@@ -39,12 +42,16 @@ public class PlatformerMover : MonoBehaviour
   float m_LatestBoostFullDuration;
   readonly float m_BoostWallDetectionEpsilon = 0.001f;
   Vector2 m_SlopeNormal = s_DefaultSlopeNormal;
+  Vector2 m_SnapPoint;
+
+  Vector3 WorldSnapOrigin => m_Transform.TransformPoint(m_LocalSnapOrigin);
 
 
   private void Awake()
   {
     m_Transform = transform;
     m_Rigidbody = GetComponent<Rigidbody2D>();
+    m_Collider = GetComponent<Collider2D>();
 
     m_PreviousX = m_Transform.position.x;
     enabled = false;
@@ -66,6 +73,7 @@ public class PlatformerMover : MonoBehaviour
     HandleGrounding();
     HandleRising();
     HandleBoosting();
+    HandleGroundSnapping();
   }
 
 
@@ -116,6 +124,38 @@ public class PlatformerMover : MonoBehaviour
 
     if (m_Grounded || m_BoostTimer >= m_LatestBoostFullDuration)
       EndBoosting();
+  }
+
+
+  void HandleGroundSnapping()
+  {
+    if (!m_Grounded) return;
+    
+    // var snappedPosition = m_Transform.position;
+    // snappedPosition.y = m_SnapPoint.y;
+    // m_Transform.position = snappedPosition;
+    
+    var worldOffset = m_Transform.TransformVector(m_LocalSnapOrigin);
+    var snapDestinationForTransform = (Vector3)m_SnapPoint - worldOffset;
+    m_Transform.position = snapDestinationForTransform;
+
+    RotateToNormal();
+  }
+
+
+  void RotateToNormal()
+  {
+    // var slopeAngle = Vector2.SignedAngle(s_DefaultSlopeNormal, m_SlopeNormal);
+    // var eulerAngles = Vector3.forward * slopeAngle;
+    // m_Transform.eulerAngles = eulerAngles;
+    // m_Transform.RotateAround(WorldSnapOrigin, Vector3.forward, slopeAngle);
+    m_Transform.rotation = Quaternion.FromToRotation(s_DefaultSlopeNormal, m_SlopeNormal);
+  }
+
+
+  void ResetRotation()
+  {
+    m_Transform.rotation = Quaternion.identity;
   }
 
 
@@ -218,6 +258,7 @@ public class PlatformerMover : MonoBehaviour
   {
     m_Events.LeftGround.Invoke();
     SetSlopeNormal(s_DefaultSlopeNormal);
+    ResetRotation();
   }
 
 
@@ -294,12 +335,22 @@ public class PlatformerMover : MonoBehaviour
   {
     var rayStart = m_Transform.position;
     var rayDirection = -m_SlopeNormal;
+    var results = new RaycastHit2D[1];
     var distance = 1.0f;
     var raycastResult = Physics2D.Raycast(rayStart, rayDirection, distance, ~m_SlopeCheckLayerMask);
+    var sweepHits = m_Collider.Cast(rayDirection, results, distance);
+    // TODO:
+    //   Here's where my mind was going with all this:
+    //   - sweep downward (or really, in the opposite direction of the slope normal)
+    //   - probably only need one hit in the results array
+    //   - do pretty much everything else the same as before, so that now the hit point ends up
+    //     being maybe the corner of the collider rather than near the center of the transform, etc.
+    //   From here, things should all kinda more or less roll out the same way as how they work now
     
     if (raycastResult.collider == null) return;
 
     SetSlopeNormal(raycastResult.normal);
+    SetSnapPoint(raycastResult.point);
   }
 
 
@@ -316,6 +367,15 @@ public class PlatformerMover : MonoBehaviour
     m_SlopeNormal = newNormal;
 
     m_Events.ChangedSlopeNormal.Invoke(movementEventData);
+  }
+
+
+  void SetSnapPoint(Vector2 newPoint)
+  {
+    // TODO:
+    //   There may be some reason to dispatch an event here, but I can't think of what it might be
+
+    m_SnapPoint = newPoint;
   }
 
 
