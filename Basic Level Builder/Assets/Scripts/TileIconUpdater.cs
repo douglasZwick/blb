@@ -1,5 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/***************************************************
+Authors:        Douglas Zwick, Brenden Epp
+Last Updated:   7/20/2026
+
+Copyright 2018-2026, DigiPen Institute of Technology
+***************************************************/
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,6 +18,30 @@ public class TileIconUpdater : MonoBehaviour
   {
     GlobalData.PrimaryTileChanged += OnPrimaryTileChanged;
     GlobalData.SecondaryTileChanged += OnSecondaryTileChanged;
+    GlobalData.TileRotated += OnTileRotated;
+  }
+
+  void OnTileRotated(Direction direction)
+  {
+    int rotation = 0;
+    switch (direction)
+    {
+      case Direction.RIGHT:
+        rotation = 0;
+        break;
+      case Direction.LEFT:
+        rotation = 180;
+        break;
+      case Direction.UP:
+        rotation = -90;
+        break;
+      case Direction.DOWN:
+        rotation = 90;
+        break;
+    }
+    
+    m_PrimaryImage.transform.localRotation = Quaternion.Euler(0,0,rotation);
+    m_SecondaryImage.transform.localRotation = Quaternion.Euler(0,0,rotation);
   }
 
 

@@ -423,10 +423,8 @@ public class TileGrid : MonoBehaviour
   public void AddRequest(Vector2Int gridIndex, TileType tileType, bool cloning = true,
     bool checkUniqueness = true, bool recomputeBounds = true)
   {
-    var state = new TileState
-    {
-      Type = tileType
-    };
+    TileState state = GlobalData.GetTileState();
+    state.Type = tileType;
 
     AddRequest(gridIndex, state, cloning, checkUniqueness, recomputeBounds);
   }

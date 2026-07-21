@@ -1,24 +1,21 @@
 ﻿/***************************************************
 File:           GlobalData.cs
 Authors:        Christopher Onorati
-Last Updated:   6/19/2019
+Last Updated:   7/20/2026
 Last Version:   2019.1.4
 
 Description:
   Houses global data useful across many scripts and
   systems.
 
-Copyright 2018-2019, DigiPen Institute of Technology
+Copyright 2018-2026, DigiPen Institute of Technology
 ***************************************************/
 
 public enum TileType
 {
   EMPTY,
   SOLID,
-  SLOPE_LEFT,
-  SLOPE_RIGHT,
-  SLOPE_LEFT_INV,
-  SLOPE_RIGHT_INV,
+  SLOPE,
   START,
   DEADLY,
   GOAL,
@@ -32,10 +29,7 @@ public enum TileType
   SWITCH,
   BOOSTER,
   BG,
-  BG_LEFT,
-  BG_RIGHT,
-  BG_LEFT_INV,
-  BG_RIGHT_INV,
+  BG_SLOPE,
   MOVESTER,
   GOON,
 }
@@ -342,10 +336,15 @@ public static class GlobalData
   //Currently selected secondary (right mouse) tile.
   static TileType m_SelectedSecondaryTile = TileType.EMPTY;
 
+  static TileState m_TileState = new();
+
   //Events to register tile selection changing.
   public delegate void TileTypeEvent(TileType _tileType);
   public static event TileTypeEvent PrimaryTileChanged;
   public static event TileTypeEvent SecondaryTileChanged;
+
+  public delegate void TileRotationEvent(Direction _direction);
+  public static event TileRotationEvent TileRotated;
 
   /**
   * FUNCTION NAME: GetSelectedPrimaryTile
@@ -403,6 +402,31 @@ public static class GlobalData
 
     //Call the event if anything is attached.
     SecondaryTileChanged?.Invoke(m_SelectedSecondaryTile);
+  }
+
+  /**
+  * FUNCTION NAME: GetTileState
+  * DESCRIPTION  : Get the state of the selected tile.
+  * INPUTS       : None
+  * OUTPUTS      : TileState
+  **/
+  public static TileState GetTileState()
+  {
+    return m_TileState;
+  }
+
+  /**
+  * FUNCTION NAME: SetSelectedTileRotation
+  * DESCRIPTION  : Set the selected tiles rotation
+  * INPUTS       : _direction - The direction to rotate the tile to.
+  * OUTPUTS      : None
+  **/
+  public static void SetSelectedTileRotation(Direction _direction)
+  {
+    m_TileState.Direction = _direction;
+
+    //Call the event if anything is attached.
+    TileRotated?.Invoke(_direction);
   }
 }
 

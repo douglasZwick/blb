@@ -4,7 +4,7 @@ using UnityEngine;
 public class TilesPalette : MonoBehaviour
 {
   // The container holding all the prefabs, keyed by tile type
-  Dictionary<TileType, GameObject> m_TilePrefabs = new Dictionary<TileType, GameObject>();
+  Dictionary<TileType, GameObject> m_TilePrefabs = new();
 
 
   // Start is called before the first frame update
@@ -25,10 +25,7 @@ public class TilesPalette : MonoBehaviour
       { TileType.GOAL,            "Prefabs/Tiles/Tile_Goal" },
       { TileType.DEADLY,          "Prefabs/Tiles/Tile_Deadly" },
       { TileType.START,           "Prefabs/Tiles/Tile_Start" },
-      { TileType.SLOPE_LEFT,      "Prefabs/Tiles/Tile_Slope_Left" },
-      { TileType.SLOPE_RIGHT,     "Prefabs/Tiles/Tile_Slope_Right" },
-      { TileType.SLOPE_LEFT_INV,  "Prefabs/Tiles/Tile_Slope_Left_Inverted" },
-      { TileType.SLOPE_RIGHT_INV, "Prefabs/Tiles/Tile_Slope_Right_Inverted" },
+      { TileType.SLOPE,           "Prefabs/Tiles/Tile_Slope" },
       { TileType.TELEPORTER,      "Prefabs/Tiles/Tile_Teleporter" },
       { TileType.DOOR,            "Prefabs/Tiles/Tile_Door" },
       { TileType.KEY,             "Prefabs/Tiles/Tile_Key" },
@@ -39,10 +36,7 @@ public class TilesPalette : MonoBehaviour
       { TileType.CHECKPOINT,      "Prefabs/Tiles/Tile_Checkpoint" },
       { TileType.BOOSTER,         "Prefabs/Tiles/Tile_Booster" },
       { TileType.BG,              "Prefabs/Tiles/Tile_BG" },
-      { TileType.BG_LEFT,         "Prefabs/Tiles/Tile_BG_Left" },
-      { TileType.BG_RIGHT,        "Prefabs/Tiles/Tile_BG_Right" },
-      { TileType.BG_LEFT_INV,     "Prefabs/Tiles/Tile_BG_Left_Inv" },
-      { TileType.BG_RIGHT_INV,    "Prefabs/Tiles/Tile_BG_Right_Inv" },
+      { TileType.BG_SLOPE,        "Prefabs/Tiles/Tile_BG_Slope" },
       { TileType.MOVESTER,        "Prefabs/Tiles/Tile_Movester" },
       { TileType.GOON,            "Prefabs/Tiles/Tile_Goon" },
     };
