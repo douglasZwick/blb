@@ -1,5 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/***************************************************
+Authors:        Douglas Zwick, Brenden Epp
+Last Updated:   7/20/2026
+
+Copyright 2018-2026, DigiPen Institute of Technology
+***************************************************/
+
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -17,6 +22,13 @@ public class LevelWindow : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     m_CameraController = m_Camera.GetComponent<EditorCameraController>();
   }
 
+  private void Update()
+  {
+    if (Input.GetButtonDown("ResetCamera"))
+    {
+      GlobalData.RotateSelectedTileClockwise();
+    }
+  }
 
   public void OnPointerDown(PointerEventData e)
   {

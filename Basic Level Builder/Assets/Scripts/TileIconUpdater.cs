@@ -23,22 +23,14 @@ public class TileIconUpdater : MonoBehaviour
 
   void OnTileRotated(Direction direction)
   {
-    int rotation = 0;
-    switch (direction)
+    int rotation = direction switch
     {
-      case Direction.RIGHT:
-        rotation = 0;
-        break;
-      case Direction.LEFT:
-        rotation = 180;
-        break;
-      case Direction.UP:
-        rotation = -90;
-        break;
-      case Direction.DOWN:
-        rotation = 90;
-        break;
-    }
+      Direction.RIGHT => 0,
+      Direction.LEFT => 180,
+      Direction.UP => -90,
+      Direction.DOWN => 90,
+      _ => 0,
+    };
     
     m_PrimaryImage.transform.localRotation = Quaternion.Euler(0,0,rotation);
     m_SecondaryImage.transform.localRotation = Quaternion.Euler(0,0,rotation);

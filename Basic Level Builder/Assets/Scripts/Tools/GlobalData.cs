@@ -428,6 +428,46 @@ public static class GlobalData
     //Call the event if anything is attached.
     TileRotated?.Invoke(_direction);
   }
+
+  public static void RotateSelectedTileClockwise()
+  {
+    m_TileState.Direction = GetRotatedDirectionClockwise(m_TileState.Direction);
+
+    //Call the event if anything is attached.
+    TileRotated?.Invoke(m_TileState.Direction);
+  }
+
+  public static void RotateSelectedTileCounterClockwise()
+  {
+    m_TileState.Direction = GetRotatedDirectionCounterClockwise(m_TileState.Direction);
+
+    //Call the event if anything is attached.
+    TileRotated?.Invoke(m_TileState.Direction);
+  }
+
+  static Direction GetRotatedDirectionClockwise(Direction _direction)
+  {
+    return _direction switch
+    {
+      Direction.RIGHT => Direction.DOWN,
+      Direction.DOWN => Direction.LEFT,
+      Direction.LEFT => Direction.UP,
+      Direction.UP => Direction.RIGHT,
+      _ => _direction,
+    };
+  }
+
+  static Direction GetRotatedDirectionCounterClockwise(Direction _direction)
+  {
+    return _direction switch
+    {
+      Direction.RIGHT => Direction.UP,
+      Direction.UP => Direction.LEFT,
+      Direction.LEFT => Direction.DOWN,
+      Direction.DOWN => Direction.RIGHT,
+      _ => _direction,
+    };
+  }
 }
 
 
