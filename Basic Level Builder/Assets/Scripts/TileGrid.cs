@@ -35,9 +35,6 @@ public class TileGrid : MonoBehaviour
 
       if (gameObject.TryGetComponent<ColorCode>(out var colorCode))
         colorCode.m_Element = this;
-
-      if (gameObject.TryGetComponent<TileDirection>(out var tileDirection))
-        tileDirection.m_Element = this;
     }
 
     public void WriteBinary(System.IO.BinaryWriter writer)

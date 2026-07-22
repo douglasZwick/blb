@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -206,7 +204,7 @@ public class PlatformerMover : MonoBehaviour
 
   public void OnBoostTriggered(BoostLogicEventData eventData)
   {
-    var direction = eventData.m_TileDirection.m_Direction;
+    var direction = eventData.m_TileDirection.Get();
     var boostSpeed = eventData.m_BoostLogic.m_Speed;
     var velocity = m_Rigidbody.velocity;
     var preventMovementInput = false;

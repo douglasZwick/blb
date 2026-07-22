@@ -1,5 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/***************************************************
+Authors:        Douglas Zwick, Brenden Epp
+Last Updated:   7/21/2026
+
+Copyright 2018-2026, DigiPen Institute of Technology
+***************************************************/
+
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -11,47 +16,34 @@ public class TileDirection : MonoBehaviour
   [System.Serializable]
   public class Events
   {
-    public TileDirectionEvent DirectionInitialized;
     public TileDirectionEvent DirectionSet;
   }
 
   public Events m_Events;
+  
+  [SerializeField]
+  private Transform m_TransformToRotate;
 
-  [HideInInspector]
-  public Direction m_Direction;
-  [HideInInspector]
-  public TileGrid.Element m_Element;
+  private Direction m_direction;
 
-
-  public void Initialize(Direction direction)
+  public Direction Get()
   {
-    SetHelper(direction, initialize: true);
+    return m_direction;
   }
-
 
   public void Set(Direction direction)
   {
-    SetHelper(direction, initialize: false);
-  }
+    m_direction = direction;
 
-
-  void SetHelper(Direction direction, bool initialize = false)
-  {
-    m_Direction = direction;
-    if (m_Element != null)
-      m_Element.m_Direction = direction;
-
-    DirectionSet?.Invoke(direction);
-
-    var eventData = new TileDirectionEventData()
+    var angle = direction switch
     {
-      m_Direction = direction,
+      Direction.UP => 90,
+      Direction.LEFT => 180,
+      Direction.DOWN => -90,
+      // Direction.RIGHT
+      _ => (float)0,
     };
-
-    if (initialize)
-      m_Events.DirectionInitialized.Invoke(eventData);
-    else
-      m_Events.DirectionSet.Invoke(eventData);
+    m_TransformToRotate.localEulerAngles = Vector3.forward * angle;
   }
 }
 

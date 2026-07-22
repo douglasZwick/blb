@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 [RequireComponent(typeof(PlatformerMover))]
-[RequireComponent(typeof(TileDirection))]
+[RequireComponent(typeof(EyesController))]
 public class PlatformerController : MonoBehaviour
 {
   [System.Serializable]
@@ -17,7 +15,7 @@ public class PlatformerController : MonoBehaviour
   public Events m_Events;
 
   PlatformerMover m_Mover;
-  TileDirection m_TileDirection;
+  EyesController m_EyesController;
   bool m_CanMove = true;
   bool m_CanJump = true;
   float m_InputAxis = 0;
@@ -28,7 +26,7 @@ public class PlatformerController : MonoBehaviour
   private void Awake()
   {
     m_Mover = GetComponent<PlatformerMover>();
-    m_TileDirection = GetComponent<TileDirection>();
+    m_EyesController = GetComponent<EyesController>();
   }
 
 
@@ -82,16 +80,16 @@ public class PlatformerController : MonoBehaviour
     m_FacingDirection = Direction.LEFT;
 
     m_Events.FacedLeft.Invoke(new FacingEventData());
-    m_TileDirection.Set(m_FacingDirection);
+    m_EyesController.FaceLeft();
   }
 
 
-  void FaceRight(bool snap = false)
+  void FaceRight()
   {
     m_FacingDirection = Direction.RIGHT;
 
     m_Events.FacedRight.Invoke(new FacingEventData());
-    m_TileDirection.Set(m_FacingDirection);
+    m_EyesController.FaceRight();
   }
 
 

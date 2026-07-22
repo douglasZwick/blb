@@ -118,13 +118,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Events:
-    DirectionInitialized:
-      m_PersistentCalls:
-        m_Calls: []
     DirectionSet:
       m_PersistentCalls:
         m_Calls: []
-  m_Direction: 0
+  m_TransformToRotate: {fileID: 5684516761742904209}
 --- !u!1 &8593485134159358653
 GameObject:
   m_ObjectHideFlags: 0

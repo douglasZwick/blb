@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EyesController : MonoBehaviour
 {
@@ -239,9 +237,9 @@ public class EyesController : MonoBehaviour
   }
 
 
-  public void OnDirectionInitialized(TileDirectionEventData eventData)
+  public void InitializeDirection(Direction _direction)
   {
-    switch (eventData.m_Direction)
+    switch (_direction)
     {
       case Direction.LEFT:
         FaceLeft(snap: true);

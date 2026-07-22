@@ -1,5 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/***************************************************
+Authors:        Douglas Zwick
+Last Updated:   7/20/2026
+
+Copyright 2018-2026, DigiPen Institute of Technology
+***************************************************/
+
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;

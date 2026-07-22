@@ -13,8 +13,9 @@ Copyright 2018-2019, DigiPen Institute of Technology
 
 using UnityEngine;
 using System.Collections.Generic;
-
 [RequireComponent(typeof(TileDirection))]
+
+[RequireComponent(typeof(Transform))]
 public class StartTileLogic : MonoBehaviour
 {
   /************************************************************************************/
@@ -32,7 +33,7 @@ public class StartTileLogic : MonoBehaviour
 
   //Game object's sprite renderer.
   public List<SpriteRenderer> m_SpriteRenderers;
-  List<float> m_EditModeOpacities = new List<float>();
+  List<float> m_EditModeOpacities = new();
 
   public float m_PlayModeOpacity = 0.25f;
 
@@ -62,10 +63,9 @@ public class StartTileLogic : MonoBehaviour
       m_Hero = Instantiate(m_HeroPrefab, m_cTransform.position, Quaternion.identity);
 
       var tileDirection = m_Hero.GetComponent<TileDirection>();
-      tileDirection?.Initialize(m_TileDirection.m_Direction);
+      tileDirection?.Set(m_TileDirection.Get());
 
-      var ghostMaker = m_Hero.GetComponent<GhostMaker>();
-      if (ghostMaker != null)
+      if (m_Hero.TryGetComponent<GhostMaker>(out var ghostMaker))
         ghostMaker.enabled = GhostToggler.s_IsInGhostMode;
     }
   }

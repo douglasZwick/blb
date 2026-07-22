@@ -1,5 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/***************************************************
+Authors:        Douglas Zwick
+Last Updated:   7/20/2026
+
+Copyright 2018-2026, DigiPen Institute of Technology
+***************************************************/
+
 using UnityEngine;
 
 public class DirectionPickerDialog : ModalDialog
@@ -9,7 +14,7 @@ public class DirectionPickerDialog : ModalDialog
   public bool m_LeftAllowed = true;
   public bool m_DownAllowed = true;
   public float m_OpenDuration = 0.25f;
-  public Vector3 m_InitialScale = new Vector3(0, 4, 1);
+  public Vector3 m_InitialScale = new(0, 4, 1);
 
   bool m_AcceptingInput = false;
 

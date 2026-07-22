@@ -72,8 +72,7 @@ public class OperationSystem : MonoBehaviour
 
   static public void Perform(Operation operation = null)
   {
-    if (operation == null)
-      operation = s_CurrentOperation;
+    operation ??= s_CurrentOperation;
 
     if (operation.m_IncrementOperationCounter)
       ++s_OperationCounter;

@@ -121,7 +121,7 @@ public class CameraController : MonoBehaviour
     if (m_Target != null)
     {
       m_TargetDirection = m_Target.GetComponent<TileDirection>();
-      m_FacingLeft = m_TargetDirection.m_Direction == Direction.LEFT;
+      m_FacingLeft = m_TargetDirection.Get() == Direction.LEFT;
       m_Offset = m_FacingLeft ? m_LeftFacingOffset : m_RightFacingOffset;
 
       var eventData = new CameraControllerEventData()
@@ -136,7 +136,7 @@ public class CameraController : MonoBehaviour
   
   void TrackTarget()
   {
-    var targetIsFacingLeft = m_TargetDirection.m_Direction == Direction.LEFT;
+    var targetIsFacingLeft = m_TargetDirection.Get() == Direction.LEFT;
 
     if      (targetIsFacingLeft && !m_FacingLeft)
       FaceLeft();

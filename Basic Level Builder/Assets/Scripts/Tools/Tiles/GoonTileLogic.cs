@@ -1,7 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(TileDirection))]
 public class GoonTileLogic : MonoBehaviour
 {
   public GameObject m_GoonPrefab;
@@ -57,12 +57,10 @@ public class GoonTileLogic : MonoBehaviour
     m_Goon = Instantiate(m_GoonPrefab, m_Transform.position, Quaternion.identity);
 
     // set direction stuff here
-    var tileDirection = m_Goon.GetComponent<TileDirection>();
-    if (tileDirection != null)
-      tileDirection.Initialize(m_TileDirection.m_Direction);
+    if (m_Goon.TryGetComponent<TileDirection>(out var tileDirection))
+      tileDirection.Set(m_TileDirection.Get());
 
-    var ghostMaker = m_Goon.GetComponent<GhostMaker>();
-    if (ghostMaker != null)
+    if (m_Goon.TryGetComponent<GhostMaker>(out var ghostMaker))
       ghostMaker.enabled = GhostToggler.s_IsInGhostMode;
 
     if (m_HeroHasReturned)
