@@ -25,10 +25,10 @@ public class TileIconUpdater : MonoBehaviour
   {
     int rotation = direction switch
     {
-      Direction.RIGHT => 0,
       Direction.LEFT => 180,
-      Direction.UP => -90,
-      Direction.DOWN => 90,
+      Direction.UP => 90,
+      Direction.DOWN => -90,
+      //Direction.RIGHT => 0,
       _ => 0,
     };
     
