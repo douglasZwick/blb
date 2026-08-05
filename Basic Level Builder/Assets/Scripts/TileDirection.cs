@@ -16,13 +16,14 @@ public class TileDirection : MonoBehaviour
   [System.Serializable]
   public class Events
   {
+    public TileDirectionEvent DirectionInitialized;
     public TileDirectionEvent DirectionSet;
   }
 
+  [HideInInspector]
   public Events m_Events;
-  
-  [SerializeField]
-  private Transform m_TransformToRotate;
+  [HideInInspector]
+  public TileGrid.Element m_Element;
 
   private Direction m_Direction;
 
@@ -33,17 +34,27 @@ public class TileDirection : MonoBehaviour
 
   public void Set(Direction direction)
   {
-    m_Direction = direction;
+    SetHelper(direction, initialize: false);
+  }
 
-    var angle = direction switch
+
+  void SetHelper(Direction direction, bool initialize = false)
+  {
+    m_Direction = direction;
+    if (m_Element != null)
+      m_Element.m_Direction = direction;
+
+    DirectionSet?.Invoke(direction);
+
+    var eventData = new TileDirectionEventData()
     {
-      Direction.UP => 90,
-      Direction.LEFT => 180,
-      Direction.DOWN => -90,
-      // Direction.RIGHT
-      _ => (float)0,
+      m_Direction = direction,
     };
-    m_TransformToRotate.localEulerAngles = Vector3.forward * angle;
+
+    if (initialize)
+      m_Events.DirectionInitialized.Invoke(eventData);
+    else
+      m_Events.DirectionSet.Invoke(eventData);
   }
 }
 

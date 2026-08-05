@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 6080695398795374185}
   - component: {fileID: 3598688716957493819}
   - component: {fileID: 6903336292396730471}
-  - component: {fileID: 4975138782032309558}
   m_Layer: 0
   m_Name: Tile_Invisible_Solid
   m_TagString: Untagged
@@ -125,20 +124,3 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &4975138782032309558
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6080695398795374187}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25e647a626d218b408606ac9edf0190f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Events:
-    DirectionSet:
-      m_PersistentCalls:
-        m_Calls: []
-  m_TransformToRotate: {fileID: 6080695398795374198}

@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: -5356048355145295569}
   - component: {fileID: 3600759253087379688}
   - component: {fileID: 8797513125405297005}
+  - component: {fileID: 3230997480353589453}
   m_Layer: 0
   m_Name: Tile_Key
   m_TagString: Untagged
@@ -183,7 +184,19 @@ MonoBehaviour:
     DirectionSet:
       m_PersistentCalls:
         m_Calls: []
-  m_TransformToRotate: {fileID: 4029083936229913722}
+--- !u!114 &3230997480353589453
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7417598986298400714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff8a49fe51d78b53bacb97d7abb56d0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_TransformToRotate: {fileID: 0}
 --- !u!1 &8354327167606477140
 GameObject:
   m_ObjectHideFlags: 0

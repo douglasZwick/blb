@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5644342353675390255}
   - component: {fileID: 283536378192802615}
   - component: {fileID: 2703046870549475963}
+  - component: {fileID: 5136824983586040282}
   m_Layer: 0
   m_Name: Tile_Slope
   m_TagString: Untagged
@@ -150,7 +151,19 @@ MonoBehaviour:
     DirectionSet:
       m_PersistentCalls:
         m_Calls: []
-  m_TransformToRotate: {fileID: 5684516761742904209}
+--- !u!114 &5136824983586040282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1186778744106086756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff8a49fe51d78b53bacb97d7abb56d0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_TransformToRotate: {fileID: 0}
 --- !u!1 &8593485134159358653
 GameObject:
   m_ObjectHideFlags: 0

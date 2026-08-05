@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 25712228652587004}
   - component: {fileID: 943375513558150438}
   - component: {fileID: 6748563365592518047}
-  - component: {fileID: 3404998591030517969}
   m_Layer: 16
   m_Name: Tile_Deadly
   m_TagString: Deadly
@@ -112,20 +111,3 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.8, y: 0.8}
   m_EdgeRadius: 0
---- !u!114 &3404998591030517969
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6624018820151266697}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25e647a626d218b408606ac9edf0190f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Events:
-    DirectionSet:
-      m_PersistentCalls:
-        m_Calls: []
-  m_TransformToRotate: {fileID: 25712228652587004}

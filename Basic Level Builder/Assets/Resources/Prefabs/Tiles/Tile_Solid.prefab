@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 5504956831607693281}
   - component: {fileID: -5093202948428583099}
   - component: {fileID: 4026025610722471354}
-  - component: {fileID: 7612166311084482752}
   m_Layer: 0
   m_Name: Tile_Solid
   m_TagString: Untagged
@@ -132,23 +131,6 @@ MonoBehaviour:
   m_SolidLeft: 1
   m_SolidDown: 1
   m_OutlineIndex: 0
---- !u!114 &7612166311084482752
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 444889570543657852}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25e647a626d218b408606ac9edf0190f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Events:
-    DirectionSet:
-      m_PersistentCalls:
-        m_Calls: []
-  m_TransformToRotate: {fileID: 3123835300484091226}
 --- !u!1 &3749488100505163930
 GameObject:
   m_ObjectHideFlags: 0

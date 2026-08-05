@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4838597614542649425}
   - component: {fileID: 7199637267045108910}
-  - component: {fileID: 1994978769424068366}
   m_Layer: 0
   m_Name: Tile_Coin
   m_TagString: Untagged
@@ -51,23 +50,6 @@ MonoBehaviour:
     type: 3}
   m_PlayModeAlpha: 0.25
   m_PlayModeSize: 0.5
---- !u!114 &1994978769424068366
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4046465146924048632}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25e647a626d218b408606ac9edf0190f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Events:
-    DirectionSet:
-      m_PersistentCalls:
-        m_Calls: []
-  m_TransformToRotate: {fileID: 4838597614542649425}
 --- !u!1 &6717434275420800597
 GameObject:
   m_ObjectHideFlags: 0

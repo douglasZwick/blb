@@ -206,6 +206,7 @@ GameObject:
   - component: {fileID: 1671602638184258294}
   - component: {fileID: 1149492697641540430}
   - component: {fileID: 8301141548405236559}
+  - component: {fileID: 5994100319958354356}
   m_Layer: 0
   m_Name: Tile_Door
   m_TagString: Untagged
@@ -375,7 +376,19 @@ MonoBehaviour:
     DirectionSet:
       m_PersistentCalls:
         m_Calls: []
-  m_TransformToRotate: {fileID: 2714937062627134446}
+--- !u!114 &5994100319958354356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2683386369050463496}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff8a49fe51d78b53bacb97d7abb56d0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_TransformToRotate: {fileID: 0}
 --- !u!1 &8367173894955029438
 GameObject:
   m_ObjectHideFlags: 0

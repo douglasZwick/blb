@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 2641357043984146709}
   - component: {fileID: 4435381154685128869}
   - component: {fileID: 5656818362296302086}
-  - component: {fileID: 8501288846685764686}
   - component: {fileID: 3789331763790746118}
   - component: {fileID: 8014308285157944092}
+  - component: {fileID: 629247214627645186}
   m_Layer: 13
   m_Name: Tile_Booster
   m_TagString: Booster
@@ -134,21 +134,6 @@ MonoBehaviour:
     DirectionSet:
       m_PersistentCalls:
         m_Calls: []
-  m_TransformToRotate: {fileID: 9125183268848921903}
---- !u!114 &8501288846685764686
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 723827454559749994}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 669a6586aefca754ba1732319aa8a037, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_ModalDialogPrefabs:
-  - {fileID: 976295625996630222, guid: 8a426249609314c4f933c70d1f240160, type: 3}
 --- !u!114 &3789331763790746118
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -179,6 +164,19 @@ MonoBehaviour:
   m_Speed: 40
   m_Delay: 0.25
   m_FullDuration: 0.5
+--- !u!114 &629247214627645186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 723827454559749994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff8a49fe51d78b53bacb97d7abb56d0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_TransformToRotate: {fileID: 0}
 --- !u!1 &962123255176292449
 GameObject:
   m_ObjectHideFlags: 0

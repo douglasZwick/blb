@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 5767379567106851379}
   - component: {fileID: 8145677195323914940}
   - component: {fileID: 6760341572106545741}
+  - component: {fileID: 4365300959687903271}
   m_Layer: 10
   m_Name: Tile_Checkpoint
   m_TagString: Checkpoint
@@ -277,7 +278,19 @@ MonoBehaviour:
     DirectionSet:
       m_PersistentCalls:
         m_Calls: []
-  m_TransformToRotate: {fileID: 6416475080455372080}
+--- !u!114 &4365300959687903271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6416475080455372093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff8a49fe51d78b53bacb97d7abb56d0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_TransformToRotate: {fileID: 0}
 --- !u!1 &7071178184160475496
 GameObject:
   m_ObjectHideFlags: 0
