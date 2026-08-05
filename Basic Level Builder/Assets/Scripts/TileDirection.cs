@@ -24,16 +24,16 @@ public class TileDirection : MonoBehaviour
   [SerializeField]
   private Transform m_TransformToRotate;
 
-  private Direction m_direction;
+  private Direction m_Direction;
 
   public Direction Get()
   {
-    return m_direction;
+    return m_Direction;
   }
 
   public void Set(Direction direction)
   {
-    m_direction = direction;
+    m_Direction = direction;
 
     var angle = direction switch
     {

@@ -24,7 +24,11 @@ public class LevelWindow : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
   private void Update()
   {
-    if (Input.GetButtonDown("ResetCamera"))
+    if (Input.GetButtonDown("RotateLeft"))
+    {
+      GlobalData.RotateSelectedTileCounterClockwise();
+    }
+    else if (Input.GetButtonDown("RotateRight"))
     {
       GlobalData.RotateSelectedTileClockwise();
     }

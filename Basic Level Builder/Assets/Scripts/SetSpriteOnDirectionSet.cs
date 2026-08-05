@@ -24,28 +24,14 @@ public class SetSpriteOnDirectionSet : MonoBehaviour
 
   void OnDirectionSet(Direction direction)
   {
-    Sprite sprite;
-
-    switch (direction)
+    m_SpriteRenderer.sprite = direction switch
     {
-      default:  // Direction.RIGHT
-        sprite = m_RightSprite;
-        break;
-
-      case Direction.UP:
-        sprite = m_UpSprite;
-        break;
-
-      case Direction.LEFT:
-        sprite = m_LeftSprite;
-        break;
-
-      case Direction.DOWN:
-        sprite = m_DownSprite;
-        break;
-    }
-
-    m_SpriteRenderer.sprite = sprite;
+      Direction.UP => m_UpSprite,
+      Direction.LEFT => m_LeftSprite,
+      Direction.DOWN => m_DownSprite,
+      // Direction.RIGHT
+      _ => m_RightSprite,
+    };
   }
 
 
