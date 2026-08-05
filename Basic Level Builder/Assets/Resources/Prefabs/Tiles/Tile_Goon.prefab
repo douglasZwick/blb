@@ -180,7 +180,6 @@ GameObject:
   - component: {fileID: 7326532416983297612}
   - component: {fileID: 4971718309489348859}
   - component: {fileID: -50962303454291192}
-  - component: {fileID: 1336599350999761522}
   - component: {fileID: 3840131100542835729}
   m_Layer: 0
   m_Name: Tile_Goon
@@ -219,10 +218,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Events:
+    DirectionInitialized:
+      m_PersistentCalls:
+        m_Calls: []
     DirectionSet:
       m_PersistentCalls:
         m_Calls: []
-  m_TransformToRotate: {fileID: 7326532416983297612}
 --- !u!114 &-50962303454291192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -242,20 +243,6 @@ MonoBehaviour:
   m_LeftSprite: {fileID: 1139888846674689098, guid: 94aee876e2dd0684da76b9afbd769ef3,
     type: 3}
   m_DownSprite: {fileID: 0}
---- !u!114 &1336599350999761522
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4475299631014261817}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 669a6586aefca754ba1732319aa8a037, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_ModalDialogPrefabs:
-  - {fileID: 976295625996630222, guid: b76e2218473f5534696782d37624d1d9, type: 3}
 --- !u!114 &3840131100542835729
 MonoBehaviour:
   m_ObjectHideFlags: 0

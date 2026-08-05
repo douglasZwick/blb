@@ -181,7 +181,6 @@ GameObject:
   - component: {fileID: -8846341513977303100}
   - component: {fileID: 4971718309489348859}
   - component: {fileID: -50962303454291192}
-  - component: {fileID: 1336599350999761522}
   m_Layer: 0
   m_Name: Tile_Start
   m_TagString: Tile_Start
@@ -237,10 +236,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Events:
+    DirectionInitialized:
+      m_PersistentCalls:
+        m_Calls: []
     DirectionSet:
       m_PersistentCalls:
         m_Calls: []
-  m_TransformToRotate: {fileID: 7326532416983297612}
 --- !u!114 &-50962303454291192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -260,17 +261,3 @@ MonoBehaviour:
   m_LeftSprite: {fileID: 6007835128358662596, guid: b0523335f04050044afb58447741b422,
     type: 3}
   m_DownSprite: {fileID: 0}
---- !u!114 &1336599350999761522
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4475299631014261817}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 669a6586aefca754ba1732319aa8a037, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_ModalDialogPrefabs:
-  - {fileID: 976295625996630222, guid: b76e2218473f5534696782d37624d1d9, type: 3}
