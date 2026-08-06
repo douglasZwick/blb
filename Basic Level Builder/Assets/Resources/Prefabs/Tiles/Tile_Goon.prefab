@@ -224,6 +224,7 @@ MonoBehaviour:
     DirectionSet:
       m_PersistentCalls:
         m_Calls: []
+  m_DirectionType: 2
 --- !u!114 &-50962303454291192
 MonoBehaviour:
   m_ObjectHideFlags: 0

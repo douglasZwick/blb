@@ -242,6 +242,7 @@ MonoBehaviour:
     DirectionSet:
       m_PersistentCalls:
         m_Calls: []
+  m_DirectionType: 2
 --- !u!114 &-50962303454291192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -256,9 +257,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_SpriteRenderer: {fileID: 5492629531808801691}
   m_SpriteRotations:
-    m_RightSprite: {fileID: 6007835128358662596, guid: b0523335f04050044afb58447741b422,
+    m_RightSprite: {fileID: -2117391412292844761, guid: b0523335f04050044afb58447741b422,
       type: 3}
     m_UpSprite: {fileID: 0}
-    m_LeftSprite: {fileID: -2117391412292844761, guid: b0523335f04050044afb58447741b422,
+    m_LeftSprite: {fileID: 6007835128358662596, guid: b0523335f04050044afb58447741b422,
       type: 3}
     m_DownSprite: {fileID: 0}

@@ -26,6 +26,7 @@ public class TileDirection : MonoBehaviour
   public TileGrid.Element m_Element;
 
   private Direction m_Direction;
+  public DirectionType m_DirectionType = DirectionType.ORTHOGONAL;
 
   public Direction Get()
   {

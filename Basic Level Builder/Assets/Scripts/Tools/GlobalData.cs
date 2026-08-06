@@ -11,6 +11,9 @@ Description:
 Copyright 2018-2026, DigiPen Institute of Technology
 ***************************************************/
 
+using System.Linq;
+using UnityEngine;
+
 public enum TileType
 {
   EMPTY,
@@ -52,7 +55,13 @@ public enum Direction
   DOWN,
   LEFT,
   UP,
-  COUNT,
+}
+
+public enum DirectionType
+{
+  ORTHOGONAL,
+  UP_DOWN,
+  LEFT_RIGHT,
 }
 
 /**
@@ -337,6 +346,9 @@ public static class GlobalData
   //Currently selected secondary (right mouse) tile.
   static TileType m_SelectedSecondaryTile = TileType.EMPTY;
 
+  // The direction for a tile with only two directions will be in
+  static int m_DuoDirectionRotation = 0;
+
   static TileState m_TileState = new();
 
   //Events to register tile selection changing.
@@ -344,7 +356,7 @@ public static class GlobalData
   public static event TileTypeEvent PrimaryTileChanged;
   public static event TileTypeEvent SecondaryTileChanged;
 
-  public delegate void TileRotationEvent(Direction _direction);
+  public delegate void TileRotationEvent();
   public static event TileRotationEvent TileRotated;
 
   /**
@@ -417,6 +429,28 @@ public static class GlobalData
   }
 
   /**
+  * FUNCTION NAME: GetTileState
+  * DESCRIPTION  : Get the state of the selected tile.
+  * INPUTS       : directionType: the type of direction setting the tile has
+  * OUTPUTS      : TileState
+  **/
+  public static TileState GetTileState(DirectionType directionType)
+  {
+    if (directionType == DirectionType.ORTHOGONAL)
+      return GetTileState();
+
+
+    TileState state = m_TileState;
+
+    int dir = m_DuoDirectionRotation * 2;
+    if (directionType == DirectionType.UP_DOWN)
+      ++dir;
+    state.Direction = (Direction)dir;
+
+    return state;
+  }
+
+  /**
   * FUNCTION NAME: SetSelectedTileRotation
   * DESCRIPTION  : Set the selected tiles rotation
   * INPUTS       : _direction - The direction to rotate the tile to.
@@ -425,38 +459,44 @@ public static class GlobalData
   public static void SetSelectedTileRotation(Direction _direction)
   {
     m_TileState.Direction = _direction;
+    // Convert the direction to left or right
+    m_DuoDirectionRotation = ((int)_direction).Mod(2);
 
     //Call the event if anything is attached.
-    TileRotated?.Invoke(_direction);
+    TileRotated?.Invoke();
   }
 
   public static void RotateSelectedTileClockwise()
   {
-    m_TileState.Direction = GetRotatedDirectionClockwise(m_TileState.Direction);
+    m_TileState.Direction = GetRotatedDirectionByAmount(m_TileState.Direction, 1);
+    m_DuoDirectionRotation = (m_DuoDirectionRotation + 1).Mod(2);
 
     //Call the event if anything is attached.
-    TileRotated?.Invoke(m_TileState.Direction);
+    TileRotated?.Invoke();
   }
 
   public static void RotateSelectedTileCounterClockwise()
   {
-    m_TileState.Direction = GetRotatedDirectionCounterClockwise(m_TileState.Direction);
+    m_TileState.Direction = GetRotatedDirectionByAmount(m_TileState.Direction, -1);
+    m_DuoDirectionRotation = (m_DuoDirectionRotation - 1).Mod(2);
 
     //Call the event if anything is attached.
-    TileRotated?.Invoke(m_TileState.Direction);
+    TileRotated?.Invoke();
   }
 
-  static Direction GetRotatedDirectionClockwise(Direction _direction)
+  static Direction GetRotatedDirectionByAmount(Direction _direction, int amount)
   {
-    return (Direction)(((int)_direction + 1) % (int)Direction.COUNT);
-  }
-
-  static Direction GetRotatedDirectionCounterClockwise(Direction _direction)
-  {
-    return (Direction)(((int)_direction - 1) % (int)Direction.COUNT);
+    return (Direction)((int)_direction + amount).Mod(4);
   }
 }
 
+public static class MathExtensions
+{
+  public static int Mod(this int x, int m)
+  {
+    return (x % m + m) % m;
+  }
+}
 
 public class PlayModeEventData
 {

@@ -420,7 +420,7 @@ public class TileGrid : MonoBehaviour
   public void AddRequest(Vector2Int gridIndex, TileType tileType, bool cloning = true,
     bool checkUniqueness = true, bool recomputeBounds = true)
   {
-    TileState state = GlobalData.GetTileState();
+    TileState state = GlobalData.GetTileState(GetTileDirectionType(tileType));
     state.Type = tileType;
 
     AddRequest(gridIndex, state, cloning, checkUniqueness, recomputeBounds);
@@ -702,6 +702,15 @@ public class TileGrid : MonoBehaviour
         return false;
 
     return true;
+  }
+
+  private DirectionType GetTileDirectionType(TileType type)
+  {
+    GameObject tilePrefab = m_TilesPalette.GetPrefabFromType(type);
+    if (tilePrefab != null && tilePrefab.TryGetComponent(out TileDirection tileDirection)){
+      return tileDirection.m_DirectionType;
+    }
+    return DirectionType.ORTHOGONAL;
   }
 }
 

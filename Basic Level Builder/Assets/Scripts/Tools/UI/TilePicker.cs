@@ -20,7 +20,7 @@ using UnityEngine.EventSystems; //Access to Unity events for the mouse.
 [RequireComponent(typeof(Image))]
 public class TilePicker : MonoBehaviour, IPointerClickHandler
 {
-  public static Dictionary<TileType, Image> s_Icons = new Dictionary<TileType, Image>();
+  public static Dictionary<TileType, Image> s_Icons = new();
 
   /************************************************************************************/
 

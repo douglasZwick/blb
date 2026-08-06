@@ -23,23 +23,27 @@ public class TileIconUpdater : MonoBehaviour
   private TileType m_PrimaryTileType, m_SecondaryTileType;
   [SerializeField]
   private List<TileSpriteRotations> m_TileRoationSprites;
-
+  private TilesPalette m_TilesPalette;
 
   private void Awake()
   {
     GlobalData.PrimaryTileChanged += OnPrimaryTileChanged;
     GlobalData.SecondaryTileChanged += OnSecondaryTileChanged;
     GlobalData.TileRotated += OnTileRotated;
+    m_TilesPalette = FindObjectOfType<TilesPalette>();
   }
 
-  void OnTileRotated(Direction direction)
+  void OnTileRotated()
   {
-    ApplyTileVisual(m_PrimaryTileType, m_PrimaryImage, direction);
-    ApplyTileVisual(m_SecondaryTileType, m_SecondaryImage, direction);
+    ApplyTileVisual(m_PrimaryTileType, m_PrimaryImage, GetTileDirection(m_PrimaryTileType));
+    ApplyTileVisual(m_SecondaryTileType, m_SecondaryImage, GetTileDirection(m_SecondaryTileType));
   }
 
   private void ApplyTileVisual(TileType tileType, Image img, Direction direction)
   {
+    var icon = TilePicker.s_Icons[tileType];
+    img.color = icon.color;
+
     foreach (TileSpriteRotations tileSpriteRotations in m_TileRoationSprites)
     {
       if (tileSpriteRotations.m_tileType == tileType)
@@ -50,9 +54,7 @@ public class TileIconUpdater : MonoBehaviour
       }
     }
 
-    var icon = TilePicker.s_Icons[tileType];
     img.sprite = icon.sprite;
-    img.color = icon.color;
     RotateTransform(direction, img);
   }
 
@@ -74,14 +76,25 @@ public class TileIconUpdater : MonoBehaviour
   void OnPrimaryTileChanged(TileType type)
   {
     m_PrimaryTileType = type;
-    ApplyTileVisual(type, m_PrimaryImage, GlobalData.GetTileState().Direction);
+    ApplyTileVisual(type, m_PrimaryImage, GetTileDirection(type));
   }
 
 
   void OnSecondaryTileChanged(TileType type)
   {
     m_SecondaryTileType = type;
-    ApplyTileVisual(type, m_SecondaryImage, GlobalData.GetTileState().Direction);
+    ApplyTileVisual(type, m_SecondaryImage, GetTileDirection(type));
+  }
+
+  private Direction GetTileDirection(TileType type)
+  {
+    GameObject tilePrefab = m_TilesPalette.GetPrefabFromType(type);
+    if (tilePrefab != null && tilePrefab.TryGetComponent(out TileDirection tileDirection)){
+      return GlobalData.GetTileState(tileDirection.m_DirectionType).Direction;
+    }
+
+    // If the tile dosn't have a tileDirection then don't rotate the preview
+    return Direction.RIGHT;
   }
 
 

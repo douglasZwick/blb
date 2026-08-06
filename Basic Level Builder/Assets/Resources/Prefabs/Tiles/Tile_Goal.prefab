@@ -379,9 +379,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Events:
+    DirectionInitialized:
+      m_PersistentCalls:
+        m_Calls: []
     DirectionSet:
       m_PersistentCalls:
         m_Calls: []
+  m_DirectionType: 0
 --- !u!114 &3417583691030761879
 MonoBehaviour:
   m_ObjectHideFlags: 0
