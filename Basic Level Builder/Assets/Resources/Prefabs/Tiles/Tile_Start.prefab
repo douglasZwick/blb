@@ -255,9 +255,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SpriteRenderer: {fileID: 5492629531808801691}
-  m_RightSprite: {fileID: -2117391412292844761, guid: b0523335f04050044afb58447741b422,
-    type: 3}
-  m_UpSprite: {fileID: 0}
-  m_LeftSprite: {fileID: 6007835128358662596, guid: b0523335f04050044afb58447741b422,
-    type: 3}
-  m_DownSprite: {fileID: 0}
+  m_SpriteRotations:
+    m_RightSprite: {fileID: 6007835128358662596, guid: b0523335f04050044afb58447741b422,
+      type: 3}
+    m_UpSprite: {fileID: 0}
+    m_LeftSprite: {fileID: -2117391412292844761, guid: b0523335f04050044afb58447741b422,
+      type: 3}
+    m_DownSprite: {fileID: 0}

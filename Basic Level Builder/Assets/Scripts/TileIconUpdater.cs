@@ -5,13 +5,24 @@ Last Updated:   7/20/2026
 Copyright 2018-2026, DigiPen Institute of Technology
 ***************************************************/
 
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+[Serializable]
+public class TileSpriteRotations : RotationSprites
+{
+  public TileType m_tileType;
+}
+
 public class TileIconUpdater : MonoBehaviour
 {
-  public Image m_PrimaryImage;
-  public Image m_SecondaryImage;
+  [SerializeField]
+  private Image m_PrimaryImage, m_SecondaryImage;
+  private TileType m_PrimaryTileType, m_SecondaryTileType;
+  [SerializeField]
+  private List<TileSpriteRotations> m_TileRoationSprites;
 
 
   private void Awake()
@@ -23,6 +34,30 @@ public class TileIconUpdater : MonoBehaviour
 
   void OnTileRotated(Direction direction)
   {
+    ApplyTileVisual(m_PrimaryTileType, m_PrimaryImage, direction);
+    ApplyTileVisual(m_SecondaryTileType, m_SecondaryImage, direction);
+  }
+
+  private void ApplyTileVisual(TileType tileType, Image img, Direction direction)
+  {
+    foreach (TileSpriteRotations tileSpriteRotations in m_TileRoationSprites)
+    {
+      if (tileSpriteRotations.m_tileType == tileType)
+      {
+        img.sprite = SetSpriteOnDirectionSet.GetSpriteFromDirection(direction, tileSpriteRotations);
+        img.transform.localRotation = Quaternion.identity;
+        return;
+      }
+    }
+
+    var icon = TilePicker.s_Icons[tileType];
+    img.sprite = icon.sprite;
+    img.color = icon.color;
+    RotateTransform(direction, img);
+  }
+
+  private void RotateTransform(Direction direction, Image img)
+  {
     int rotation = direction switch
     {
       Direction.LEFT => 180,
@@ -31,25 +66,22 @@ public class TileIconUpdater : MonoBehaviour
       //Direction.RIGHT => 0,
       _ => 0,
     };
-    
-    m_PrimaryImage.transform.localRotation = Quaternion.Euler(0,0,rotation);
-    m_SecondaryImage.transform.localRotation = Quaternion.Euler(0,0,rotation);
+
+    img.transform.localRotation = Quaternion.Euler(0, 0, rotation);
   }
 
 
   void OnPrimaryTileChanged(TileType type)
   {
-    var icon = TilePicker.s_Icons[type];
-    m_PrimaryImage.sprite = icon.sprite;
-    m_PrimaryImage.color = icon.color;
+    m_PrimaryTileType = type;
+    ApplyTileVisual(type, m_PrimaryImage, GlobalData.GetTileState().Direction);
   }
 
 
   void OnSecondaryTileChanged(TileType type)
   {
-    var icon = TilePicker.s_Icons[type];
-    m_SecondaryImage.sprite = icon.sprite;
-    m_SecondaryImage.color = icon.color;
+    m_SecondaryTileType = type;
+    ApplyTileVisual(type, m_SecondaryImage, GlobalData.GetTileState().Direction);
   }
 
 
@@ -57,5 +89,6 @@ public class TileIconUpdater : MonoBehaviour
   {
     GlobalData.PrimaryTileChanged -= OnPrimaryTileChanged;
     GlobalData.SecondaryTileChanged -= OnSecondaryTileChanged;
+    GlobalData.TileRotated -= OnTileRotated;
   }
 }

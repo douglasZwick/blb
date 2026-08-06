@@ -237,12 +237,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SpriteRenderer: {fileID: 5492629531808801691}
-  m_RightSprite: {fileID: 3126168342954444991, guid: 94aee876e2dd0684da76b9afbd769ef3,
-    type: 3}
-  m_UpSprite: {fileID: 0}
-  m_LeftSprite: {fileID: 1139888846674689098, guid: 94aee876e2dd0684da76b9afbd769ef3,
-    type: 3}
-  m_DownSprite: {fileID: 0}
+  m_SpriteRotations:
+    m_RightSprite: {fileID: 3126168342954444991, guid: 94aee876e2dd0684da76b9afbd769ef3,
+      type: 3}
+    m_UpSprite: {fileID: 0}
+    m_LeftSprite: {fileID: 1139888846674689098, guid: 94aee876e2dd0684da76b9afbd769ef3,
+      type: 3}
+    m_DownSprite: {fileID: 0}
 --- !u!114 &3840131100542835729
 MonoBehaviour:
   m_ObjectHideFlags: 0

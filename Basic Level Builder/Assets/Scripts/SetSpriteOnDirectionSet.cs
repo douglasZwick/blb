@@ -1,16 +1,24 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+
+[Serializable]
+public class RotationSprites
+{
+  public Sprite m_RightSprite;
+  public Sprite m_UpSprite;
+  public Sprite m_LeftSprite;
+  public Sprite m_DownSprite;
+}
 
 [RequireComponent(typeof(TileDirection))]
 public class SetSpriteOnDirectionSet : MonoBehaviour
 {
   public SpriteRenderer m_SpriteRenderer;
-  public Sprite m_RightSprite;
-  public Sprite m_UpSprite;
-  public Sprite m_LeftSprite;
-  public Sprite m_DownSprite;
+  [SerializeField]
+  private RotationSprites m_SpriteRotations;
+  
 
   TileDirection m_TileDirection;
-
 
   private void Awake()
   {
@@ -22,14 +30,23 @@ public class SetSpriteOnDirectionSet : MonoBehaviour
 
   void OnDirectionSet(Direction direction)
   {
-    m_SpriteRenderer.sprite = direction switch
+    m_SpriteRenderer.sprite = GetSpriteFromDirection(direction, m_SpriteRotations);
+  }
+
+  public static Sprite GetSpriteFromDirection(Direction direction, RotationSprites rotSprites)
+  {
+    Sprite[] sprites = { rotSprites.m_RightSprite, rotSprites.m_DownSprite, rotSprites.m_LeftSprite, rotSprites.m_UpSprite };
+    for (int i = 0; i < sprites.Length; i++)
     {
-      Direction.UP => m_UpSprite,
-      Direction.LEFT => m_LeftSprite,
-      Direction.DOWN => m_DownSprite,
-      // Direction.RIGHT
-      _ => m_RightSprite,
-    };
+      int index = ((int)direction + i) % sprites.Length;
+
+      if (sprites[index] != null)
+      {
+        return sprites[index];
+      }
+    }
+
+    return null;
   }
 
 

@@ -49,9 +49,10 @@ public enum TileColor
 public enum Direction
 {
   RIGHT,
+  DOWN,
   LEFT,
   UP,
-  DOWN,
+  COUNT,
 }
 
 /**
@@ -447,26 +448,12 @@ public static class GlobalData
 
   static Direction GetRotatedDirectionClockwise(Direction _direction)
   {
-    return _direction switch
-    {
-      Direction.RIGHT => Direction.DOWN,
-      Direction.DOWN => Direction.LEFT,
-      Direction.LEFT => Direction.UP,
-      Direction.UP => Direction.RIGHT,
-      _ => _direction,
-    };
+    return (Direction)(((int)_direction + 1) % (int)Direction.COUNT);
   }
 
   static Direction GetRotatedDirectionCounterClockwise(Direction _direction)
   {
-    return _direction switch
-    {
-      Direction.RIGHT => Direction.UP,
-      Direction.UP => Direction.LEFT,
-      Direction.LEFT => Direction.DOWN,
-      Direction.DOWN => Direction.RIGHT,
-      _ => _direction,
-    };
+    return (Direction)(((int)_direction - 1) % (int)Direction.COUNT);
   }
 }
 
