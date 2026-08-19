@@ -2045,13 +2045,7 @@ MonoBehaviour:
     DirectionSet:
       m_PersistentCalls:
         m_Calls: []
-  m_Direction: 0
-  m_Element:
-    m_GridIndex: {x: 0, y: 0}
-    m_Type: 0
-    m_TileColor: 0
-    m_Direction: 0
-    m_Path: []
+  m_DirectionType: 2
 --- !u!114 &-8656358901731430110
 MonoBehaviour:
   m_ObjectHideFlags: 0

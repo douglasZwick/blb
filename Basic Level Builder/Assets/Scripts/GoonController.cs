@@ -188,7 +188,7 @@ public class GoonController : MonoBehaviour
   }
 
 
-  void FaceRight(bool snap = false)
+  void FaceRight()
   {
     m_FacingDirection = Direction.RIGHT;
 

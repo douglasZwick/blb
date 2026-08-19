@@ -237,9 +237,9 @@ public class EyesController : MonoBehaviour
   }
 
 
-  public void InitializeDirection(Direction _direction)
+  public void OnDirectionInitialized(TileDirectionEventData eventData)
   {
-    switch (_direction)
+    switch (eventData.m_Direction)
     {
       case Direction.LEFT:
         FaceLeft(snap: true);

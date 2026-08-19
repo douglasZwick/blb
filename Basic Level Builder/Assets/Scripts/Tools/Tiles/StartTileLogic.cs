@@ -13,8 +13,8 @@ Copyright 2018-2019, DigiPen Institute of Technology
 
 using UnityEngine;
 using System.Collections.Generic;
-[RequireComponent(typeof(TileDirection))]
 
+[RequireComponent(typeof(TileDirection))]
 [RequireComponent(typeof(Transform))]
 public class StartTileLogic : MonoBehaviour
 {
@@ -62,8 +62,8 @@ public class StartTileLogic : MonoBehaviour
     {
       m_Hero = Instantiate(m_HeroPrefab, m_cTransform.position, Quaternion.identity);
 
-      var tileDirection = m_Hero.GetComponent<TileDirection>();
-      tileDirection?.Set(m_TileDirection.Get());
+      if (m_Hero.TryGetComponent<TileDirection>(out var tileDirection))
+        tileDirection.Initialize(m_TileDirection.Get());
 
       if (m_Hero.TryGetComponent<GhostMaker>(out var ghostMaker))
         ghostMaker.enabled = GhostToggler.s_IsInGhostMode;

@@ -2,7 +2,6 @@
 using UnityEngine.Events;
 
 [RequireComponent(typeof(PlatformerMover))]
-[RequireComponent(typeof(EyesController))]
 public class PlatformerController : MonoBehaviour
 {
   [System.Serializable]
@@ -15,7 +14,6 @@ public class PlatformerController : MonoBehaviour
   public Events m_Events;
 
   PlatformerMover m_Mover;
-  EyesController m_EyesController;
   bool m_CanMove = true;
   bool m_CanJump = true;
   float m_InputAxis = 0;
@@ -26,7 +24,6 @@ public class PlatformerController : MonoBehaviour
   private void Awake()
   {
     m_Mover = GetComponent<PlatformerMover>();
-    m_EyesController = GetComponent<EyesController>();
   }
 
 
@@ -58,7 +55,7 @@ public class PlatformerController : MonoBehaviour
 
   void HandleFacing()
   {
-    if      (m_InputAxis < 0 && m_FacingDirection != Direction.LEFT)
+    if (m_InputAxis < 0 && m_FacingDirection != Direction.LEFT)
       FaceLeft();
     else if (m_InputAxis > 0 && m_FacingDirection != Direction.RIGHT)
       FaceRight();
@@ -77,19 +74,15 @@ public class PlatformerController : MonoBehaviour
 
   void FaceLeft()
   {
-    m_FacingDirection = Direction.LEFT;
-
     m_Events.FacedLeft.Invoke(new FacingEventData());
-    m_EyesController.FaceLeft();
+    m_FacingDirection = Direction.LEFT;
   }
 
 
   void FaceRight()
   {
-    m_FacingDirection = Direction.RIGHT;
-
     m_Events.FacedRight.Invoke(new FacingEventData());
-    m_EyesController.FaceRight();
+    m_FacingDirection = Direction.RIGHT;
   }
 
 

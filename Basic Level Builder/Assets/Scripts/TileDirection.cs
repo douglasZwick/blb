@@ -20,7 +20,6 @@ public class TileDirection : MonoBehaviour
     public TileDirectionEvent DirectionSet;
   }
 
-  [HideInInspector]
   public Events m_Events;
   [HideInInspector]
   public TileGrid.Element m_Element;
@@ -38,6 +37,10 @@ public class TileDirection : MonoBehaviour
     SetHelper(direction, initialize: false);
   }
 
+  public void Initialize(Direction direction)
+  {
+    SetHelper(direction, initialize: true);
+  }
 
   void SetHelper(Direction direction, bool initialize = false)
   {

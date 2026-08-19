@@ -58,7 +58,7 @@ public class GoonTileLogic : MonoBehaviour
 
     // set direction stuff here
     if (m_Goon.TryGetComponent<TileDirection>(out var tileDirection))
-      tileDirection.Set(m_TileDirection.Get());
+      tileDirection.Initialize(m_TileDirection.Get());
 
     if (m_Goon.TryGetComponent<GhostMaker>(out var ghostMaker))
       ghostMaker.enabled = GhostToggler.s_IsInGhostMode;
