@@ -101,6 +101,9 @@ public class PlatformerController : MonoBehaviour
 
   public void OnHeroReturned(HealthEventData eventData)
   {
+    if (TryGetComponent(out TileDirection tileDirection))
+      tileDirection.Initialize(tileDirection.Get());
+      
     m_CanMove = true;
     m_CanJump = true;
   }
