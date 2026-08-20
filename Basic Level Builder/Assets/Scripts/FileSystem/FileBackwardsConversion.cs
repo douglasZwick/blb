@@ -20,6 +20,7 @@ public class FileBackwardsConversion
   {
     new(1,0,0,0), // Ignore versions between 1.0.0.0 and 1.2.1.0 as they were alpha builds with diffrent save files that we never released
     new(1,2,0,0),
+    new(1,3,0,0),
   };
 
   static public void ConvertAllOldFiles()
@@ -47,7 +48,7 @@ public class FileBackwardsConversion
 
       if (fileVersion < s_LatestFileVersionPerConversion[0])
       {
-        if (FileSystem.Instance.TryConvertV0FileToV1File(oldFilePath, fileName, out string newFilePath))
+        if (FileSystem.Instance.TryConvertV0FileToV1_2File(oldFilePath, fileName, out string newFilePath))
         {
           convertedFiles.Add(newFilePath);
         }
@@ -59,6 +60,12 @@ public class FileBackwardsConversion
       // Explicity ignore the alpha versions that we don't support
       else if (fileVersion < s_LatestFileVersionPerConversion[1])
         continue;
+      // Before the tile rotation update that removed explicit tile rotations from the tile list
+      // Skip here as we are converting during the level load process
+      else if (fileVersion < s_LatestFileVersionPerConversion[2])
+      {
+        continue;
+      }
     }
 
     if (convertedFiles.Count + corruptedFiles.Count > 0)
@@ -90,5 +97,53 @@ public class FileBackwardsConversion
     // Recursively get all invalid files from the directory and its subdirectories
     return Directory.GetFiles(directoryPath, "*", SearchOption.AllDirectories)
       .Where(path => FileDirUtilities.IsValidExtension(path) && (FileDirUtilities.GetFileVersion(path) < s_LatestFileVersionPerConversion[^1]));
+  }
+
+  static public void ConvertTileTypeAndDirVersions(Version fileVersion, ref TileType tileType, ref Direction tileDir)
+  {
+    // Explicity ignore the alpha versions that we don't support, and the old blb as we are doing different conversions
+    if (fileVersion < s_LatestFileVersionPerConversion[1])
+      return;
+    // Before the tile rotation update that removed explicit tile rotations from the tile list
+    else if (fileVersion < s_LatestFileVersionPerConversion[2])
+    {
+      ConvertV1_2TileTypeAndDirVToV1_3(ref tileType, ref tileDir);
+    }
+  }
+
+  // Takes in the V1.2 TileType and TileDirection and converts them to V1.3
+  static private void ConvertV1_2TileTypeAndDirVToV1_3(ref TileType tileType, ref Direction tileDir)
+  {
+    int tileTypeInt = (int)tileType;
+    int tileDirInt = (int)tileDir;
+    int oldRot = 0;
+
+    // If the tile is a slope
+    if (tileTypeInt >= 2 && tileTypeInt <= 5)
+    {
+      oldRot = tileTypeInt - 2;
+      // Use magic number just incase the enum changes
+      tileTypeInt = 2;
+    }
+
+    // If the tile is a bg slope
+    if (tileTypeInt >= 19 && tileTypeInt <= 22)
+    {
+      oldRot = tileTypeInt - 19;
+      // Use magic number just incase the enum changes
+      tileTypeInt = 16;
+    }
+
+    tileDirInt = oldRot switch
+    {
+      0 => 0,
+      1 => 3,
+      2 => 1,
+      3 => 2,
+      _ => tileDirInt
+    };
+
+    tileType = (TileType)tileTypeInt;
+    tileDir = (Direction)tileDirInt;
   }
 }

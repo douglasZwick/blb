@@ -1201,7 +1201,7 @@ public class FileSystemInternal : MonoBehaviour
     fileInfo.m_FileData.m_ManualSaves = new(count);
     for (ushort i = 0; i < count; ++i)
     {
-      fileInfo.m_FileData.m_ManualSaves.Add(ReadLevelDataBinarySteam(reader));
+      fileInfo.m_FileData.m_ManualSaves.Add(ReadLevelDataBinarySteam(reader, fileInfo.m_FileHeader.m_BlbVersion));
       fileInfo.m_FileData.m_ManualSaves[i].m_Id = i;
     }
 
@@ -1212,14 +1212,14 @@ public class FileSystemInternal : MonoBehaviour
     fileInfo.m_FileData.m_AutoSaves = new(count);
     for (ushort i = 0; i < count; ++i)
     {
-      fileInfo.m_FileData.m_AutoSaves.Add(ReadLevelDataBinarySteam(reader));
+      fileInfo.m_FileData.m_AutoSaves.Add(ReadLevelDataBinarySteam(reader, fileInfo.m_FileHeader.m_BlbVersion));
       fileInfo.m_FileData.m_AutoSaves[i].m_Id = id + i;
     }
 
     fileInfo.m_FileData.m_LastId = id + (uint)fileInfo.m_FileData.m_AutoSaves.Count - 1;
   }
 
-  private LevelData ReadLevelDataBinarySteam(BinaryReader reader)
+  private LevelData ReadLevelDataBinarySteam(BinaryReader reader, Version fileVersion)
   {
     LevelData levelData = new()
     {
@@ -1234,7 +1234,10 @@ public class FileSystemInternal : MonoBehaviour
     levelData.m_AddedTiles = new(count);
     for (ushort i = 0; i < count; ++i)
     {
-      levelData.m_AddedTiles.Add(TileGrid.Element.ReadBinary(reader));
+      TileGrid.Element element = TileGrid.Element.ReadBinary(reader);
+      // Try to convert the tile type and direction incase we are loading an old version
+      FileBackwardsConversion.ConvertTileTypeAndDirVersions(fileVersion, ref element.m_Type, ref element.m_Direction);
+      levelData.m_AddedTiles.Add(element);
     }
 
     count = reader.ReadUInt16();
@@ -1263,7 +1266,7 @@ public class FileSystemInternal : MonoBehaviour
   }
 
   // Returns true if the conversion was sucessful
-  protected bool TryConvertV0FileToV1FileEx(string filePathToConvert, string newFileName, out string newFilePath)
+  protected bool TryConvertV0FileToV1_2FileEx(string filePathToConvert, string newFileName, out string newFilePath)
   {
     newFilePath = "";
     try

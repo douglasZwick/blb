@@ -1,7 +1,7 @@
 ﻿/***************************************************
 File:           GlobalData.cs
-Authors:        Christopher Onorati
-Last Updated:   7/20/2026
+Authors:        Christopher Onorati, Brenden Epp
+Last Updated:   8/19/2026
 Last Version:   2019.1.4
 
 Description:
@@ -10,9 +10,6 @@ Description:
 
 Copyright 2018-2026, DigiPen Institute of Technology
 ***************************************************/
-
-using System.Linq;
-using UnityEngine;
 
 public enum TileType
 {
