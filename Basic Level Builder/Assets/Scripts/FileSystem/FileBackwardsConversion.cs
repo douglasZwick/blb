@@ -15,14 +15,6 @@ public class FileBackwardsConversion
   // NOTE: calling Path.GetExtension on a file with the old extension will return only the part of the extension after the last dot.
   readonly static private string s_ConvertedFileExtension = ".old" + FileDirUtilities.s_FilenameExtension;
 
-  // Latest version handled by each conversion step
-  readonly static public Version[] s_LatestFileVersionPerConversion =
-  {
-    new(1,0,0,0), // Ignore versions between 1.0.0.0 and 1.2.1.0 as they were alpha builds with diffrent save files that we never released
-    new(1,2,0,0),
-    new(1,3,0,0),
-  };
-
   static public void ConvertAllOldFiles()
   {
     string documentsPath = FileDirUtilities.GetDocumentsPath();
@@ -46,7 +38,7 @@ public class FileBackwardsConversion
       string oldFilePath = AddOldExtension(filePath);
       File.Move(filePath, oldFilePath);
 
-      if (fileVersion < s_LatestFileVersionPerConversion[0])
+      if (fileVersion < new Version(1,0,0,0))
       {
         if (FileSystem.Instance.TryConvertV0FileToV1_2File(oldFilePath, fileName, out string newFilePath))
         {
@@ -56,15 +48,6 @@ public class FileBackwardsConversion
         {
           corruptedFiles.Add(fileName);
         }
-      }
-      // Explicity ignore the alpha versions that we don't support
-      else if (fileVersion < s_LatestFileVersionPerConversion[1])
-        continue;
-      // Before the tile rotation update that removed explicit tile rotations from the tile list
-      // Skip here as we are converting during the level load process
-      else if (fileVersion < s_LatestFileVersionPerConversion[2])
-      {
-        continue;
       }
     }
 
@@ -96,6 +79,6 @@ public class FileBackwardsConversion
   {
     // Recursively get all invalid files from the directory and its subdirectories
     return Directory.GetFiles(directoryPath, "*", SearchOption.AllDirectories)
-      .Where(path => FileDirUtilities.IsValidExtension(path) && (FileDirUtilities.GetFileVersion(path) < s_LatestFileVersionPerConversion[^1]));
+      .Where(path => FileDirUtilities.IsValidExtension(path) && (FileDirUtilities.GetFileVersion(path) < new Version(1,0,0,0)));
   }
 }

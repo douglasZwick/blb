@@ -277,7 +277,7 @@ public class FileDirUtilities : MonoBehaviour
 
   static public bool IsSupportedVersion(string fullFilePath)
   {
-    return GetFileVersion(fullFilePath) >= FileBackwardsConversion.s_LatestFileVersionPerConversion[^1];
+    return GetFileVersion(fullFilePath) >= new Version(1,2,1,0);
   }
 
   // Returns version 0 if not found

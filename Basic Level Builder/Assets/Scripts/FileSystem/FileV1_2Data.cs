@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 public static class FileV1_2Data
@@ -381,42 +382,93 @@ public static class FileV1_2Data
             }
         }
 
-        // At this point both filedata types are exactly the same so, we can reinterpret the memory as the current versions data type
-        return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<FileInfo, FileSystemInternal.FileInfo>(ref v1_2FileInfo); // Direct memory reinterpretation
+        // Convert data to the V1.3 data class
+        var result = new FileSystemInternal.FileInfo
+        {
+            m_SaveFilePath = v1_2FileInfo.m_SaveFilePath,
+            m_LoadedVersion = new LevelVersioning.LevelVersion(
+                v1_2FileInfo.m_LoadedVersion.m_ManualVersion,
+                v1_2FileInfo.m_LoadedVersion.m_AutoVersion),
+            m_FileHeader = new FileSystemInternal.FileHeader(
+                v1_2FileInfo.m_FileHeader.m_BlbVersion.ToString(),
+                v1_2FileInfo.m_FileHeader.m_IsTempFile),
+            m_FileData = new FileSystemInternal.FileData
+            {
+                m_Description = v1_2FileInfo.m_FileData.m_Description,
+                m_LastId = v1_2FileInfo.m_FileData.m_LastId,
+                m_ManualSaves = v1_2FileInfo.m_FileData.m_ManualSaves
+                    .Select(ConvertLevelData)
+                    .ToList(),
+                m_AutoSaves = v1_2FileInfo.m_FileData.m_AutoSaves
+                    .Select(ConvertLevelData)
+                    .ToList()
+            }
+        };
+        return result;
     }
 
-    static private void ConvertV1_2TileTypeAndDirVToV1_3(ref TileType tileType, ref Direction tileDir)
+    private static FileSystemInternal.LevelData ConvertLevelData(LevelData source)
     {
-        int tileTypeInt = (int)tileType;
-        int tileDirInt = (int)tileDir;
-        int oldRot = 0;
-
-        // If the tile is a slope
-        if (tileTypeInt >= 2 && tileTypeInt <= 5)
+        return new FileSystemInternal.LevelData
         {
-            oldRot = tileTypeInt - 2;
-            // Use magic number just incase the enum changes
-            tileTypeInt = 2;
-        }
-
-        // If the tile is a bg slope
-        if (tileTypeInt >= 19 && tileTypeInt <= 22)
-        {
-            oldRot = tileTypeInt - 19;
-            // Use magic number just incase the enum changes
-            tileTypeInt = 16;
-        }
-
-        tileDirInt = oldRot switch
-        {
-            0 => 0,
-            1 => 3,
-            2 => 1,
-            3 => 2,
-            _ => tileDirInt
+            m_Version = new LevelVersioning.LevelVersion(
+                source.m_Version.m_ManualVersion,
+                source.m_Version.m_AutoVersion),
+            m_Name = source.m_Name,
+            m_Id = source.m_Id,
+            m_CameraPos = source.m_CameraPos,
+            m_Thumbnail = source.m_Thumbnail,
+            m_TimeStamp = source.m_TimeStamp,
+            m_AddedTiles = source.m_AddedTiles
+                .Select(ConvertElement)
+                .ToList(),
+            m_RemovedTiles = new List<Vector2Int>(source.m_RemovedTiles)
         };
+    }
 
-        tileType = (TileType)tileTypeInt;
-        tileDir = (Direction)tileDirInt;
+    private static TileGrid.Element ConvertElement(Element source)
+    {
+        return new TileGrid.Element
+        {
+            m_GridIndex = source.m_GridIndex,
+            m_Type = (global::TileType)(int)source.m_Type,
+            m_TileColor = (global::TileColor)(int)source.m_TileColor,
+            m_Direction = (global::Direction)(int)source.m_Direction,
+            m_GameObject = source.m_GameObject,
+            m_Path = source.m_Path == null
+                ? null
+                : new List<Vector2Int>(source.m_Path)
+        };
+    }
+
+    // Convert legacy slope variants into a slope tile and its equivalent direction.
+    private static void ConvertV1_2TileTypeAndDirVToV1_3(ref TileType tileType, ref Direction tileDir)
+    {
+        switch (tileType)
+        {
+            case TileType.SLOPE_LEFT:
+            case TileType.BG_LEFT:
+                tileDir = (Direction)(int)global::Direction.RIGHT;
+                break;
+            case TileType.SLOPE_RIGHT:
+            case TileType.BG_RIGHT:
+                tileDir = (Direction)(int)global::Direction.UP;
+                break;
+            case TileType.SLOPE_LEFT_INV:
+            case TileType.BG_LEFT_INV:
+                tileDir = (Direction)(int)global::Direction.DOWN;
+                break;
+            case TileType.SLOPE_RIGHT_INV:
+            case TileType.BG_RIGHT_INV:
+                tileDir = (Direction)(int)global::Direction.LEFT;
+                break;
+            default:
+                return;
+        }
+
+        bool isBackgroundSlope = tileType >= TileType.BG_LEFT;
+        tileType = isBackgroundSlope
+            ? (TileType)(int)global::TileType.BG_SLOPE
+            : (TileType)(int)global::TileType.SLOPE;
     }
 }
