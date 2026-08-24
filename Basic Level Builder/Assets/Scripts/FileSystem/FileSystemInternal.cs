@@ -1,8 +1,8 @@
 ﻿/***************************************************
 Authors:        Douglas Zwick, Brenden Epp
-Last Updated:   6/10/2026
+Last Updated:   8/24/2026
 
-Copyright 2018-2025, DigiPen Institute of Technology
+Copyright 2018-2026, DigiPen Institute of Technology
 ***************************************************/
 
 using B83.Win32;
@@ -22,6 +22,8 @@ public class FileSystemInternal : MonoBehaviour
   public static event AnyFileSaved OnAnyFileSaved;
 
   readonly static public string s_DateTimeFormat = "h-mm-ss.ff tt, ddd d MMM yyyy";
+
+  readonly static private Version s_OldestSupportedVersion = new(1, 3, 0, 0);
 
   // Used only in FileDirUtilities in SetTitleBarFileName to skip renaming the title bar, as that frezes the app when closing and saving.
   public bool m_IsAppQuitting = false;
@@ -100,7 +102,7 @@ public class FileSystemInternal : MonoBehaviour
 
   public class FileHeader
   {
-    public FileHeader(string ver = "", bool isTempFile = false)
+    public FileHeader(string ver = "0.0.0.0", bool isTempFile = false)
     {
       m_BlbVersion = new(ver);
       m_IsTempFile = isTempFile;
@@ -1108,7 +1110,7 @@ public class FileSystemInternal : MonoBehaviour
     if (GlobalData.AreEffectsUnderway())
       return;
 
-    // If we are trying to load the same file and version as we currently have mounted, skip
+    // If we are trying to load the same file and version that we currently have mounted, skip
     if (IsFileMounted() && m_MountedFileInfo.m_SaveFilePath.Equals(fullFilePath))
     {
       LevelVersion toLoadVersion = version ?? new(GetLastManualSaveVersion(m_MountedFileInfo.m_FileData), 0);
@@ -1191,8 +1193,20 @@ public class FileSystemInternal : MonoBehaviour
 
   private void ReadBinaryStream(BinaryReader reader, ref FileInfo fileInfo)
   {
+    // Check if we can read this file first before continuing with the read
+    // If outdated, try to read using the previous file structure
+    Version blbVersion = new(reader.ReadString());
+    if (blbVersion < s_OldestSupportedVersion)
+    {
+      // Reset the reader so the other readers can reread the file
+      reader.BaseStream.Position = 0;
+      FileV1_2Data.ReadAndConvertToV1_3(reader, ref fileInfo);
+      return;
+    }
+
+
     // Write file version first so we can later check for future file changes and adapt
-    fileInfo.m_FileHeader.m_BlbVersion = new(reader.ReadString());
+    fileInfo.m_FileHeader.m_BlbVersion = blbVersion;
     // TODO, from here add check to see if the file is new or old and how to proceed with the read
     fileInfo.m_FileHeader.m_IsTempFile = reader.ReadBoolean();
     fileInfo.m_FileData.m_Description = reader.ReadString();

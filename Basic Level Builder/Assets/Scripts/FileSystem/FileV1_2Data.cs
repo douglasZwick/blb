@@ -1,11 +1,18 @@
+/***************************************************
+Authors:        Brenden Epp
+Last Updated:   8/24/2026
+
+Copyright 2018-2026, DigiPen Institute of Technology
+***************************************************/
+
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 
 public static class FileV1_2Data
 {
+    readonly static private Version s_OldestSupportedVersion = new(1, 2, 1, 0);
     public enum TileType
     {
         EMPTY,
@@ -63,11 +70,6 @@ public static class FileV1_2Data
             m_AutoVersion = Auto;
         }
 
-        public readonly bool IsManual()
-        {
-            return m_AutoVersion == 0;
-        }
-
         public readonly void WriteBinary(System.IO.BinaryWriter writer)
         {
             writer.Write((ushort)m_ManualVersion);
@@ -81,62 +83,6 @@ public static class FileV1_2Data
                 m_ManualVersion = reader.ReadUInt16(),
                 m_AutoVersion = reader.ReadUInt16()
             };
-        }
-
-        public override readonly string ToString()
-        {
-            return $"Save version: Manual {m_ManualVersion}, Auto {m_AutoVersion}"; // Using string interpolation for a readable output
-        }
-
-        public readonly bool Equals(LevelVersion rhs)
-        {
-            return m_ManualVersion == rhs.m_ManualVersion && m_AutoVersion == rhs.m_AutoVersion;
-        }
-
-        public static bool operator ==(LevelVersion left, LevelVersion right)
-        {
-            return left.Equals(right); // Delegate to Equals method
-        }
-
-        public static bool operator !=(LevelVersion left, LevelVersion right)
-        {
-            return !(left == right);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is LevelVersion other && Equals(other);
-        }
-
-        // Override GetHashCode
-        public override int GetHashCode()
-        {
-            return m_ManualVersion.GetHashCode() + m_AutoVersion.GetHashCode();
-        }
-
-        public readonly int CompareTo(LevelVersion other)
-        {
-            // Sorts Largest to Smallest/Top to Bottom
-            // -# = This goes up
-            // +# = This goes down
-            // == This stays
-
-            int diff = other.m_ManualVersion - m_ManualVersion;
-
-            // If they are the same maunal save, one (or both) of them is an autosave.
-            if (diff == 0)
-            {
-                // Sort the auto saves to have the newest on top
-                diff = other.m_AutoVersion - m_AutoVersion;
-
-                // If either werer a manaul save, we need to put that on top
-                if (other.m_AutoVersion == 0)
-                    diff = 1;
-                if (m_AutoVersion == 0)
-                    diff = -1;
-            }
-
-            return diff;
         }
 
         // The version of the manaul save, or maunal the auto is branched off of
@@ -207,16 +153,13 @@ public static class FileV1_2Data
 
     public struct FileInfo
     {
-        public string m_SaveFilePath;
-        // The version of the manual or autosave that is loaded
-        public LevelVersion m_LoadedVersion;
         public FileData m_FileData;
         public FileHeader m_FileHeader;
     }
 
     public class FileHeader
     {
-        public FileHeader(string ver = "", bool isTempFile = false)
+        public FileHeader(string ver = "0.0.0.0", bool isTempFile = false)
         {
             m_BlbVersion = new(ver);
             m_IsTempFile = isTempFile;
@@ -291,11 +234,10 @@ public static class FileV1_2Data
     }
     #endregion
 
-    public static FileInfo Read(BinaryReader reader, string filePath)
+    public static FileInfo Read(System.IO.BinaryReader reader)
     {
         FileInfo fileInfo = new()
         {
-            m_SaveFilePath = filePath,
             m_FileHeader = new(),
             m_FileData = new()
         };
@@ -305,10 +247,24 @@ public static class FileV1_2Data
         return fileInfo;
     }
 
-    private static void ReadBinaryStream(BinaryReader reader, ref FileInfo fileInfo)
+    public static void ReadAndConvertToV1_3(System.IO.BinaryReader reader, ref FileSystemInternal.FileInfo fileInfo)
     {
+        ConvertToV1_3(Read(reader), ref fileInfo);
+    }
+
+    private static void ReadBinaryStream(System.IO.BinaryReader reader, ref FileInfo fileInfo)
+    {
+        // Check if we can read this file first before continuing with the read
+        // If outdated, try to read using the previous file structure
+        Version blbVersion = new(reader.ReadString());
+        if (blbVersion < s_OldestSupportedVersion)
+        {
+            throw new Exception($"Attempted to read file with unsuported version: \"{blbVersion}\"");
+        }
+
+
         // Write file version first so we can later check for future file changes and adapt
-        fileInfo.m_FileHeader.m_BlbVersion = new(reader.ReadString());
+        fileInfo.m_FileHeader.m_BlbVersion = blbVersion;
         // TODO, from here add check to see if the file is new or old and how to proceed with the read
         fileInfo.m_FileHeader.m_IsTempFile = reader.ReadBoolean();
         fileInfo.m_FileData.m_Description = reader.ReadString();
@@ -335,7 +291,7 @@ public static class FileV1_2Data
         fileInfo.m_FileData.m_LastId = id + (uint)fileInfo.m_FileData.m_AutoSaves.Count - 1;
     }
 
-    private static LevelData ReadLevelDataBinarySteam(BinaryReader reader)
+    private static LevelData ReadLevelDataBinarySteam(System.IO.BinaryReader reader)
     {
         LevelData levelData = new()
         {
@@ -364,7 +320,7 @@ public static class FileV1_2Data
         return levelData;
     }
 
-    public static FileSystemInternal.FileInfo ConvertToV1_3(FileInfo v1_2FileInfo)
+    public static void ConvertToV1_3(FileInfo v1_2FileInfo, ref FileSystemInternal.FileInfo fileInfo)
     {
         foreach (var save in v1_2FileInfo.m_FileData.m_ManualSaves)
         {
@@ -383,28 +339,22 @@ public static class FileV1_2Data
         }
 
         // Convert data to the V1.3 data class
-        var result = new FileSystemInternal.FileInfo
+
+        fileInfo.m_FileHeader = new FileSystemInternal.FileHeader(
+            v1_2FileInfo.m_FileHeader.m_BlbVersion.ToString(),
+            v1_2FileInfo.m_FileHeader.m_IsTempFile);
+
+        fileInfo.m_FileData = new FileSystemInternal.FileData
         {
-            m_SaveFilePath = v1_2FileInfo.m_SaveFilePath,
-            m_LoadedVersion = new LevelVersioning.LevelVersion(
-                v1_2FileInfo.m_LoadedVersion.m_ManualVersion,
-                v1_2FileInfo.m_LoadedVersion.m_AutoVersion),
-            m_FileHeader = new FileSystemInternal.FileHeader(
-                v1_2FileInfo.m_FileHeader.m_BlbVersion.ToString(),
-                v1_2FileInfo.m_FileHeader.m_IsTempFile),
-            m_FileData = new FileSystemInternal.FileData
-            {
-                m_Description = v1_2FileInfo.m_FileData.m_Description,
-                m_LastId = v1_2FileInfo.m_FileData.m_LastId,
-                m_ManualSaves = v1_2FileInfo.m_FileData.m_ManualSaves
-                    .Select(ConvertLevelData)
-                    .ToList(),
-                m_AutoSaves = v1_2FileInfo.m_FileData.m_AutoSaves
-                    .Select(ConvertLevelData)
-                    .ToList()
-            }
+            m_Description = v1_2FileInfo.m_FileData.m_Description,
+            m_LastId = v1_2FileInfo.m_FileData.m_LastId,
+            m_ManualSaves = v1_2FileInfo.m_FileData.m_ManualSaves
+                .Select(ConvertLevelData)
+                .ToList(),
+            m_AutoSaves = v1_2FileInfo.m_FileData.m_AutoSaves
+                .Select(ConvertLevelData)
+                .ToList()
         };
-        return result;
     }
 
     private static FileSystemInternal.LevelData ConvertLevelData(LevelData source)
@@ -448,27 +398,53 @@ public static class FileV1_2Data
         {
             case TileType.SLOPE_LEFT:
             case TileType.BG_LEFT:
-                tileDir = (Direction)(int)global::Direction.RIGHT;
+                tileDir = (Direction)(int)global::Direction.UP;
                 break;
             case TileType.SLOPE_RIGHT:
             case TileType.BG_RIGHT:
-                tileDir = (Direction)(int)global::Direction.UP;
+                tileDir = (Direction)(int)global::Direction.RIGHT;
                 break;
             case TileType.SLOPE_LEFT_INV:
             case TileType.BG_LEFT_INV:
-                tileDir = (Direction)(int)global::Direction.DOWN;
+                tileDir = (Direction)(int)global::Direction.LEFT;
                 break;
             case TileType.SLOPE_RIGHT_INV:
             case TileType.BG_RIGHT_INV:
-                tileDir = (Direction)(int)global::Direction.LEFT;
+                tileDir = (Direction)(int)global::Direction.DOWN;
                 break;
             default:
-                return;
+                tileDir = tileDir switch
+                {
+                    Direction.RIGHT => (Direction)(int)global::Direction.RIGHT,
+                    Direction.LEFT => (Direction)(int)global::Direction.LEFT,
+                    Direction.UP => (Direction)(int)global::Direction.UP,
+                    Direction.DOWN => (Direction)(int)global::Direction.DOWN,
+                    _ => Direction.RIGHT
+                };
+                break;
         }
 
-        bool isBackgroundSlope = tileType >= TileType.BG_LEFT;
-        tileType = isBackgroundSlope
-            ? (TileType)(int)global::TileType.BG_SLOPE
-            : (TileType)(int)global::TileType.SLOPE;
+        if (tileType >= TileType.SLOPE_LEFT)
+        {
+            if (tileType <= TileType.SLOPE_RIGHT_INV)
+            {
+                tileType = TileType.SLOPE_LEFT;
+            }
+            else
+            {
+                if (tileType >= TileType.BG_LEFT)
+                {
+                    if (tileType <= TileType.BG_RIGHT_INV)
+                    {
+                        tileType = TileType.BG_LEFT;
+                    }
+                    else
+                    {
+                        tileType -= 3;
+                    }
+                }
+                tileType -= 3;
+            }
+        }
     }
 }
