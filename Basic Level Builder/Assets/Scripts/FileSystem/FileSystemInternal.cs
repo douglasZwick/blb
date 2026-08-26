@@ -323,13 +323,10 @@ public class FileSystemInternal : MonoBehaviour
   /// </summary>
   private static void CreateFileInfo(out FileInfo fileInfo, string filePath = "")
   {
-    if (s_EditorVersion == null)
-      s_EditorVersion = new(Application.version);
-
     fileInfo = new()
     {
       m_SaveFilePath = filePath,
-      m_FileHeader = new(s_EditorVersion.ToString(), false),
+      m_FileHeader = new(),
       m_FileData = new()
     };
   }
@@ -984,7 +981,7 @@ public class FileSystemInternal : MonoBehaviour
     using BinaryWriter writer = new(stream);
 
     // Write file version first so we can later check for future file changes and adapt
-    writer.Write(sourceFileInfo.m_FileHeader.m_BlbVersion.ToString());
+    writer.Write(s_EditorVersion.ToString());
     writer.Write(sourceFileInfo.m_FileHeader.m_IsTempFile);
     writer.Write(sourceFileInfo.m_FileData.m_Description);
 
@@ -1275,117 +1272,6 @@ public class FileSystemInternal : MonoBehaviour
     }
 
     m_FileDirUtilities.UpdateFilesList();
-  }
-
-  // Returns true if the conversion was sucessful
-  protected bool TryConvertV0FileToV1_2FileEx(string filePathToConvert, string newFileName, out string newFilePath)
-  {
-    newFilePath = "";
-    try
-    {
-      string[] jsonStrings = File.ReadAllLines(filePathToConvert);
-
-      int failedLines = TryCreateDictonaryFromJsonStrings(jsonStrings, out Dictionary<Vector2Int, TileGrid.Element> gridDictionary);
-
-      if (failedLines <= -1)
-      {
-        StatusBar.Print($"This level seems to be invalid and can not be converted.");
-        Debug.Log($"File with path\"" + filePathToConvert + "\" was unable to be converted.");
-        return false;
-      }
-      else if (failedLines > 0)
-      {
-        StatusBar.Print($"File converted with {failedLines} read failures");
-      }
-
-      bool autosave = false;
-      bool isSaveAs = true;
-      bool updateCameraPosButtonPressed = false;
-      bool shouldPrintElapsedTime = false;
-      bool shouldMountFile = false;
-      var directoryPath = m_FileDirUtilities.GetCurrentDirectoryPath();
-      var baseFileName = Path.GetFileNameWithoutExtension(newFileName);
-      newFilePath = Path.Combine(directoryPath, newFileName);
-
-      // If a file already exists with the same name in the default directory, change the file name
-      int duplicateIndex = 1;
-      while (File.Exists(newFilePath))
-      {
-        newFileName = $"{baseFileName} ({duplicateIndex}){FileDirUtilities.s_FilenameExtension}";
-        newFilePath = Path.Combine(directoryPath, newFileName);
-        duplicateIndex++;
-      }
-
-      CreateFileInfo(out FileInfo sourceFileInfo, newFilePath);
-      StartSavingThread(newFilePath, sourceFileInfo, gridDictionary, autosave, isSaveAs, updateCameraPosButtonPressed, shouldPrintElapsedTime, shouldMountFile);
-    }
-    catch (Exception e)
-    {
-      Debug.LogError($"Error while loading. {e.Message} ({e.GetType()})");
-      return false;
-    }
-    return true;
-  }
-
-  // Creates a grid of tiles from JSON strings from BLB V0
-  // Returns the number of failures. If there were no sucesses, returns -1.
-  private int TryCreateDictonaryFromJsonStrings(string[] jsonStrings, out Dictionary<Vector2Int, TileGrid.Element> gridDictionary)
-  {
-    int successes = 0;
-    int failures = 0;
-
-    bool startTileFound = false;
-    Vector2 camPos = Vector2.zero;
-    Vector2 minBounds = new(float.MaxValue, float.MaxValue);
-    Vector2 maxBounds = new(float.MinValue, float.MinValue);
-
-    gridDictionary = new();
-    foreach (var jsonString in jsonStrings)
-    {
-      try
-      {
-        TileGrid.Element element = JsonUtility.FromJson<TileGrid.Element>(jsonString);
-        Vector2Int index = element.m_GridIndex;
-        gridDictionary.Add(index, element);
-
-        if (!startTileFound)
-        {
-          if (element.m_Type == TileType.START)
-          {
-            camPos = index;
-            startTileFound = true;
-          }
-
-          if (index.x < minBounds.x)
-            minBounds.x = index.x;
-          if (index.x > maxBounds.x)
-            maxBounds.x = index.x;
-          if (index.y < minBounds.y)
-            minBounds.y = index.y;
-          if (index.y > maxBounds.y)
-            maxBounds.y = index.y;
-        }
-
-        ++successes;
-      }
-      catch (System.ArgumentException e)
-      {
-        Debug.Log($"Failed to parse the line \"{jsonString}\" " +
-          $"as a grid element. {e.Message} ({e.GetType()})");
-
-        ++failures;
-      }
-    }
-
-    if (successes > 0)
-    {
-      if (!startTileFound)
-        camPos = maxBounds - minBounds;
-
-      Camera.main.transform.position = new Vector3(camPos.x, camPos.y, Camera.main.transform.position.z);
-      return failures;
-    }
-    return -1;
   }
 
   protected void UpdateLoadedVersionIfDeleted(FileInfo fileInfo, LevelVersion version)

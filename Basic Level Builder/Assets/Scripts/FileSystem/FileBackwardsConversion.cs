@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UnityEngine;
 
 public class FileBackwardsConversion
 {
@@ -38,7 +39,7 @@ public class FileBackwardsConversion
       string oldFilePath = AddOldExtension(filePath);
       File.Move(filePath, oldFilePath);
 
-      if (fileVersion < new Version(1,0,0,0))
+      if (fileVersion < new Version(1, 0, 0, 0))
       {
         if (FileSystem.Instance.TryConvertV0FileToV1_2File(oldFilePath, fileName, out string newFilePath))
         {
@@ -79,6 +80,143 @@ public class FileBackwardsConversion
   {
     // Recursively get all invalid files from the directory and its subdirectories
     return Directory.GetFiles(directoryPath, "*", SearchOption.AllDirectories)
-      .Where(path => FileDirUtilities.IsValidExtension(path) && (FileDirUtilities.GetFileVersion(path) < new Version(1,0,0,0)));
+      .Where(path => FileDirUtilities.IsValidExtension(path) && (FileDirUtilities.GetFileVersion(path) < new Version(1, 0, 0, 0)));
+  }
+
+
+
+
+
+
+
+
+  // Returns true if the conversion was sucessful
+  private bool TryConvertV0FileToV1_2FileEx(string filePathToConvert, string newFileName, out string newFilePath)
+  {
+    newFilePath = "";
+    try
+    {
+      string[] jsonStrings = File.ReadAllLines(filePathToConvert);
+
+      int failedLines = TryCreateDictonaryFromJsonStrings(jsonStrings, out Dictionary<Vector2Int, FileV1_2Data.Element> gridDictionary);
+
+      if (failedLines <= -1)
+      {
+        StatusBar.Print($"This level seems to be invalid and can not be converted.");
+        Debug.Log($"File with path\"" + filePathToConvert + "\" was unable to be converted.");
+        return false;
+      }
+      else if (failedLines > 0)
+      {
+        StatusBar.Print($"File converted with {failedLines} read failures");
+      }
+
+
+
+
+      FileV1_2Data.FileInfo sourceFileInfo = new()
+      {
+        m_FileHeader = new(),
+        m_FileData = new()
+      };
+      FileV1_2Data.LevelData levelData = new()
+      {
+        m_AddedTiles = new List<FileV1_2Data.Element>(gridDictionary.Values),
+      };
+
+      sourceFileInfo.m_FileData.m_ManualSaves.Add(levelData);
+
+      FileSystemInternal.FileInfo convertedFileInfo = new();
+      FileV1_2Data.ConvertToV1_3(sourceFileInfo, ref convertedFileInfo);
+
+
+      bool autosave = false;
+      bool isSaveAs = true;
+      bool updateCameraPosButtonPressed = false;
+      bool shouldPrintElapsedTime = false;
+      bool shouldMountFile = false;
+      var directoryPath = m_FileDirUtilities.GetCurrentDirectoryPath();
+      var baseFileName = Path.GetFileNameWithoutExtension(newFileName);
+      newFilePath = Path.Combine(directoryPath, newFileName);
+
+      // If a file already exists with the same name in the default directory, change the file name
+      int duplicateIndex = 1;
+      while (File.Exists(newFilePath))
+      {
+        newFileName = $"{baseFileName} ({duplicateIndex}){FileDirUtilities.s_FilenameExtension}";
+        newFilePath = Path.Combine(directoryPath, newFileName);
+        duplicateIndex++;
+      }
+
+      //CreateFileInfo(out FileInfo sourceFileInfo, newFilePath);
+      StartSavingThread(newFilePath, sourceFileInfo, convertedFileInfo.m_FileData.m_ManualSaves[0].m_AddedTiles, autosave, isSaveAs, updateCameraPosButtonPressed, shouldPrintElapsedTime, shouldMountFile);
+    }
+    catch (Exception e)
+    {
+      Debug.LogError($"Error while loading. {e.Message} ({e.GetType()})");
+      return false;
+    }
+    return true;
+  }
+
+  // Creates a grid of tiles from JSON strings from BLB V0
+  // Returns the number of failures. If there were no sucesses, returns -1.
+  private int TryCreateDictonaryFromJsonStrings(string[] jsonStrings, out Dictionary<Vector2Int, FileV1_2Data.Element> gridDictionary)
+  {
+    int successes = 0;
+    int failures = 0;
+
+    bool startTileFound = false;
+    Vector2 camPos = Vector2.zero;
+    Vector2 minBounds = new(float.MaxValue, float.MaxValue);
+    Vector2 maxBounds = new(float.MinValue, float.MinValue);
+
+    gridDictionary = new();
+    foreach (var jsonString in jsonStrings)
+    {
+      try
+      {
+        FileV1_2Data.Element element = JsonUtility.FromJson<FileV1_2Data.Element>(jsonString);
+        Vector2Int index = element.m_GridIndex;
+        gridDictionary.Add(index, element);
+
+        if (!startTileFound)
+        {
+          if (element.m_Type == FileV1_2Data.TileType.START)
+          {
+            camPos = index;
+            startTileFound = true;
+          }
+
+          if (index.x < minBounds.x)
+            minBounds.x = index.x;
+          if (index.x > maxBounds.x)
+            maxBounds.x = index.x;
+          if (index.y < minBounds.y)
+            minBounds.y = index.y;
+          if (index.y > maxBounds.y)
+            maxBounds.y = index.y;
+        }
+
+        ++successes;
+      }
+      catch (System.ArgumentException e)
+      {
+        Debug.Log($"Failed to parse the line \"{jsonString}\" " +
+          $"as a grid element. {e.Message} ({e.GetType()})");
+
+        ++failures;
+      }
+    }
+
+    if (successes > 0)
+    {
+      if (!startTileFound)
+        camPos = maxBounds - minBounds;
+
+      Camera.main.transform.position = new Vector3(camPos.x, camPos.y, Camera.main.transform.position.z);
+      return failures;
+    }
+    return -1;
   }
 }
