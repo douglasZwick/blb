@@ -65,15 +65,9 @@ public class FileDirUtilities : MonoBehaviour
     if (GlobalData.AreEffectsUnderway())
       return;
 
-    if (m_CurrentDirectoryPath == null)
-      InitSavesDirectory();
-
-    if (!Directory.Exists(m_CurrentDirectoryPath))
-      Directory.CreateDirectory(m_CurrentDirectoryPath);
-
     try
     {
-      var filePaths = Directory.GetFiles(m_CurrentDirectoryPath);
+      var filePaths = Directory.GetFiles(GetCurrentDirectoryPath());
       var validFilePaths = filePaths.Where(path => IsFileValid(path) && !IsTempFile(path)).ToArray();
 
       if (filePaths.Length == 0)
@@ -110,12 +104,12 @@ public class FileDirUtilities : MonoBehaviour
     if (GlobalData.AreEffectsUnderway())
       return null;
 
-    if (!Directory.Exists(m_CurrentDirectoryPath))
+    if (!Directory.Exists(GetCurrentDirectoryPath()))
       return null;
 
     try
     {
-      var filePaths = Directory.GetFiles(m_CurrentDirectoryPath);
+      var filePaths = Directory.GetFiles(GetCurrentDirectoryPath());
 
       var validFilePaths = filePaths
           .Where(path => IsFileValid(path))
@@ -143,6 +137,8 @@ public class FileDirUtilities : MonoBehaviour
 
   public string GetCurrentDirectoryPath()
   {
+    if (m_CurrentDirectoryPath == null || !Directory.Exists(m_CurrentDirectoryPath))
+      InitSavesDirectory();
     return m_CurrentDirectoryPath;
   }
 
@@ -421,7 +417,7 @@ public class FileDirUtilities : MonoBehaviour
   public string CreateTempFileName()
   {
     string tempFilePath = s_TempFilePrefix + DateTime.Now.ToString("yy-M-d-HH-mm");
-    tempFilePath = Path.Combine(m_CurrentDirectoryPath, tempFilePath);
+    tempFilePath = Path.Combine(GetCurrentDirectoryPath(), tempFilePath);
     int dup = 0;
     string tempFilePathDup = tempFilePath + s_FilenameExtension;
     while (File.Exists(tempFilePathDup))
@@ -434,7 +430,7 @@ public class FileDirUtilities : MonoBehaviour
 
   public string CreateFilePath(string fileName)
   {
-    return Path.Combine(m_CurrentDirectoryPath, fileName + s_FilenameExtension);
+    return Path.Combine(GetCurrentDirectoryPath(), fileName + s_FilenameExtension);
   }
 
   /// <summary>

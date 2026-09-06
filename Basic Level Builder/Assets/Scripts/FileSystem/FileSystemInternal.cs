@@ -74,12 +74,12 @@ public class FileSystemInternal : MonoBehaviour
   // A thread to run when saving should be performed.
   // Only one save thread is run at once.
   private Task m_SavingThread;
-  private static int mainThreadId;
+  private static int s_MainThreadId = -1;
   public static bool IsMainThread
   {
     get
     {
-      return Thread.CurrentThread.ManagedThreadId == mainThreadId;
+      return Thread.CurrentThread.ManagedThreadId == s_MainThreadId;
     }
   }
 
@@ -89,25 +89,21 @@ public class FileSystemInternal : MonoBehaviour
   [DllImport("__Internal")]
   private static extern void SyncFiles();
 
-  // Start is called before the first frame update
   void Start()
   {
-    mainThreadId = Thread.CurrentThread.ManagedThreadId;
+    s_MainThreadId = Thread.CurrentThread.ManagedThreadId;
     s_EditorVersion = new(Application.version);
     m_ModalDialogMaster = FindObjectOfType<ModalDialogMaster>();
-
-    m_FileDirUtilities.InitSavesDirectory();
 
     // Thumbnail generation init
     var tileHeight = (int)m_ThumbnailTileAtlas.rect.height;
     m_ThumbnailTileSize = new Vector2Int(tileHeight, tileHeight);
     GenerateThumbnailTiles();
 
-    FileBackwardsConversion.ConvertAllOldFiles();
-
     // Call any functions pushed to the main thread,
     // as there might be ones added files to the file list which we don't want to do untill after the list is updated
     m_MainThreadDispatcher.Update();
+    FileBackwardsConversion.ConvertAllOldFiles();
     m_FileDirUtilities.UpdateFilesList();
     CheckForTempFiles();
   }
@@ -147,7 +143,8 @@ public class FileSystemInternal : MonoBehaviour
   // Check if any file got deleted when we were off the game
   private async void OnApplicationFocus(bool focus)
   {
-    if (focus)
+    // If we are focusing on the window, and start has run (setting the main thread id)
+    if (focus && s_MainThreadId != -1)
     {
       // If we have a saving thread running, wait for it to finish before checking if a file was removed
       m_SavingThread?.Wait();
@@ -165,6 +162,7 @@ public class FileSystemInternal : MonoBehaviour
       }
 
       // Update file list incase files were added or removed
+      FileBackwardsConversion.ConvertAllOldFiles();
       m_FileDirUtilities.UpdateFilesList();
     }
   }

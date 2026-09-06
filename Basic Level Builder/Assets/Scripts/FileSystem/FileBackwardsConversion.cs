@@ -81,7 +81,10 @@ public class FileBackwardsConversion
   {
     // Recursively get all invalid files from the directory and its subdirectories
     return Directory.GetFiles(directoryPath, "*", SearchOption.AllDirectories)
-      .Where(path => FileDirUtilities.IsValidExtension(path) && (FileDirUtilities.GetFileVersion(path) < new Version(1, 0, 0, 0)));
+      .Where(path =>
+        FileDirUtilities.IsValidExtension(path) &&
+        !path.EndsWith(s_ConvertedFileExtension) &&
+        (FileDirUtilities.GetFileVersion(path) < new Version(1, 0, 0, 0)));
   }
 
   // Returns true if the conversion was sucessful
