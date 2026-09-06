@@ -16,18 +16,6 @@ public class FileBackwardsConversion
   // NOTE: calling Path.GetExtension on a file with the old extension will return only the part of the extension after the last dot.
   readonly static private string s_ConvertedFileExtension = ".old" + FileDirUtilities.s_FilenameExtension;
 
-  // Calls the previous data versions conversion function
-  // NOTE: If adding a new save data format don't forget to change this function to call that version instead
-  public static void ReadAndConvertToNewest(System.IO.BinaryReader reader, ref FileSystemInternal.FileInfo fileInfo)
-  {
-    FileV1_2Data.ReadAndConvertToV1_3(reader, ref fileInfo);
-  }
-
-  public static void ConvertToNewest()
-  {
-    
-  }
-
   static public void ConvertAllOldFiles()
   {
     string documentsPath = FileDirUtilities.GetDocumentsPath();

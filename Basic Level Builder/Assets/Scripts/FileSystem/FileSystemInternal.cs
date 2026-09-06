@@ -15,6 +15,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using static LevelVersioning;
+using NewestFileData;
+using FileInfo = NewestFileData.FileInfo;
 
 public class FileSystemInternal : MonoBehaviour
 {
@@ -22,8 +24,6 @@ public class FileSystemInternal : MonoBehaviour
   public static event AnyFileSaved OnAnyFileSaved;
 
   readonly static public string s_DateTimeFormat = "h-mm-ss.ff tt, ddd d MMM yyyy";
-
-  readonly static private Version s_OldestSupportedVersion = new(1, 3, 0, 0);
 
   // Used only in FileDirUtilities in SetTitleBarFileName to skip renaming the title bar, as that frezes the app when closing and saving.
   public bool m_IsAppQuitting = false;
@@ -88,94 +88,6 @@ public class FileSystemInternal : MonoBehaviour
 
   [DllImport("__Internal")]
   private static extern void SyncFiles();
-
-  #region FileStructure classes
-
-  public class FileInfo : FileInfoInterface
-  {
-    public string m_SaveFilePath;
-    // The version of the manual or autosave that is loaded
-    public LevelVersion m_LoadedVersion;
-    public FileData m_FileData;
-    public FileHeader m_FileHeader;
-  }
-
-  public class FileHeader
-  {
-    public FileHeader(string ver = "0.0.0.0", bool isTempFile = false)
-    {
-      m_BlbVersion = new(ver);
-      m_IsTempFile = isTempFile;
-    }
-
-    public Version m_BlbVersion;
-    public bool m_IsTempFile = false;
-  }
-
-  public class FileData
-  {
-    public FileData()
-    {
-      m_ManualSaves = new List<LevelData>();
-      m_AutoSaves = new List<LevelData>();
-      m_Description = "";
-    }
-    public List<LevelData> m_ManualSaves;
-    public List<LevelData> m_AutoSaves;
-    public uint m_LastId;
-    public string m_Description;
-  }
-
-  public class LevelData
-  {
-    public LevelData()
-    {
-      m_AddedTiles = new List<TileGrid.Element>();
-      m_RemovedTiles = new List<Vector2Int>();
-      m_Name = "";
-    }
-
-    public LevelVersion m_Version;
-    public string m_Name;
-    public uint m_Id;
-    public Vector2 m_CameraPos;
-    public string m_Thumbnail;
-    public DateTime m_TimeStamp;
-    public List<TileGrid.Element> m_AddedTiles;
-    public List<Vector2Int> m_RemovedTiles;
-  }
-
-  public class ThumbnailTile
-  {
-    public Color[] m_ColorData;
-
-    public ThumbnailTile(TileType tileType, Color[] atlasBuffer,
-      int atlasWidth, Vector2Int tileSize)
-    {
-      m_ColorData = new Color[tileSize.x * tileSize.y];
-      // The buffer contains the pixel colors starting from the bottom-left
-      //   corner of the texture. I believe it then goes to the right, and when
-      //   it reaches the end of a row, it goes back to the start of the next
-      //   row up from there.
-      // startIndex is the index of the bottom-left pixel in the tile.
-      var startIndex = (int)tileType * tileSize.x;
-      // This is the index for writing to the thumbnail tile, incremented
-      //   manually in the loop, so it's separate from the x and y indices that
-      //   are only used to read from the atlas.
-      var dataIndex = 0;
-
-      for (var y = 0; y < tileSize.y; ++y)
-      {
-        for (var x = 0; x < tileSize.x; ++x)
-        {
-          var color = atlasBuffer[startIndex + x + y * atlasWidth];
-          m_ColorData[dataIndex] = color;
-          ++dataIndex;
-        }
-      }
-    }
-  }
-  #endregion
 
   // Start is called before the first frame update
   void Start()
@@ -430,7 +342,7 @@ public class FileSystemInternal : MonoBehaviour
     }
   }
 
-  private string GenerateThumbnail(Dictionary<Vector2Int, TileGrid.Element> _grid)
+  private string GenerateThumbnail(Dictionary<Vector2Int, Element> _grid)
   {
     // TODO, code to generate thumbnail
     // Texutre needs to be uncompressed and marked for read/write (Might be diffrent if the image is generated)
@@ -649,7 +561,7 @@ public class FileSystemInternal : MonoBehaviour
     await Save(isAutoSave, null, false, shouldPrintElapsedTime, shouldMountFile);
   }
 
-  protected void StartSavingThread(string destFilePath, FileInfo sourceFileInfo, Dictionary<Vector2Int, TileGrid.Element> gridDictionary,
+  protected void StartSavingThread(string destFilePath, FileInfo sourceFileInfo, Dictionary<Vector2Int, Element> gridDictionary,
     bool autosave, bool isSaveAs, bool updateCameraPosButtonPressed, bool shouldPrintElapsedTime, bool shouldMountFile = true)
   {
     // Store camera position to the nearest tile
@@ -698,7 +610,7 @@ public class FileSystemInternal : MonoBehaviour
   }
 
   private void SavingThreadFlatten(FileInfo sourceFileInfo, string destFilePath, bool shouldPrintElapsedTime,
-    Dictionary<Vector2Int, TileGrid.Element> gridDictionary, Vector2 cameraPos, string thumbnail, bool shouldMountFile)
+    Dictionary<Vector2Int, Element> gridDictionary, Vector2 cameraPos, string thumbnail, bool shouldMountFile)
   {
     var startTime = DateTime.Now;
 
@@ -714,7 +626,7 @@ public class FileSystemInternal : MonoBehaviour
 
     LevelData levelData = new()
     {
-      m_AddedTiles = new List<TileGrid.Element>(gridDictionary.Values),
+      m_AddedTiles = new List<Element>(gridDictionary.Values),
       m_TimeStamp = DateTime.Now,
       m_Version = new(1, 0),
       m_Thumbnail = thumbnail,
@@ -739,7 +651,7 @@ public class FileSystemInternal : MonoBehaviour
   }
 
   private void SavingThread(FileInfo sourceFileInfo, string destFilePath, bool autosave, bool shouldPrintElapsedTime,
-    bool updateCameraPosButtonPressed, Dictionary<Vector2Int, TileGrid.Element> gridDictionary, Vector2 cameraPos, string thumbnail, bool shouldMountFile)
+    bool updateCameraPosButtonPressed, Dictionary<Vector2Int, Element> gridDictionary, Vector2 cameraPos, string thumbnail, bool shouldMountFile)
   {
     var startTime = DateTime.Now;
 
@@ -1011,7 +923,7 @@ public class FileSystemInternal : MonoBehaviour
     writer.Write(levelData.m_TimeStamp.Ticks);
 
     writer.Write((ushort)levelData.m_AddedTiles.Count);
-    foreach (TileGrid.Element tile in levelData.m_AddedTiles)
+    foreach (Element tile in levelData.m_AddedTiles)
     {
       tile.WriteBinary(writer);
     }
@@ -1084,7 +996,7 @@ public class FileSystemInternal : MonoBehaviour
     {
       using FileStream stream = new(fullFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
       using BinaryReader reader = new(stream);
-      ReadBinaryStream(reader, ref fileInfo);
+      fileInfo.Read(reader);
     }
     catch (Exception e)
     {
@@ -1183,80 +1095,9 @@ public class FileSystemInternal : MonoBehaviour
   {
     CreateFileInfo(out m_MountedFileInfo);
 
-    ReadBinaryStream(reader, ref m_MountedFileInfo);
+    m_MountedFileInfo.Read(reader);
 
     m_TileGrid.LoadFromDictonary(GetGridDictionaryFromFileData(m_MountedFileInfo, version));
-  }
-
-  private void ReadBinaryStream(BinaryReader reader, ref FileInfo fileInfo)
-  {
-    // Check if we can read this file first before continuing with the read
-    // If outdated, try to read using the previous file structure
-    Version blbVersion = new(reader.ReadString());
-    if (blbVersion < s_OldestSupportedVersion)
-    {
-      // Reset the reader so the other readers can reread the file
-      reader.BaseStream.Position = 0;
-      FileV1_2Data.ReadAndConvertToV1_3(reader, ref fileInfo);
-      return;
-    }
-
-
-    // Write file version first so we can later check for future file changes and adapt
-    fileInfo.m_FileHeader.m_BlbVersion = blbVersion;
-    // TODO, from here add check to see if the file is new or old and how to proceed with the read
-    fileInfo.m_FileHeader.m_IsTempFile = reader.ReadBoolean();
-    fileInfo.m_FileData.m_Description = reader.ReadString();
-
-    ushort count = reader.ReadUInt16();
-    fileInfo.m_FileData.m_ManualSaves = new(count);
-    for (ushort i = 0; i < count; ++i)
-    {
-      fileInfo.m_FileData.m_ManualSaves.Add(ReadLevelDataBinarySteam(reader));
-      fileInfo.m_FileData.m_ManualSaves[i].m_Id = i;
-    }
-
-    // Start the id count at the last manual save id for the auto saves
-    uint id = (uint)fileInfo.m_FileData.m_ManualSaves.Count;
-
-    count = reader.ReadUInt16();
-    fileInfo.m_FileData.m_AutoSaves = new(count);
-    for (ushort i = 0; i < count; ++i)
-    {
-      fileInfo.m_FileData.m_AutoSaves.Add(ReadLevelDataBinarySteam(reader));
-      fileInfo.m_FileData.m_AutoSaves[i].m_Id = id + i;
-    }
-
-    fileInfo.m_FileData.m_LastId = id + (uint)fileInfo.m_FileData.m_AutoSaves.Count - 1;
-  }
-
-  private LevelData ReadLevelDataBinarySteam(BinaryReader reader)
-  {
-    LevelData levelData = new()
-    {
-      m_Version = LevelVersion.ReadBinary(reader),
-      m_Name = reader.ReadString(),
-      m_CameraPos = new(reader.ReadInt16(), reader.ReadInt16()),
-      m_Thumbnail = reader.ReadString(),
-      m_TimeStamp = new(reader.ReadInt64()),
-    };
-
-    ushort count = reader.ReadUInt16();
-    levelData.m_AddedTiles = new(count);
-    for (ushort i = 0; i < count; ++i)
-    {
-      TileGrid.Element element = TileGrid.Element.ReadBinary(reader);
-      levelData.m_AddedTiles.Add(element);
-    }
-
-    count = reader.ReadUInt16();
-    levelData.m_RemovedTiles = new(count);
-    for (ushort i = 0; i < count; ++i)
-    {
-      levelData.m_RemovedTiles.Add(new(reader.ReadInt16(), reader.ReadInt16()));
-    }
-
-    return levelData;
   }
 
   public void DeleteFileEx(string fullFilePath)

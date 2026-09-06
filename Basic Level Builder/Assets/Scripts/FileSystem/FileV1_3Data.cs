@@ -7,20 +7,17 @@ Copyright 2018-2026, DigiPen Institute of Technology
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using FileV1_3Data = NewestFileData;
+using System.Linq;
 
-namespace FileV1_2Data
+
+namespace NewestFileData
 {
     public enum TileType
     {
         EMPTY,
         SOLID,
-        SLOPE_LEFT,
-        SLOPE_RIGHT,
-        SLOPE_LEFT_INV,
-        SLOPE_RIGHT_INV,
+        SLOPE,
         START,
         DEADLY,
         GOAL,
@@ -34,10 +31,7 @@ namespace FileV1_2Data
         SWITCH,
         BOOSTER,
         BG,
-        BG_LEFT,
-        BG_RIGHT,
-        BG_LEFT_INV,
-        BG_RIGHT_INV,
+        BG_SLOPE,
         MOVESTER,
         GOON,
     }
@@ -57,9 +51,16 @@ namespace FileV1_2Data
     public enum Direction
     {
         RIGHT,
+        DOWN,
         LEFT,
         UP,
-        DOWN,
+    }
+
+    public enum DirectionType
+    {
+        ORTHOGONAL,
+        UP_DOWN,
+        LEFT_RIGHT,
     }
 
     public struct LevelVersion
@@ -68,6 +69,11 @@ namespace FileV1_2Data
         {
             m_ManualVersion = manual;
             m_AutoVersion = Auto;
+        }
+
+        public readonly bool IsManual()
+        {
+            return m_AutoVersion == 0;
         }
 
         public readonly void WriteBinary(System.IO.BinaryWriter writer)
@@ -85,13 +91,69 @@ namespace FileV1_2Data
             };
         }
 
+        public override readonly string ToString()
+        {
+            return $"Save version: Manual {m_ManualVersion}, Auto {m_AutoVersion}"; // Using string interpolation for a readable output
+        }
+
+        public readonly bool Equals(LevelVersion rhs)
+        {
+            return m_ManualVersion == rhs.m_ManualVersion && m_AutoVersion == rhs.m_AutoVersion;
+        }
+
+        public static bool operator ==(LevelVersion left, LevelVersion right)
+        {
+            return left.Equals(right); // Delegate to Equals method
+        }
+
+        public static bool operator !=(LevelVersion left, LevelVersion right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is LevelVersion other && Equals(other);
+        }
+
+        // Override GetHashCode
+        public override int GetHashCode()
+        {
+            return m_ManualVersion.GetHashCode() + m_AutoVersion.GetHashCode();
+        }
+
+        public readonly int CompareTo(LevelVersion other)
+        {
+            // Sorts Largest to Smallest/Top to Bottom
+            // -# = This goes up
+            // +# = This goes down
+            // == This stays
+
+            int diff = other.m_ManualVersion - m_ManualVersion;
+
+            // If they are the same maunal save, one (or both) of them is an autosave.
+            if (diff == 0)
+            {
+                // Sort the auto saves to have the newest on top
+                diff = other.m_AutoVersion - m_AutoVersion;
+
+                // If either werer a manaul save, we need to put that on top
+                if (other.m_AutoVersion == 0)
+                    diff = 1;
+                if (m_AutoVersion == 0)
+                    diff = -1;
+            }
+
+            return diff;
+        }
+
         // The version of the manaul save, or maunal the auto is branched off of
         public int m_ManualVersion;
         // The autosave version, 0 if not an autosave
         public int m_AutoVersion;
     }
 
-    public class Element
+    public class Element : ICloneable
     {
         public Vector2Int m_GridIndex;
         public TileType m_Type;
@@ -102,6 +164,19 @@ namespace FileV1_2Data
 
 
         public Element() { }
+
+        public Element(Vector2Int gridIndex, TileState state, GameObject gameObject)
+        {
+            m_GridIndex = gridIndex;
+            m_Type = state.Type;
+            m_TileColor = state.Color;
+            m_Direction = state.Direction;
+            m_Path = state.Path;
+            m_GameObject = gameObject;
+
+            if (gameObject.TryGetComponent<ColorCode>(out var colorCode))
+                colorCode.m_Element = this;
+        }
 
         public void WriteBinary(System.IO.BinaryWriter writer)
         {
@@ -146,66 +221,96 @@ namespace FileV1_2Data
             }
             return element;
         }
-    }
 
+        public bool Equals(Element other)
+        {
+            if (m_GridIndex != other.m_GridIndex)
+                return false;
+            if (m_Type != other.m_Type)
+                return false;
+            if (m_TileColor != other.m_TileColor)
+                return false;
+            if (m_Direction != other.m_Direction)
+                return false;
+            if (!PathsEqual(other))
+                return false;
+            return true;
+        }
+
+        public bool PathsEqual(Element other)
+        {
+            // If both paths don't exist or the paths are equal
+            if ((other.m_Path == null && m_Path == null) ||
+              (other.m_Path != null && m_Path != null && m_Path.SequenceEqual(other.m_Path)))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public void SetState(TileState state)
+        {
+            m_Type = state.Type;
+            m_TileColor = state.Color;
+            m_Direction = state.Direction;
+            m_Path = state.Path;
+        }
+
+        public TileState ToState()
+        {
+            return new TileState()
+            {
+                Type = m_Type,
+                Color = m_TileColor,
+                Direction = m_Direction,
+                Path = m_Path,
+            };
+        }
+
+
+        public T GetComponent<T>() where T : Component
+        {
+            if (m_GameObject == null)
+                return null;
+
+            return m_GameObject.GetComponent<T>();
+        }
+
+        public object Clone()
+        {
+            return new Element
+            {
+                m_GridIndex = m_GridIndex,
+                m_Type = m_Type,
+                m_TileColor = m_TileColor,
+                m_Direction = m_Direction,
+                m_Path = m_Path != null ? new List<Vector2Int>(m_Path) : null,
+                m_GameObject = null // intentionally not cloned
+            };
+        }
+    }
 
     #region FileStructure classes
 
     public class FileInfo : FileInfoInterface
     {
         // This data format supports any versions after this untill the next specified version from another data fromats oldest version
-        readonly static public Version s_OldestSupportedVersion = new(1, 2, 1, 0);
+        readonly static private Version s_OldestSupportedVersion = new(1, 3, 0, 0);
 
+        public string m_SaveFilePath;
+        // The version of the manual or autosave that is loaded
+        public LevelVersion m_LoadedVersion;
         public FileData m_FileData;
         public FileHeader m_FileHeader;
+
         public override FileInfoInterface ConvertToNewest()
         {
-            FileInfoInterface v1_3FileInfo = ConvertToNextVersion();
-            return v1_3FileInfo.ConvertToNewest();
+            return this;
         }
 
-        // Converting to v1.3
         public override FileInfoInterface ConvertToNextVersion()
         {
-            FileV1_3Data.FileInfo v1_3FileInfo = new()
-            {
-                // Convert data to the V1.3 data class
-
-                m_FileHeader = new FileV1_3Data.FileHeader(
-                  m_FileHeader.m_BlbVersion.ToString(),
-                  m_FileHeader.m_IsTempFile),
-
-                m_FileData = new FileV1_3Data.FileData
-                {
-                    m_Description = m_FileData.m_Description,
-                    m_LastId = m_FileData.m_LastId,
-                    m_ManualSaves = m_FileData.m_ManualSaves
-                      .Select(ConvertLevelData)
-                      .ToList(),
-                    m_AutoSaves = m_FileData.m_AutoSaves
-                      .Select(ConvertLevelData)
-                      .ToList()
-                }
-            };
-
-            // Convert the tileTypes and direction enums
-            foreach (var save in v1_3FileInfo.m_FileData.m_ManualSaves)
-            {
-                foreach (var tile in save.m_AddedTiles)
-                {
-                    ConvertV1_2TileTypeAndDirVToV1_3(ref tile.m_Type, ref tile.m_Direction);
-                }
-            }
-
-            foreach (var save in v1_3FileInfo.m_FileData.m_AutoSaves)
-            {
-                foreach (var tile in save.m_AddedTiles)
-                {
-                    ConvertV1_2TileTypeAndDirVToV1_3(ref tile.m_Type, ref tile.m_Direction);
-                }
-            }
-
-            return v1_3FileInfo;
+            return this;
         }
 
         public override void Read(System.IO.BinaryReader reader)
@@ -231,7 +336,10 @@ namespace FileV1_2Data
             Version blbVersion = new(reader.ReadString());
             if (blbVersion < s_OldestSupportedVersion)
             {
-                throw new Exception($"Attempted to read file with unsuported version: \"{blbVersion}\"");
+                // Reset the reader so the other readers can reread the file
+                reader.BaseStream.Position = 0;
+                FileInfoInterface v1_2FileInfo = FileV1_2Data.FileInfo.ReadAndCreate(reader);
+                return v1_2FileInfo.ConvertToNewest();
             }
 
 
@@ -264,7 +372,7 @@ namespace FileV1_2Data
             return this;
         }
 
-        private static LevelData ReadLevelDataBinarySteam(System.IO.BinaryReader reader)
+        private LevelData ReadLevelDataBinarySteam(System.IO.BinaryReader reader)
         {
             LevelData levelData = new()
             {
@@ -291,88 +399,6 @@ namespace FileV1_2Data
             }
 
             return levelData;
-        }
-
-        private static FileV1_3Data.LevelData ConvertLevelData(LevelData source)
-        {
-            return new FileV1_3Data.LevelData
-            {
-                m_Version = new FileV1_3Data.LevelVersion(
-                    source.m_Version.m_ManualVersion,
-                    source.m_Version.m_AutoVersion),
-                m_Name = source.m_Name,
-                m_Id = source.m_Id,
-                m_CameraPos = source.m_CameraPos,
-                m_Thumbnail = source.m_Thumbnail,
-                m_TimeStamp = source.m_TimeStamp,
-                m_AddedTiles = source.m_AddedTiles
-                    .Select(ConvertElement)
-                    .ToList(),
-                m_RemovedTiles = new List<Vector2Int>(source.m_RemovedTiles)
-            };
-        }
-
-        private static FileV1_3Data.Element ConvertElement(Element source)
-        {
-            return new FileV1_3Data.Element
-            {
-                m_GridIndex = source.m_GridIndex,
-                m_Type = (FileV1_3Data.TileType)(int)source.m_Type,
-                m_TileColor = (FileV1_3Data.TileColor)(int)source.m_TileColor,
-                m_Direction = (FileV1_3Data.Direction)(int)source.m_Direction,
-                m_GameObject = source.m_GameObject,
-                m_Path = source.m_Path == null
-                    ? null
-                    : new List<Vector2Int>(source.m_Path)
-            };
-        }
-
-        // Convert legacy slope variants into a slope tile and its equivalent direction.
-        private static void ConvertV1_2TileTypeAndDirVToV1_3(ref FileV1_3Data.TileType tileTypeV1_3, ref FileV1_3Data.Direction tileDirV1_3)
-        {
-            TileType tileType = (TileType)(int)tileTypeV1_3;
-            Direction tileDir = (Direction)(int)tileDirV1_3;
-
-            tileDir = tileType switch
-            {
-                TileType.SLOPE_LEFT or TileType.BG_LEFT => (Direction)(int)FileV1_3Data.Direction.UP,
-                TileType.SLOPE_RIGHT or TileType.BG_RIGHT => (Direction)(int)FileV1_3Data.Direction.RIGHT,
-                TileType.SLOPE_LEFT_INV or TileType.BG_LEFT_INV => (Direction)(int)FileV1_3Data.Direction.LEFT,
-                TileType.SLOPE_RIGHT_INV or TileType.BG_RIGHT_INV => (Direction)(int)FileV1_3Data.Direction.DOWN,
-                _ => tileDir switch
-                {
-                    Direction.RIGHT => (Direction)(int)FileV1_3Data.Direction.RIGHT,
-                    Direction.LEFT => (Direction)(int)FileV1_3Data.Direction.LEFT,
-                    Direction.UP => (Direction)(int)FileV1_3Data.Direction.UP,
-                    Direction.DOWN => (Direction)(int)FileV1_3Data.Direction.DOWN,
-                    _ => Direction.RIGHT
-                },
-            };
-            if (tileType >= TileType.SLOPE_LEFT)
-            {
-                if (tileType <= TileType.SLOPE_RIGHT_INV)
-                {
-                    tileType = TileType.SLOPE_LEFT;
-                }
-                else
-                {
-                    if (tileType >= TileType.BG_LEFT)
-                    {
-                        if (tileType <= TileType.BG_RIGHT_INV)
-                        {
-                            tileType = TileType.BG_LEFT;
-                        }
-                        else
-                        {
-                            tileType -= 3;
-                        }
-                    }
-                    tileType -= 3;
-                }
-            }
-
-            tileTypeV1_3 = (FileV1_3Data.TileType)(int)tileType;
-            tileDirV1_3 = (FileV1_3Data.Direction)(int)tileDir;
         }
     }
 

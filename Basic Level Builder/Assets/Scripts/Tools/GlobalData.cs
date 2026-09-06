@@ -1,7 +1,7 @@
 ﻿/***************************************************
 File:           GlobalData.cs
 Authors:        Christopher Onorati, Brenden Epp
-Last Updated:   8/19/2026
+Last Updated:   9/5/2026
 Last Version:   2019.1.4
 
 Description:
@@ -11,55 +11,7 @@ Description:
 Copyright 2018-2026, DigiPen Institute of Technology
 ***************************************************/
 
-public enum TileType
-{
-  EMPTY,
-  SOLID,
-  SLOPE,
-  START,
-  DEADLY,
-  GOAL,
-  FALSE_SOLID,
-  INVISIBLE_SOLID,
-  CHECKPOINT,
-  TELEPORTER,
-  DOOR,
-  KEY,
-  COIN,
-  SWITCH,
-  BOOSTER,
-  BG,
-  BG_SLOPE,
-  MOVESTER,
-  GOON,
-}
-
-public enum TileColor
-{
-  RED,
-  ORANGE,
-  YELLOW,
-  GREEN,
-  CYAN,
-  BLUE,
-  PURPLE,
-  MAGENTA,
-}
-
-public enum Direction
-{
-  RIGHT,
-  DOWN,
-  LEFT,
-  UP,
-}
-
-public enum DirectionType
-{
-  ORTHOGONAL,
-  UP_DOWN,
-  LEFT_RIGHT,
-}
+using NewestFileData;
 
 /**
 * CLASS NAME  : GlobalData
@@ -68,7 +20,6 @@ public enum DirectionType
 public static class GlobalData
 {
   // This is an abomination and it should never have existed
-  //public static string s_Version = "0.9.40";
 
   /************************************************************************************/
   /************************************************************************************/

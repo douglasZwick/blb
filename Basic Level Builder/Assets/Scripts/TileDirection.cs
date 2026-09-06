@@ -7,6 +7,7 @@ Copyright 2018-2026, DigiPen Institute of Technology
 
 using UnityEngine;
 using UnityEngine.Events;
+using NewestFileData;
 
 public class TileDirection : MonoBehaviour
 {

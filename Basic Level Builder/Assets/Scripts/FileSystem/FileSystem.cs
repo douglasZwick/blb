@@ -11,6 +11,8 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using static LevelVersioning;
+using NewestFileData;
+using FileInfo = NewestFileData.FileInfo;
 
 public class FileSystem : FileSystemInternal
 {

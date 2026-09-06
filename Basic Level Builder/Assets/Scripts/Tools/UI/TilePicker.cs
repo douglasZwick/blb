@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI; //Image.
 using UnityEngine.EventSystems; //Access to Unity events for the mouse.
+using NewestFileData;
 
 [RequireComponent(typeof(Image))]
 public class TilePicker : MonoBehaviour, IPointerClickHandler

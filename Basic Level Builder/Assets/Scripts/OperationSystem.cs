@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using NewestFileData;
 
 public class OperationSystem : MonoBehaviour
 {
@@ -119,7 +120,7 @@ public class OperationSystem : MonoBehaviour
   }
 
 
-  static public void AddDelta(TileGrid.Element oldElement, TileGrid.Element newElement, GameObject tile = null)
+  static public void AddDelta(Element oldElement, Element newElement, GameObject tile = null)
   {
     s_CurrentOperation.AddDelta(oldElement, newElement, tile);
   }
@@ -278,7 +279,7 @@ public class Operation
     m_IncrementOperationCounter = incrementOperationCounter;
   }
 
-  public Operation(string name, TileGrid.Element oldElement, TileGrid.Element newElement,
+  public Operation(string name, Element oldElement, Element newElement,
     bool incrementOperationCounter = true)
   {
     m_Name = name;
@@ -303,7 +304,7 @@ public class Operation
     m_Deltas.Add(delta);
   }
 
-  public void AddDelta(TileGrid.Element oldElement, TileGrid.Element newElement, GameObject tile = null)
+  public void AddDelta(Element oldElement, Element newElement, GameObject tile = null)
   {
     if (oldElement == null && newElement == null)
       return;
