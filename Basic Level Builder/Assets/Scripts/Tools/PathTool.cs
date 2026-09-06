@@ -10,6 +10,7 @@ Copyright 2018-2025, DigiPen Institute of Technology
 ***************************************************/
 
 using System.Collections.Generic;
+using NewestFileData;
 using UnityEngine;
 
 public class PathTool : BlbTool
@@ -37,7 +38,7 @@ public class PathTool : BlbTool
 
   Vector2Int m_PointerDownPosition;
   Vector2Int m_PointerDragEndPosition;
-  List<TileGrid.Element> m_SelectedElements;
+  List<Element> m_SelectedElements;
   Vector2Int m_AnchorIndex;
   //Vector2Int m_AnchorStartingIndex; // used for moving the anchor
   List<Vector2Int> m_Path;
@@ -309,7 +310,7 @@ public class PathTool : BlbTool
   void EnterIdle()
   {
     m_State = State.Idle;
-    m_SelectedElements = new List<TileGrid.Element>();
+    m_SelectedElements = new List<Element>();
 
     if (m_AnchorIconTransform != null)
       Destroy(m_AnchorIconTransform.gameObject);
@@ -400,7 +401,7 @@ public class PathTool : BlbTool
       max.y = temp;
     }
 
-    m_SelectedElements = new List<TileGrid.Element>();
+    m_SelectedElements = new List<Element>();
 
     for (var y = min.y; y <= max.y; ++y)
     {

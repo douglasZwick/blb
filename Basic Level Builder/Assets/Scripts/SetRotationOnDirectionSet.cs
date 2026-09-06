@@ -1,4 +1,5 @@
 using UnityEngine;
+using NewestFileData;
 
 [RequireComponent(typeof(TileDirection))]
 public class SetRotationOnDirectionSet : MonoBehaviour

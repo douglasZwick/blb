@@ -315,18 +315,28 @@ namespace NewestFileData
 
         public override void Read(System.IO.BinaryReader reader)
         {
-            _ = ReadBinaryStream(reader);
+            if (ReadBinaryStream(reader) is not FileInfo fileInfo)
+                throw new InvalidOperationException("The file data could not be converted to the newest file format.");
+
+            m_SaveFilePath = fileInfo.m_SaveFilePath;
+            m_LoadedVersion = fileInfo.m_LoadedVersion;
+            m_FileData = fileInfo.m_FileData;
+            m_FileHeader = fileInfo.m_FileHeader;
         }
 
-        public new static FileInfoInterface ReadAndCreate(System.IO.BinaryReader reader)
+        public new static FileInfoInterface Create(string filePath = "")
         {
-            FileInfo fileInfo = new()
+            return new FileInfo()
             {
+                m_SaveFilePath = filePath,
                 m_FileHeader = new(),
                 m_FileData = new()
             };
+        }
 
-            return fileInfo.ReadBinaryStream(reader);
+        public new static FileInfoInterface ReadAndCreate(System.IO.BinaryReader reader, string filePath = "")
+        {
+            return (Create(filePath) as FileInfo).ReadBinaryStream(reader);
         }
 
         private FileInfoInterface ReadBinaryStream(System.IO.BinaryReader reader)

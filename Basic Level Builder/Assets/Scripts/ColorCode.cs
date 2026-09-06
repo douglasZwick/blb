@@ -63,7 +63,7 @@ public class ColorCode : MonoBehaviour
   [HideInInspector]
   public TileColor m_TileColor;
   [HideInInspector]
-  public TileGrid.Element m_Element;
+  public Element m_Element;
 
   [System.Serializable]
   public class Events

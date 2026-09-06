@@ -11,6 +11,7 @@ Copyright 2018-2019, DigiPen Institute of Technology
 ***************************************************/
 
 using UnityEngine;
+using NewestFileData;
 
 public class DoorLogic : MonoBehaviour
 {

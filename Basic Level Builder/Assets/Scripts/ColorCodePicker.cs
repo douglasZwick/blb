@@ -1,8 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using NewestFileData;
 
 [RequireComponent(typeof(Image))]
 public class ColorCodePicker : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler

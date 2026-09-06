@@ -11,13 +11,11 @@ Copyright 2018-2019, DigiPen Institute of Technology
 ***************************************************/
 
 using UnityEngine;
+using NewestFileData;
 
 public class ColorCodePickerDialog : ModalDialog
 {
   public float m_OpenDuration = 0.25f;
-
-  //ColorCode m_ColorCode;
-  //TileGrid.Element m_Element;
 
   //Flag to check if input is accepted for the wheel.
   bool m_AcceptingInput = false;

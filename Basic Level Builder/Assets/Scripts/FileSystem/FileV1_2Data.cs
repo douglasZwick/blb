@@ -156,6 +156,7 @@ namespace FileV1_2Data
         // This data format supports any versions after this untill the next specified version from another data fromats oldest version
         readonly static public Version s_OldestSupportedVersion = new(1, 2, 1, 0);
 
+        public string m_SaveFilePath;
         public FileData m_FileData;
         public FileHeader m_FileHeader;
         public override FileInfoInterface ConvertToNewest()
@@ -170,7 +171,7 @@ namespace FileV1_2Data
             FileV1_3Data.FileInfo v1_3FileInfo = new()
             {
                 // Convert data to the V1.3 data class
-
+                m_SaveFilePath = m_SaveFilePath,
                 m_FileHeader = new FileV1_3Data.FileHeader(
                   m_FileHeader.m_BlbVersion.ToString(),
                   m_FileHeader.m_IsTempFile),
@@ -210,18 +211,26 @@ namespace FileV1_2Data
 
         public override void Read(System.IO.BinaryReader reader)
         {
-            _ = ReadBinaryStream(reader);
+            if (ReadBinaryStream(reader) is not FileInfo fileInfo)
+                throw new InvalidOperationException("The file data could not be converted to the newest file format.");
+
+            m_FileData = fileInfo.m_FileData;
+            m_FileHeader = fileInfo.m_FileHeader;
         }
 
-        public new static FileInfoInterface ReadAndCreate(System.IO.BinaryReader reader)
+        public new static FileInfoInterface Create(string filePath = "")
         {
-            FileInfo fileInfo = new()
+            return new FileInfo()
             {
+                m_SaveFilePath = filePath,
                 m_FileHeader = new(),
                 m_FileData = new()
             };
+        }
 
-            return fileInfo.ReadBinaryStream(reader);
+        public new static FileInfoInterface ReadAndCreate(System.IO.BinaryReader reader, string filePath = "")
+        {
+            return (Create(filePath) as FileInfo).ReadBinaryStream(reader);
         }
 
         private FileInfoInterface ReadBinaryStream(System.IO.BinaryReader reader)

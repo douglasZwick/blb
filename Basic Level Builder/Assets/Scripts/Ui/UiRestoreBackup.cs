@@ -9,6 +9,8 @@ using System;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
+using NewestFileData;
+using FileInfo = NewestFileData.FileInfo;
 
 public class UiRestoreBackup : ModalDialog
 {
@@ -17,7 +19,7 @@ public class UiRestoreBackup : ModalDialog
   [SerializeField]
   private Image m_FileThumbnail;
   private string m_fullFilePath;
-  private LevelVersioning.LevelVersion m_VersionToLoad = new(0,0);
+  private LevelVersion m_VersionToLoad = new(0,0);
 
   public override void StringsSetup(string[] strings = null)
   {
@@ -27,14 +29,14 @@ public class UiRestoreBackup : ModalDialog
 
     m_fullFilePath = strings[0];
 
-    FileSystem.Instance.GetFileInfoFromFullFilePath(m_fullFilePath, out FileSystemInternal.FileInfo fileInfo);
+    FileSystem.Instance.GetFileInfoFromFullFilePath(m_fullFilePath, out FileInfo fileInfo);
 
     string fileName = Path.GetFileNameWithoutExtension(m_fullFilePath);
     string timestamp = File.GetLastWriteTime(m_fullFilePath).ToString("M/d/yy h:mm:sstt").ToLower();
     m_FilePreviewText.text = $"<b>{fileName}</b>{Environment.NewLine}<color=#C6C6C6>{timestamp}</color>";
 
     m_VersionToLoad.m_AutoVersion = LevelVersioning.GetLastAutoSaveVersion(fileInfo.m_FileData, 0);
-    LevelVersioning.GetVersionLevelData(fileInfo.m_FileData, m_VersionToLoad, out FileSystemInternal.LevelData levelData);
+    LevelVersioning.GetVersionLevelData(fileInfo.m_FileData, m_VersionToLoad, out LevelData levelData);
     m_FileThumbnail.sprite = LevelVersioning.GetThumbnailSprite(levelData);
   }
 

@@ -10,7 +10,11 @@ public abstract class FileInfoInterface
     public abstract FileInfoInterface ConvertToNewest();
     public abstract FileInfoInterface ConvertToNextVersion();
     public abstract void Read(System.IO.BinaryReader reader);
-    public static FileInfoInterface ReadAndCreate(System.IO.BinaryReader reader)
+    public static FileInfoInterface Create(string filePath = "")
+    {
+        return null;
+    }
+    public static FileInfoInterface ReadAndCreate(System.IO.BinaryReader reader, string filePath = "")
     {
         return null;
     }

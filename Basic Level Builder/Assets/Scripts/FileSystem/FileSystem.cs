@@ -45,12 +45,18 @@ public class FileSystem : FileSystemInternal
 
   public string GetMountedFilePath()
   {
-    return m_MountedFileInfo.m_SaveFilePath;
+    return m_MountedFileInfo?.m_SaveFilePath;
   }
 
   public void WaitForSavingToFinish()
   {
     WaitForSavingToFinishEx();
+  }
+
+  public void StartSavingThreadForConversion(string destFilePath, FileInfo sourceFileInfo, Dictionary<Vector2Int, Element> gridDictionary,
+    bool autosave, bool isSaveAs, bool updateCameraPosButtonPressed, bool shouldPrintElapsedTime, bool shouldMountFile = true)
+  {
+    StartSavingThread(destFilePath, sourceFileInfo, gridDictionary, autosave, isSaveAs, updateCameraPosButtonPressed, shouldPrintElapsedTime, shouldMountFile);
   }
 
   /// <summary>

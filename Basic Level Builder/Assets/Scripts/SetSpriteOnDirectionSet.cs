@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using NewestFileData;
 
 [Serializable]
 public class RotationSprites

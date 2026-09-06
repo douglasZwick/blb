@@ -9,6 +9,8 @@ using System;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
+using NewestFileData;
+using FileInfo = NewestFileData.FileInfo;
 
 public class UiGeneralInfoTab : UiTab
 {
@@ -32,7 +34,7 @@ public class UiGeneralInfoTab : UiTab
   public override void InitLoad(string fullFilePath)
   {
     // Get data
-    if (ReadFile(out FileSystemInternal.FileInfo fileInfo))
+    if (ReadFile(out FileInfo fileInfo))
       return;
 
     // Set text from file data
@@ -43,13 +45,13 @@ public class UiGeneralInfoTab : UiTab
 
   public override void OpenTab()
   {
-    if (ReadFile(out FileSystemInternal.FileInfo fileInfo))
+    if (ReadFile(out FileInfo fileInfo))
       return;
     UpdateLatestVersionPreview(fileInfo);
   }
 
   // Returns true if an error occured
-  private bool ReadFile(out FileSystemInternal.FileInfo fileInfo)
+  private bool ReadFile(out FileInfo fileInfo)
   {
     try
     {
@@ -66,7 +68,7 @@ public class UiGeneralInfoTab : UiTab
     return false;
   }
 
-  private void UpdateLatestVersionPreview(FileSystemInternal.FileInfo fileInfo)
+  private void UpdateLatestVersionPreview(FileInfo fileInfo)
   {
     m_SaveNumberTxt.text = fileInfo.m_FileData.m_ManualSaves.Count + " Manual Saves    " + fileInfo.m_FileData.m_AutoSaves.Count + " Auto Saves";
     string timeStamp = File.GetCreationTime(m_FileInfo.FullFilePath).ToString("M/d/yy h:mm:sstt").ToLower();
@@ -77,7 +79,7 @@ public class UiGeneralInfoTab : UiTab
     m_DescriptionInputField.ForceLabelUpdate();
 
     // Get latest manual save and its thumbnail
-    FileSystemInternal.LevelData levelData;
+    LevelData levelData;
     // Check if we have any data to read
     if (fileInfo.m_FileData.m_ManualSaves.Count > 0)
       levelData = fileInfo.m_FileData.m_ManualSaves[^1];

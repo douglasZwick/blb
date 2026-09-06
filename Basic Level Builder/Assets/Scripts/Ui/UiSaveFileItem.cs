@@ -11,6 +11,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using NewestFileData;
+using FileInfo = NewestFileData.FileInfo;
 
 public class UiSaveFileItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
@@ -102,7 +104,7 @@ public class UiSaveFileItem : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
   public void UpdateThumbnail()
   {    
-    FileSystemInternal.FileInfo fileInfo;
+    FileInfo fileInfo;
     try
     {
       FileSystem.Instance.GetFileInfoFromFullFilePath(m_FullFilePath, out fileInfo);
@@ -114,7 +116,7 @@ public class UiSaveFileItem : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     }
 
     // Get latest manual save and its thumbnail
-    FileSystemInternal.LevelData levelData;
+    LevelData levelData;
     // Check if we have any data to read
     if (fileInfo.m_FileData.m_ManualSaves.Count > 0)
       levelData = fileInfo.m_FileData.m_ManualSaves[^1];

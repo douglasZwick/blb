@@ -13,6 +13,7 @@ Copyright 2018-2019, DigiPen Institute of Technology
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using NewestFileData;
 
 public class BlbTool : MonoBehaviour
 {
@@ -108,7 +109,7 @@ public class BlbTool : MonoBehaviour
 
 public class ToolEvent
 {
-  public TileGrid.Element Element;
+  public Element Element;
   public Vector2 EventScreenPosition;
   public Vector3 EventWorldPosition;
   public Vector3 TileWorldPosition;

@@ -5,12 +5,12 @@ Last Updated:   8/24/2026
 Copyright 2018-2026, DigiPen Institute of Technology
 ***************************************************/
 
-using B83.Win32;
+using B83.Win32; // Drag and drop
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Runtime.InteropServices; // DllImport
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -220,7 +220,7 @@ public class FileSystemInternal : MonoBehaviour
   private void CreateEmptyTempFile()
   {
     // This first save will be an empty manual
-    CreateFileInfo(out m_MountedFileInfo);
+    m_MountedFileInfo = FileInfo.Create() as FileInfo;
 
     string destFilePath = m_FileDirUtilities.CreateTempFileName();
     m_MountedFileInfo.m_FileHeader.m_IsTempFile = true;
@@ -228,28 +228,6 @@ public class FileSystemInternal : MonoBehaviour
     m_MountedFileInfo.m_FileData.m_ManualSaves[0].m_TimeStamp = DateTime.Now;
     // Mount temp file so we can check when the full file path isn't the temp file
     MountFile(destFilePath, m_MountedFileInfo, new(0, 0));
-  }
-
-  /// <summary>
-  /// Creates new file data structures.
-  /// </summary>
-  private static void CreateFileInfo(out FileInfo fileInfo, string filePath = "")
-  {
-    fileInfo = new()
-    {
-      m_SaveFilePath = filePath,
-      m_FileHeader = new(),
-      m_FileData = new()
-    };
-  }
-
-  /// <summary>
-  /// Clears the file data structures.
-  /// </summary>
-  private void ClearFileData(FileInfo fileInfo)
-  {
-    fileInfo.m_FileHeader = null;
-    fileInfo.m_FileData = null;
   }
 
   /// <summary>
@@ -298,12 +276,16 @@ public class FileSystemInternal : MonoBehaviour
 
   private bool IsFileMounted()
   {
-    return !String.IsNullOrEmpty(m_MountedFileInfo.m_SaveFilePath);
+    if (m_MountedFileInfo != null)
+      return !String.IsNullOrEmpty(m_MountedFileInfo.m_SaveFilePath);
+    return false;
   }
 
   protected bool IsFileMounted(string filePath)
   {
-    return m_MountedFileInfo.m_SaveFilePath == filePath;
+    if (m_MountedFileInfo != null)
+      return m_MountedFileInfo.m_SaveFilePath == filePath;
+    return false;
   }
 
   protected void RenameMountedFile(string newFilePath)
@@ -480,7 +462,7 @@ public class FileSystemInternal : MonoBehaviour
 
     if (!FileDataExists(m_MountedFileInfo.m_FileData))
     {
-      CreateFileInfo(out m_MountedFileInfo);
+      m_MountedFileInfo = FileInfo.Create() as FileInfo;
     }
 
     string destFilePath;
@@ -773,7 +755,7 @@ public class FileSystemInternal : MonoBehaviour
 
     bool isOverwriting = File.Exists(destFilePath);
 
-    CreateFileInfo(out FileInfo sourceInfo, destFilePath);
+    FileInfo sourceInfo = FileInfo.Create(destFilePath) as FileInfo;
 
     // If we are exporting out multiple versions, this variable should exist
     if (m_PendingExportVersions != null)
@@ -986,7 +968,6 @@ public class FileSystemInternal : MonoBehaviour
   /// <exception cref="Exception">Thrown when the file cannot be found.</exception>
   protected void GetFileInfoFromFullFilePathEx(string fullFilePath, out FileInfo fileInfo)
   {
-    CreateFileInfo(out fileInfo, fullFilePath);
     if (!File.Exists(fullFilePath))
     {
       throw new Exception($"File not found: {fullFilePath}");
@@ -996,11 +977,11 @@ public class FileSystemInternal : MonoBehaviour
     {
       using FileStream stream = new(fullFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
       using BinaryReader reader = new(stream);
-      fileInfo.Read(reader);
+      fileInfo = FileInfo.ReadAndCreate(reader, fullFilePath) as FileInfo;
     }
     catch (Exception e)
     {
-      var errorString = $"Error reading save file {Path.GetFileName(fileInfo.m_SaveFilePath)}. The file data may be corrupted.";
+      var errorString = $"Error reading save file {Path.GetFileName(fullFilePath)}. The file data may be corrupted.";
       m_MainThreadDispatcher.Enqueue(() => StatusBar.Error(errorString, $"{e.Message} ({e.GetType()})"));
       throw new Exception(errorString);
     }
@@ -1093,9 +1074,7 @@ public class FileSystemInternal : MonoBehaviour
   // Intermidiatarty load function. Calls the rest of the load functions.
   private void LoadFromBinaryStream(BinaryReader reader, LevelVersion? version = null)
   {
-    CreateFileInfo(out m_MountedFileInfo);
-
-    m_MountedFileInfo.Read(reader);
+    m_MountedFileInfo = FileInfo.ReadAndCreate(reader) as FileInfo;
 
     m_TileGrid.LoadFromDictonary(GetGridDictionaryFromFileData(m_MountedFileInfo, version));
   }

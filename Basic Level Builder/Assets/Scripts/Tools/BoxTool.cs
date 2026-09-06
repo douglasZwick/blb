@@ -10,6 +10,7 @@ Description:
 Copyright 2018-2019, DigiPen Institute of Technology
 ***************************************************/
 
+using NewestFileData;
 using UnityEngine;
 
 public class BoxTool : BlbTool

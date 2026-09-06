@@ -12,6 +12,7 @@ Copyright 2018-2019, DigiPen Institute of Technology
 
 using UnityEngine;
 using TMPro;  //Text
+using NewestFileData;
 
 [RequireComponent(typeof(SpriteRenderer))]
 public class DoorTileLogic : MonoBehaviour

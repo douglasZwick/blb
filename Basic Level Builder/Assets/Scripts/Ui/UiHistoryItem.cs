@@ -9,6 +9,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using static LevelVersioning;
+using NewestFileData;
 
 public class UiHistoryItem : MonoBehaviour
 {
@@ -27,7 +28,7 @@ public class UiHistoryItem : MonoBehaviour
   public delegate void CloseInfoWindowAction();
   public static event CloseInfoWindowAction OnCloseInfoWindow;
 
-  private FileSystemInternal.LevelData m_LevelData;
+  private LevelData m_LevelData;
 
   [SerializeField]
   private Image m_ThumbnailImage;
@@ -69,7 +70,7 @@ public class UiHistoryItem : MonoBehaviour
     return s_ManualSaveName + m_LevelData.m_Version.m_ManualVersion; //+ " ID: " + m_LevelData.m_Id;
   }
 
-  public void Init(FileSystemInternal.LevelData levelData, UiFileInfo fileInfo)
+  public void Init(LevelData levelData, UiFileInfo fileInfo)
   {
     m_LevelData = levelData;
     m_FileInfo = fileInfo;

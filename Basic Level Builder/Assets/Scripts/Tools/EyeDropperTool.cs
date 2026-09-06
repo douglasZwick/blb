@@ -10,6 +10,7 @@ Description:
 Copyright 2018-2019, DigiPen Institute of Technology
 ***************************************************/
 
+using NewestFileData;
 public class EyeDropperTool : BlbTool
 {
   /**

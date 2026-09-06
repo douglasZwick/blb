@@ -8,10 +8,10 @@ Copyright 2018-2025, DigiPen Institute of Technology
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
-using static LevelVersioning;
+using NewestFileData;
+using FileInfo = NewestFileData.FileInfo;
 
 public class UiHistoryTab : UiTab
 {
@@ -95,7 +95,7 @@ public class UiHistoryTab : UiTab
     {
       // Create all the file items
       // Load the files data
-      FileSystemInternal.FileInfo fileInfo;
+      FileInfo fileInfo;
 
       try
       {
@@ -147,7 +147,7 @@ public class UiHistoryTab : UiTab
     }
   }
 
-  private UiHistoryItem CreateHistoryItem(FileSystemInternal.LevelData levelData, string fullFilePath, UiHistoryItem prefab)
+  private UiHistoryItem CreateHistoryItem(LevelData levelData, string fullFilePath, UiHistoryItem prefab)
   {
     UiHistoryItem historyItem = Instantiate(prefab);
     // Give level data so it can init its text and thumbnail
@@ -239,7 +239,7 @@ public class UiHistoryTab : UiTab
 
   public async void DeleteSelectedVersionsCoda()
   {
-    FileSystem.Instance.GetFileInfoFromFullFilePath(m_FileInfo.FullFilePath, out FileSystemInternal.FileInfo fileInfo);
+    FileSystem.Instance.GetFileInfoFromFullFilePath(m_FileInfo.FullFilePath, out FileInfo fileInfo);
     int manualsSelected = 0;
     foreach (var item in m_Selection)
     {
@@ -290,7 +290,7 @@ public class UiHistoryTab : UiTab
       throw new Exception("Deleting version(s) with no version(s) selected");
     }
 
-    FileSystem.Instance.GetFileInfoFromFullFilePath(m_FileInfo.FullFilePath, out FileSystemInternal.FileInfo fileInfo);
+    FileSystem.Instance.GetFileInfoFromFullFilePath(m_FileInfo.FullFilePath, out FileInfo fileInfo);
     if (m_Selection.Count > 1)
     {
       List<LevelVersion> versions = new();
@@ -462,7 +462,7 @@ public class UiHistoryTab : UiTab
 
   private bool IsCameraDifferent(LevelVersion version)
   {
-    FileSystem.Instance.GetFileInfoFromFullFilePath(m_FileInfo.FullFilePath, out FileSystemInternal.FileInfo fileInfo);
+    FileSystem.Instance.GetFileInfoFromFullFilePath(m_FileInfo.FullFilePath, out FileInfo fileInfo);
     return LevelVersioning.IsCameraDifferent(fileInfo.m_FileData, version);
   }
 

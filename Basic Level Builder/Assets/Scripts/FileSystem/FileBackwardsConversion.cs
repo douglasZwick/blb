@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using NewestFileData;
+using FileInfo = NewestFileData.FileInfo;
 
 public class FileBackwardsConversion
 {
@@ -82,11 +84,6 @@ public class FileBackwardsConversion
       .Where(path => FileDirUtilities.IsValidExtension(path) && (FileDirUtilities.GetFileVersion(path) < new Version(1, 0, 0, 0)));
   }
 
-
-
-
-
-
   // Returns true if the conversion was sucessful
   private static bool TryConvertV0FileToV1_2File(string filePathToConvert, string newFileName, out string newFilePath)
   {
@@ -123,8 +120,7 @@ public class FileBackwardsConversion
 
       sourceFileInfo.m_FileData.m_ManualSaves.Add(levelData);
 
-      FileSystemInternal.FileInfo convertedFileInfo = new();
-      FileV1_2Data.ConvertToV1_3(sourceFileInfo, ref convertedFileInfo);
+      FileInfo convertedFileInfo = (FileInfo)sourceFileInfo.ConvertToNewest();
 
 
       bool autosave = false;
@@ -145,8 +141,9 @@ public class FileBackwardsConversion
         duplicateIndex++;
       }
 
-      //CreateFileInfo(out FileInfo sourceFileInfo, newFilePath);
-      StartSavingThread(newFilePath, sourceFileInfo, convertedFileInfo.m_FileData.m_ManualSaves[0].m_AddedTiles, autosave, isSaveAs, updateCameraPosButtonPressed, shouldPrintElapsedTime, shouldMountFile);
+      Dictionary<Vector2Int, Element> grid = convertedFileInfo.m_FileData.m_ManualSaves[0].m_AddedTiles
+        .ToDictionary(element => element.m_GridIndex);
+      FileSystem.Instance.StartSavingThreadForConversion(newFilePath, convertedFileInfo, grid, autosave, isSaveAs, updateCameraPosButtonPressed, shouldPrintElapsedTime, shouldMountFile);
     }
     catch (Exception e)
     {

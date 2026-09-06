@@ -28,7 +28,7 @@ public class FileDirUtilities : MonoBehaviour
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
   private System.IntPtr m_WindowPtr;
 #endif
-  
+
   private void Awake()
   {
     m_AppName = Application.productName;
@@ -59,7 +59,7 @@ public class FileDirUtilities : MonoBehaviour
     if (!Directory.Exists(m_CurrentDirectoryPath))
       Directory.CreateDirectory(m_CurrentDirectoryPath);
   }
-  
+
   public void UpdateFilesList()
   {
     if (GlobalData.AreEffectsUnderway())
@@ -93,7 +93,9 @@ public class FileDirUtilities : MonoBehaviour
         // at this point, filePaths is already sorted chronologically
         AddFileItemsForFiles(validFilePaths);
 
-        FileItemSetSelected(FileSystem.Instance.GetMountedFilePath());
+        string filePath = FileSystem.Instance.GetMountedFilePath();
+        if (filePath != null)
+          FileItemSetSelected(filePath);
       }
     }
     catch (Exception e)
@@ -153,7 +155,7 @@ public class FileDirUtilities : MonoBehaviour
 
   public void SetTitleBarFileName(string filePath)
   {
-    #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
     if (m_WindowPtr == System.IntPtr.Zero ||FileSystem.Instance.m_IsAppQuitting)
       return;
 
@@ -162,7 +164,7 @@ public class FileDirUtilities : MonoBehaviour
         : m_AppName + " - " + Path.GetFileNameWithoutExtension(filePath);
 
     SetWindowText(m_WindowPtr, newTitle);
-    #endif
+#endif
   }
 
   public static bool IsFileNameValid(string name)
@@ -276,7 +278,7 @@ public class FileDirUtilities : MonoBehaviour
 
   static public bool IsSupportedVersion(string fullFilePath)
   {
-    return GetFileVersion(fullFilePath) >= new Version(1,2,1,0);
+    return GetFileVersion(fullFilePath) >= new Version(1, 2, 1, 0);
   }
 
   // Returns version 0 if not found
@@ -293,7 +295,7 @@ public class FileDirUtilities : MonoBehaviour
     {
       string errorStr = $"Error checking save file version: {Path.GetFileName(fullFilePath)}. {e.Message} ({e.GetType()})";
       Debug.Log(errorStr);
-      fileVersion = new(0,0);
+      fileVersion = new(0, 0);
     }
 
     return fileVersion;

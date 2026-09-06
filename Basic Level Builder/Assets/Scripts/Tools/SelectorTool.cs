@@ -11,6 +11,7 @@ Copyright 2018-2019, DigiPen Institute of Technology
 ***************************************************/
 
 using System.Collections.Generic; //Lists.
+using NewestFileData;
 using UnityEngine;
 
 public class SelectorTool : BlbTool
@@ -37,7 +38,7 @@ public class SelectorTool : BlbTool
   bool m_bCanPaste = false;
 
   //List of tile elements to cache.
-  List<TileGrid.Element> m_ClipboardElements = new();
+  List<Element> m_ClipboardElements = new();
 
   // THE CURSOR!!!!
   Transform m_Cursor;

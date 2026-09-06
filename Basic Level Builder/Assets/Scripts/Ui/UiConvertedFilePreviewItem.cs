@@ -8,6 +8,8 @@ Copyright 2018-2026, DigiPen Institute of Technology
 using UnityEngine;
 using System.IO;
 using UnityEngine.UI;
+using NewestFileData;
+using FileInfo = NewestFileData.FileInfo;
 
 public class UiConvertedFilePreviewItem : MonoBehaviour
 {
@@ -18,8 +20,8 @@ public class UiConvertedFilePreviewItem : MonoBehaviour
 
     public void Init(string fullFilePath)
     {
-        FileSystem.Instance.GetFileInfoFromFullFilePath(fullFilePath, out FileSystemInternal.FileInfo fileInfo);
-        FileSystemInternal.LevelData levelData = LevelVersioning.GetLastManualSaveData(fileInfo.m_FileData);
+        FileSystem.Instance.GetFileInfoFromFullFilePath(fullFilePath, out FileInfo fileInfo);
+        LevelData levelData = LevelVersioning.GetLastManualSaveData(fileInfo.m_FileData);
 
         string fileName = Path.GetFileName(fullFilePath);
         string date = levelData.m_TimeStamp.ToString("M/d/yy h:mm:sstt").ToLower();
