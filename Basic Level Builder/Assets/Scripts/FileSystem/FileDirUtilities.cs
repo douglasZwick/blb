@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
@@ -24,7 +23,7 @@ public class FileDirUtilities : MonoBehaviour
   public GameObject m_FileItemPrefab;
   public UiListView m_SaveList;
 
-  protected string m_CurrentDirectoryPath;
+  private string m_CurrentDirectoryPath;
   private string m_AppName;
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
   private System.IntPtr m_WindowPtr;

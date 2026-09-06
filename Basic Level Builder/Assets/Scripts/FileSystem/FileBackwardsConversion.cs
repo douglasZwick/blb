@@ -16,6 +16,18 @@ public class FileBackwardsConversion
   // NOTE: calling Path.GetExtension on a file with the old extension will return only the part of the extension after the last dot.
   readonly static private string s_ConvertedFileExtension = ".old" + FileDirUtilities.s_FilenameExtension;
 
+  // Calls the previous data versions conversion function
+  // NOTE: If adding a new save data format don't forget to change this function to call that version instead
+  public static void ReadAndConvertToNewest(System.IO.BinaryReader reader, ref FileSystemInternal.FileInfo fileInfo)
+  {
+    FileV1_2Data.ReadAndConvertToV1_3(reader, ref fileInfo);
+  }
+
+  public static void ConvertToNewest()
+  {
+    
+  }
+
   static public void ConvertAllOldFiles()
   {
     string documentsPath = FileDirUtilities.GetDocumentsPath();
@@ -41,7 +53,7 @@ public class FileBackwardsConversion
 
       if (fileVersion < new Version(1, 0, 0, 0))
       {
-        if (FileSystem.Instance.TryConvertV0FileToV1_2File(oldFilePath, fileName, out string newFilePath))
+        if (TryConvertV0FileToV1_2File(oldFilePath, fileName, out string newFilePath))
         {
           convertedFiles.Add(newFilePath);
         }
@@ -63,7 +75,6 @@ public class FileBackwardsConversion
   {
     return File.Exists(fullFilePath) && fullFilePath.EndsWith(s_ConvertedFileExtension);
   }
-
 
   static private string AddOldExtension(string filePath)
   {
@@ -88,10 +99,8 @@ public class FileBackwardsConversion
 
 
 
-
-
   // Returns true if the conversion was sucessful
-  private bool TryConvertV0FileToV1_2FileEx(string filePathToConvert, string newFileName, out string newFilePath)
+  private static bool TryConvertV0FileToV1_2File(string filePathToConvert, string newFileName, out string newFilePath)
   {
     newFilePath = "";
     try
@@ -113,7 +122,7 @@ public class FileBackwardsConversion
 
 
 
-
+      // Create file data V1_2 from the tile dictonary
       FileV1_2Data.FileInfo sourceFileInfo = new()
       {
         m_FileHeader = new(),
@@ -135,7 +144,7 @@ public class FileBackwardsConversion
       bool updateCameraPosButtonPressed = false;
       bool shouldPrintElapsedTime = false;
       bool shouldMountFile = false;
-      var directoryPath = m_FileDirUtilities.GetCurrentDirectoryPath();
+      var directoryPath = FileSystem.Instance.GetDirectoryPath();
       var baseFileName = Path.GetFileNameWithoutExtension(newFileName);
       newFilePath = Path.Combine(directoryPath, newFileName);
 
@@ -161,7 +170,7 @@ public class FileBackwardsConversion
 
   // Creates a grid of tiles from JSON strings from BLB V0
   // Returns the number of failures. If there were no sucesses, returns -1.
-  private int TryCreateDictonaryFromJsonStrings(string[] jsonStrings, out Dictionary<Vector2Int, FileV1_2Data.Element> gridDictionary)
+  private static int TryCreateDictonaryFromJsonStrings(string[] jsonStrings, out Dictionary<Vector2Int, FileV1_2Data.Element> gridDictionary)
   {
     int successes = 0;
     int failures = 0;

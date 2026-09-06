@@ -12,7 +12,8 @@ using UnityEngine;
 
 public static class FileV1_2Data
 {
-    readonly static private Version s_OldestSupportedVersion = new(1, 2, 1, 0);
+    // This data format supports any versions after this untill the next specified version from another data fromats oldest version
+    readonly static public Version s_OldestSupportedVersion = new(1, 2, 1, 0);
     public enum TileType
     {
         EMPTY,
@@ -151,10 +152,24 @@ public static class FileV1_2Data
 
     #region FileStructure classes
 
-    public struct FileInfo
+    public class FileInfo : FileInfoInterface
     {
         public FileData m_FileData;
         public FileHeader m_FileHeader;
+
+        // Converting to v1.3
+        public override void ConvertToNext(ref FileInfoInterface nextFileInfo)
+        {
+            if (nextFileInfo is FileSystemInternal.FileInfo){
+                nextFileInfo = ConvertToV1_3(this, nextFileInfo as FileSystemInternal.FileInfo);
+            }else
+                throw new Exception("Expected ")
+        }
+
+        public override void ReadAndConvertToNext()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class FileHeader
@@ -320,8 +335,8 @@ public static class FileV1_2Data
         return levelData;
     }
 
-    public static void ConvertToV1_3(FileInfo v1_2FileInfo, ref FileSystemInternal.FileInfo fileInfo)
-    {
+    public static FileInfoInterface ConvertToV1_3(FileInfo v1_2FileInfo, FileSystemInternal.FileInfo fileInfo)
+    { 
         foreach (var save in v1_2FileInfo.m_FileData.m_ManualSaves)
         {
             foreach (var tile in save.m_AddedTiles)
@@ -355,6 +370,8 @@ public static class FileV1_2Data
                 .Select(ConvertLevelData)
                 .ToList()
         };
+
+        return fileInfo;
     }
 
     private static FileSystemInternal.LevelData ConvertLevelData(LevelData source)
@@ -394,37 +411,22 @@ public static class FileV1_2Data
     // Convert legacy slope variants into a slope tile and its equivalent direction.
     private static void ConvertV1_2TileTypeAndDirVToV1_3(ref TileType tileType, ref Direction tileDir)
     {
-        switch (tileType)
-        {
-            case TileType.SLOPE_LEFT:
-            case TileType.BG_LEFT:
-                tileDir = (Direction)(int)global::Direction.UP;
-                break;
-            case TileType.SLOPE_RIGHT:
-            case TileType.BG_RIGHT:
-                tileDir = (Direction)(int)global::Direction.RIGHT;
-                break;
-            case TileType.SLOPE_LEFT_INV:
-            case TileType.BG_LEFT_INV:
-                tileDir = (Direction)(int)global::Direction.LEFT;
-                break;
-            case TileType.SLOPE_RIGHT_INV:
-            case TileType.BG_RIGHT_INV:
-                tileDir = (Direction)(int)global::Direction.DOWN;
-                break;
-            default:
-                tileDir = tileDir switch
-                {
-                    Direction.RIGHT => (Direction)(int)global::Direction.RIGHT,
-                    Direction.LEFT => (Direction)(int)global::Direction.LEFT,
-                    Direction.UP => (Direction)(int)global::Direction.UP,
-                    Direction.DOWN => (Direction)(int)global::Direction.DOWN,
-                    _ => Direction.RIGHT
-                };
-                break;
-        }
-
-        if (tileType >= TileType.SLOPE_LEFT)
+    tileDir = tileType switch
+    {
+      TileType.SLOPE_LEFT or TileType.BG_LEFT => (Direction)(int)global::Direction.UP,
+      TileType.SLOPE_RIGHT or TileType.BG_RIGHT => (Direction)(int)global::Direction.RIGHT,
+      TileType.SLOPE_LEFT_INV or TileType.BG_LEFT_INV => (Direction)(int)global::Direction.LEFT,
+      TileType.SLOPE_RIGHT_INV or TileType.BG_RIGHT_INV => (Direction)(int)global::Direction.DOWN,
+      _ => tileDir switch
+      {
+        Direction.RIGHT => (Direction)(int)global::Direction.RIGHT,
+        Direction.LEFT => (Direction)(int)global::Direction.LEFT,
+        Direction.UP => (Direction)(int)global::Direction.UP,
+        Direction.DOWN => (Direction)(int)global::Direction.DOWN,
+        _ => Direction.RIGHT
+      },
+    };
+    if (tileType >= TileType.SLOPE_LEFT)
         {
             if (tileType <= TileType.SLOPE_RIGHT_INV)
             {

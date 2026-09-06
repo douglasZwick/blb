@@ -91,7 +91,7 @@ public class FileSystemInternal : MonoBehaviour
 
   #region FileStructure classes
 
-  public struct FileInfo
+  public class FileInfo : FileInfoInterface
   {
     public string m_SaveFilePath;
     // The version of the manual or autosave that is loaded
