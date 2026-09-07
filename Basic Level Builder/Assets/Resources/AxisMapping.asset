@@ -118,3 +118,9 @@ MonoBehaviour:
   - m_axisName: CreateNewLevel
     m_buttons:
     - N
+  - m_axisName: RotateLeft
+    m_buttons:
+    - Q
+  - m_axisName: RotateRight
+    m_buttons:
+    - E

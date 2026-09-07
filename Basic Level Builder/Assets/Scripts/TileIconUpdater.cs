@@ -28,6 +28,7 @@ public class TileIconUpdater : MonoBehaviour
   private GameObject m_RotateArrowLeft, m_RotateArrowRight;
   private TilesPalette m_TilesPalette;
   private Quaternion m_PrimaryBaseRotation;
+  private ActionSequence m_JiggleSequence;
 
   private void Awake()
   {
@@ -53,25 +54,26 @@ public class TileIconUpdater : MonoBehaviour
 
     float baseRotation = m_PrimaryBaseRotation.eulerAngles.z;
     float offsetRotation = direction * 10.0f;
-    var jiggleSequence = ActionMaster.Actions.Sequence();
-    var easeIn = new Ease(Ease.Sin.In);
-    var easeOut = new Ease(Ease.Sin.Out);
-    jiggleSequence.Rotate2D(m_PrimaryImage.gameObject, baseRotation + offsetRotation, 0.15f, easeIn);
-    jiggleSequence.Rotate2D(m_PrimaryImage.gameObject, baseRotation, 0.15f, easeOut);
-    jiggleSequence.Rotate2D(m_PrimaryImage.gameObject, baseRotation + offsetRotation, 0.15f, easeIn);
-    jiggleSequence.Rotate2D(m_PrimaryImage.gameObject, baseRotation, 0.15f, easeOut);
+    m_JiggleSequence = ActionMaster.Actions.Sequence();
+    Ease easeIn = new(Ease.Sin.In);
+    Ease easeOut = new(Ease.Sin.Out);
+    m_JiggleSequence.Rotate2D(m_PrimaryImage.gameObject, baseRotation + offsetRotation, 0.15f, easeIn);
+    m_JiggleSequence.Rotate2D(m_PrimaryImage.gameObject, baseRotation, 0.15f, easeOut);
+    m_JiggleSequence.Rotate2D(m_PrimaryImage.gameObject, baseRotation + offsetRotation, 0.15f, easeIn);
+    m_JiggleSequence.Rotate2D(m_PrimaryImage.gameObject, baseRotation, 0.15f, easeOut);
   }
 
   public void CancelPrimaryTileJiggle()
   {
-    ActionMaster.Actions.CancelAllInTreeRegarding(m_PrimaryImage.gameObject);
+    m_JiggleSequence?.Cancel();
+    m_JiggleSequence = null;
     m_PrimaryImage.transform.localRotation = m_PrimaryBaseRotation;
   }
 
   void OnTileRotated()
   {
-    ApplyTileVisual(m_PrimaryTileType, m_PrimaryImage, GetTileDirection(m_PrimaryTileType));
-    ApplyTileVisual(m_SecondaryTileType, m_SecondaryImage, GetTileDirection(m_SecondaryTileType));
+    ApplyTileVisual(m_PrimaryTileType, m_PrimaryImage, GetTileDirection(m_PrimaryTileType), true);
+    ApplyTileVisual(m_SecondaryTileType, m_SecondaryImage, GetTileDirection(m_SecondaryTileType), true);
   }
 
   public void RotateTileLeft()
@@ -84,25 +86,49 @@ public class TileIconUpdater : MonoBehaviour
     GlobalData.RotateSelectedTileClockwise();
   }
 
-  private void ApplyTileVisual(TileType tileType, Image img, Direction direction)
+  private void ApplyTileVisual(TileType tileType, Image img, Direction direction, bool animateRotation = false)
   {
     var icon = TilePicker.s_Icons[tileType];
     img.color = icon.color;
+    Quaternion targetRotation = Quaternion.identity;
+    bool hasRotatedSprite = false;
 
     foreach (TileSpriteRotations tileSpriteRotations in m_TileRoationSprites)
     {
       if (tileSpriteRotations.m_tileType == tileType)
       {
         img.sprite = SetSpriteOnDirectionSet.GetSpriteFromDirection(direction, tileSpriteRotations);
-        img.transform.localRotation = Quaternion.identity;
-        SetPrimaryBaseRotation(img);
-        return;
+        hasRotatedSprite = true;
+        break;
       }
     }
 
-    img.sprite = icon.sprite;
-    RotateTransform(direction, img);
-    SetPrimaryBaseRotation(img);
+    if (!hasRotatedSprite)
+    {
+      img.sprite = icon.sprite;
+
+      int rotation = direction switch
+      {
+        Direction.LEFT => 180,
+        Direction.UP => 90,
+        Direction.DOWN => -90,
+        _ => 0,
+      };
+      targetRotation = Quaternion.Euler(0, 0, rotation);
+    }
+
+    if (animateRotation)
+    {
+      ActionMaster.Actions.CancelAllInTreeRegarding(img.gameObject);
+      ActionMaster.Actions.Rotate2D(img.gameObject, targetRotation.eulerAngles.z, 0.2f, new Ease(Ease.Back.Out));
+      if (img == m_PrimaryImage)
+        m_PrimaryBaseRotation = targetRotation;
+    }
+    else
+    {
+      img.transform.localRotation = targetRotation;
+      SetPrimaryBaseRotation(img);
+    }
   }
 
   private void SetPrimaryBaseRotation(Image img)
@@ -110,21 +136,6 @@ public class TileIconUpdater : MonoBehaviour
     if (img == m_PrimaryImage)
       m_PrimaryBaseRotation = img.transform.localRotation;
   }
-
-  private void RotateTransform(Direction direction, Image img)
-  {
-    int rotation = direction switch
-    {
-      Direction.LEFT => 180,
-      Direction.UP => 90,
-      Direction.DOWN => -90,
-      //Direction.RIGHT => 0,
-      _ => 0,
-    };
-
-    img.transform.localRotation = Quaternion.Euler(0, 0, rotation);
-  }
-
 
   void OnPrimaryTileChanged(TileType type)
   {
