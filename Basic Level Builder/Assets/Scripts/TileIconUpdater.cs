@@ -24,7 +24,10 @@ public class TileIconUpdater : MonoBehaviour
   private TileType m_PrimaryTileType = TileType.SOLID, m_SecondaryTileType;
   [SerializeField]
   private List<TileSpriteRotations> m_TileRoationSprites;
+  [SerializeField]
+  private GameObject m_RotateArrowLeft, m_RotateArrowRight;
   private TilesPalette m_TilesPalette;
+  private Quaternion m_PrimaryBaseRotation;
 
   private void Awake()
   {
@@ -32,6 +35,37 @@ public class TileIconUpdater : MonoBehaviour
     GlobalData.SecondaryTileChanged += OnSecondaryTileChanged;
     GlobalData.TileRotated += OnTileRotated;
     m_TilesPalette = FindObjectOfType<TilesPalette>();
+    m_PrimaryBaseRotation = m_PrimaryImage.transform.localRotation;
+  }
+
+  private void Start()
+  {
+    ToggleRotateArrows();
+  }
+
+  public void JigglePrimaryTile(int direction)
+  {
+    direction = Mathf.Clamp(direction, -1, 1);
+    if (direction == 0)
+      return;
+
+    CancelPrimaryTileJiggle();
+
+    float baseRotation = m_PrimaryBaseRotation.eulerAngles.z;
+    float offsetRotation = direction * 10.0f;
+    var jiggleSequence = ActionMaster.Actions.Sequence();
+    var easeIn = new Ease(Ease.Sin.In);
+    var easeOut = new Ease(Ease.Sin.Out);
+    jiggleSequence.Rotate2D(m_PrimaryImage.gameObject, baseRotation + offsetRotation, 0.15f, easeIn);
+    jiggleSequence.Rotate2D(m_PrimaryImage.gameObject, baseRotation, 0.15f, easeOut);
+    jiggleSequence.Rotate2D(m_PrimaryImage.gameObject, baseRotation + offsetRotation, 0.15f, easeIn);
+    jiggleSequence.Rotate2D(m_PrimaryImage.gameObject, baseRotation, 0.15f, easeOut);
+  }
+
+  public void CancelPrimaryTileJiggle()
+  {
+    ActionMaster.Actions.CancelAllInTreeRegarding(m_PrimaryImage.gameObject);
+    m_PrimaryImage.transform.localRotation = m_PrimaryBaseRotation;
   }
 
   void OnTileRotated()
@@ -61,12 +95,20 @@ public class TileIconUpdater : MonoBehaviour
       {
         img.sprite = SetSpriteOnDirectionSet.GetSpriteFromDirection(direction, tileSpriteRotations);
         img.transform.localRotation = Quaternion.identity;
+        SetPrimaryBaseRotation(img);
         return;
       }
     }
 
     img.sprite = icon.sprite;
     RotateTransform(direction, img);
+    SetPrimaryBaseRotation(img);
+  }
+
+  private void SetPrimaryBaseRotation(Image img)
+  {
+    if (img == m_PrimaryImage)
+      m_PrimaryBaseRotation = img.transform.localRotation;
   }
 
   private void RotateTransform(Direction direction, Image img)
@@ -88,6 +130,23 @@ public class TileIconUpdater : MonoBehaviour
   {
     m_PrimaryTileType = type;
     ApplyTileVisual(type, m_PrimaryImage, GetTileDirection(type));
+    ToggleRotateArrows();
+  }
+
+  void ToggleRotateArrows()
+  {
+    // Remove rotate arrows on tiles without a rotator
+    GameObject tilePrefab = m_TilesPalette.GetPrefabFromType(m_PrimaryTileType);
+    if (tilePrefab != null && !tilePrefab.TryGetComponent(out TileDirection _))
+    {
+      m_RotateArrowLeft.SetActive(false);
+      m_RotateArrowRight.SetActive(false);
+    }
+    else
+    {
+      m_RotateArrowLeft.SetActive(true);
+      m_RotateArrowRight.SetActive(true);
+    }
   }
 
 
