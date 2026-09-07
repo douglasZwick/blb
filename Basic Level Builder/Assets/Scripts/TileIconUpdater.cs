@@ -21,7 +21,7 @@ public class TileIconUpdater : MonoBehaviour
 {
   [SerializeField]
   private Image m_PrimaryImage, m_SecondaryImage;
-  private TileType m_PrimaryTileType, m_SecondaryTileType;
+  private TileType m_PrimaryTileType = TileType.SOLID, m_SecondaryTileType;
   [SerializeField]
   private List<TileSpriteRotations> m_TileRoationSprites;
   private TilesPalette m_TilesPalette;
@@ -38,6 +38,16 @@ public class TileIconUpdater : MonoBehaviour
   {
     ApplyTileVisual(m_PrimaryTileType, m_PrimaryImage, GetTileDirection(m_PrimaryTileType));
     ApplyTileVisual(m_SecondaryTileType, m_SecondaryImage, GetTileDirection(m_SecondaryTileType));
+  }
+
+  public void RotateTileLeft()
+  {
+    GlobalData.RotateSelectedTileCounterClockwise();
+  }
+
+  public void RotateTileRight()
+  {
+    GlobalData.RotateSelectedTileClockwise();
   }
 
   private void ApplyTileVisual(TileType tileType, Image img, Direction direction)
@@ -90,14 +100,14 @@ public class TileIconUpdater : MonoBehaviour
   private Direction GetTileDirection(TileType type)
   {
     GameObject tilePrefab = m_TilesPalette.GetPrefabFromType(type);
-    if (tilePrefab != null && tilePrefab.TryGetComponent(out TileDirection tileDirection)){
+    if (tilePrefab != null && tilePrefab.TryGetComponent(out TileDirection tileDirection))
+    {
       return GlobalData.GetTileState(tileDirection.m_DirectionType).Direction;
     }
 
     // If the tile dosn't have a tileDirection then don't rotate the preview
     return Direction.RIGHT;
   }
-
 
   private void OnDestroy()
   {

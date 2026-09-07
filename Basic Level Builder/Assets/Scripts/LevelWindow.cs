@@ -22,18 +22,6 @@ public class LevelWindow : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     m_CameraController = m_Camera.GetComponent<EditorCameraController>();
   }
 
-  private void Update()
-  {
-    if (Input.GetButtonDown("RotateLeft"))
-    {
-      GlobalData.RotateSelectedTileCounterClockwise();
-    }
-    else if (Input.GetButtonDown("RotateRight"))
-    {
-      GlobalData.RotateSelectedTileClockwise();
-    }
-  }
-
   public void OnPointerDown(PointerEventData e)
   {
     if (GlobalData.AreEffectsUnderway())
