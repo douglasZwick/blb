@@ -1324,7 +1324,6 @@ MonoBehaviour:
   m_MaximizedTabSizeDelta: {x: 55, y: 159}
   m_MinimizedColor: {r: 0.14901961, g: 0.14901961, b: 0.14901961, a: 1}
   m_MaximizedColor: {r: 0.32156864, g: 0.43529412, b: 0.60784316, a: 1}
-  m_CodaAdder: {fileID: 7117174629281832910}
 --- !u!114 &7117174629281832910
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5781,7 +5780,6 @@ MonoBehaviour:
   m_PromoteButton: {fileID: 115907452729318348}
   m_LoadButton: {fileID: 5722571221885826180}
   m_DeleteButton: {fileID: 8545896915410068236}
-  m_CodaAdder: {fileID: 7117174629281832910}
 --- !u!1 &7550082644921767834
 GameObject:
   m_ObjectHideFlags: 0
@@ -8452,7 +8450,7 @@ PrefabInstance:
     - target: {fileID: 8320027039918689860, guid: ea4794da28b5d084fad42ef1fddc27ce,
         type: 3}
       propertyPath: m_Text
-      value: Save this version with a specified file name
+      value: Save this version as a new file
       objectReference: {fileID: 0}
     - target: {fileID: 8320027039918689912, guid: ea4794da28b5d084fad42ef1fddc27ce,
         type: 3}

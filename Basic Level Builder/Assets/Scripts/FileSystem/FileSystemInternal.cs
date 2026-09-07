@@ -102,8 +102,8 @@ public class FileSystemInternal : MonoBehaviour
 
     // Call any functions pushed to the main thread,
     // as there might be ones added files to the file list which we don't want to do untill after the list is updated
-    m_MainThreadDispatcher.Update();
     FileBackwardsConversion.ConvertAllOldFiles();
+    m_MainThreadDispatcher.Update();
     m_FileDirUtilities.UpdateFilesList();
     CheckForTempFiles();
   }
@@ -163,6 +163,7 @@ public class FileSystemInternal : MonoBehaviour
 
       // Update file list incase files were added or removed
       FileBackwardsConversion.ConvertAllOldFiles();
+      m_MainThreadDispatcher.Update();
       m_FileDirUtilities.UpdateFilesList();
     }
   }
@@ -458,7 +459,7 @@ public class FileSystemInternal : MonoBehaviour
     // If we have a thread running
     m_SavingThread?.Wait();
 
-    if (!FileDataExists(m_MountedFileInfo.m_FileData))
+    if (m_MountedFileInfo == null || !FileDataExists(m_MountedFileInfo.m_FileData))
     {
       m_MountedFileInfo = FileInfo.Create() as FileInfo;
     }
