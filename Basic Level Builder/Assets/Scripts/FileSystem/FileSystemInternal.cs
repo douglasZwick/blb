@@ -1083,7 +1083,7 @@ public class FileSystemInternal : MonoBehaviour
     File.Delete(fullFilePath);
 
     // If we deleted the file we have open, unmount it
-    if (m_MountedFileInfo.m_SaveFilePath == fullFilePath)
+    if (IsFileMounted() && m_MountedFileInfo.m_SaveFilePath == fullFilePath)
     {
       UnmountFile();
       // Also clear all tiles so the users sees the level as fully deleted
@@ -1096,7 +1096,7 @@ public class FileSystemInternal : MonoBehaviour
   protected void UpdateLoadedVersionIfDeleted(FileInfo fileInfo, LevelVersion version)
   {
     // If deleting from our own loaded file
-    if (m_MountedFileInfo.m_SaveFilePath == fileInfo.m_SaveFilePath)
+    if (IsFileMounted() && m_MountedFileInfo.m_SaveFilePath == fileInfo.m_SaveFilePath)
     {
       // Mark the version we have loaded from to be the newest one
       if (m_MountedFileInfo.m_LoadedVersion.m_ManualVersion == version.m_ManualVersion && fileInfo.m_FileData.m_ManualSaves.Count > 0)
@@ -1130,7 +1130,7 @@ public class FileSystemInternal : MonoBehaviour
     {
       // If deleting from our own loaded file
       // Update the mounted data to the new data
-      if (m_MountedFileInfo.m_SaveFilePath == fileInfo.m_SaveFilePath)
+      if (IsFileMounted() && m_MountedFileInfo.m_SaveFilePath == fileInfo.m_SaveFilePath)
       {
         m_MountedFileInfo = fileInfo;
       }
