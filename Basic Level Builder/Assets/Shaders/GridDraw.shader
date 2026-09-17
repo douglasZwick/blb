@@ -2,12 +2,15 @@
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
+        _GridColor ("Grid Color", Color) = (0.25, 0.25, 0.25, 1)
+        _BackgroundColor ("Background Color", Color) = (0, 0, 0, 0)
     }
     SubShader
     {
-        // No culling or depth
-        Cull Off ZWrite Off ZTest Always
+        Cull Off
+        ZWrite Off
+        ZTest Always
+        Blend SrcAlpha OneMinusSrcAlpha
 
         Pass
         {
@@ -29,6 +32,11 @@
                 float4 vertex : SV_POSITION;
             };
 
+            static const float TILE_SIZE = 1;
+
+            fixed4 _GridColor;
+            fixed4 _BackgroundColor;
+
             v2f vert (appdata v)
             {
                 v2f o;
@@ -37,15 +45,21 @@
                 return o;
             }
 
-            sampler2D _MainTex;
-
             fixed4 frag (v2f i) : SV_Target
             {
-                fixed4 col = tex2D(_MainTex, i.uv);
+                // unity_OrthoParams.xy is the camera's visible world width and height.
+                float2 cameraWorldSize = unity_OrthoParams.xy;
+                float2 worldPosition = _WorldSpaceCameraPos.xy +
+                    (i.uv - 0.5) * (cameraWorldSize / 0.5) + (TILE_SIZE * 0.5);
+                float2 gridPosition = worldPosition / TILE_SIZE;
+                float2 distanceToLine = min(frac(gridPosition), 1.0 - frac(gridPosition));
+                float2 lineWidth = fwidth(gridPosition) * 1.5;
+                lineWidth.x = max(lineWidth.x, 0.001);
+                lineWidth.y = max(lineWidth.y, 0.001);
+                float2 lineMask = 1.0 - smoothstep(0.0, lineWidth, distanceToLine);
+                float grid = max(lineMask.x, lineMask.y);
 
-                // just invert the colors
-                col.rgb = 1 - col.rgb;
-                return col;
+                return lerp(_BackgroundColor, _GridColor, grid);
             }
             ENDCG
         }
