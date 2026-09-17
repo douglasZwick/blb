@@ -26,14 +26,14 @@ public class FileDirUtilities : MonoBehaviour
 
   private string m_CurrentDirectoryPath;
   private string m_AppName;
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
   private System.IntPtr m_WindowPtr;
 #endif
 
   private void Awake()
   {
     m_AppName = Application.productName;
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
     m_WindowPtr = FindWindow(null, m_AppName);
     if (m_WindowPtr == System.IntPtr.Zero)
     {
@@ -143,7 +143,7 @@ public class FileDirUtilities : MonoBehaviour
     return m_CurrentDirectoryPath;
   }
 
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
   [DllImport("user32.dll", EntryPoint = "SetWindowText")]
   public static extern bool SetWindowText(System.IntPtr hwnd, string lpString);
   [DllImport("user32.dll", EntryPoint = "FindWindow")]
@@ -152,7 +152,7 @@ public class FileDirUtilities : MonoBehaviour
 
   public void SetTitleBarFileName(string filePath)
   {
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
     if (m_WindowPtr == System.IntPtr.Zero ||FileSystem.Instance.m_IsAppQuitting)
       return;
 
