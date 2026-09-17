@@ -46,7 +46,7 @@ public class UiFileInfo : MonoBehaviour
 
       CloseWindow();
       // Attempt to remove any open dialougs
-      ModalDialog[] dialogs = FindObjectsOfType<ModalDialog>();
+      ModalDialog[] dialogs = FindObjectsByType<ModalDialog>();
       foreach (var dialog in dialogs)
       {
         dialog.Close();

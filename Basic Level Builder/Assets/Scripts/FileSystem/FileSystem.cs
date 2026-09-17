@@ -24,7 +24,7 @@ public class FileSystem : FileSystemInternal
     {
       if (_instance == null)
       {
-        _instance = FindObjectOfType<FileSystem>();
+        _instance = FindAnyObjectByType<FileSystem>();
       }
       return _instance;
     }

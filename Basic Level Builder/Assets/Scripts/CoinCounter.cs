@@ -43,7 +43,7 @@ public class CoinCounter : MonoBehaviour
   {
     m_Total = 0;
 
-    var allCoins = FindObjectsOfType<Coin>();
+    var allCoins = FindObjectsByType<Coin>();
 
     foreach (var coin in allCoins)
       m_Total += coin.m_Value;

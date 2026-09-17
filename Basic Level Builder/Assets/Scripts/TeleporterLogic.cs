@@ -48,7 +48,7 @@ public class TeleporterLogic : MonoBehaviour
     float flLeastDistance = Mathf.Infinity;
 
     //Get all teleporters.
-    TeleporterLogic[] teleporters = FindObjectsOfType<TeleporterLogic>();
+    TeleporterLogic[] teleporters = FindObjectsByType<TeleporterLogic>();
 
     //Check all of the LPK_TagManagers for the tags.
     foreach (var teleporter in teleporters)

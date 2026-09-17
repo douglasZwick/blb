@@ -83,7 +83,7 @@ public class SwitchLogic : MonoBehaviour
 
   void FindDoors()
   {
-    var allDoors = FindObjectsOfType<DoorLogic>();
+    var allDoors = FindObjectsByType<DoorLogic>();
 
     foreach (var door in allDoors)
     {

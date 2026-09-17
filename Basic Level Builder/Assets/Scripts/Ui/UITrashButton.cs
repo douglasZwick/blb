@@ -29,7 +29,7 @@ public sealed class UITrashButton : MonoBehaviour
   **/
   void Start()
   {
-    m_TileGrid = FindObjectOfType<TileGrid>();
+    m_TileGrid = FindAnyObjectByType<TileGrid>();
   }
 
   /**

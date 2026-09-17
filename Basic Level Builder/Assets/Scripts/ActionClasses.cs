@@ -1054,10 +1054,10 @@ public class ActionVelocity2D : ActionVector2
     m_RB = go == null ? null : go.GetComponent<Rigidbody2D>();
   }
 
-  protected override void Initialize() { Start = m_RB.velocity; }
+  protected override void Initialize() { Start = m_RB.linearVelocity; }
   protected override void Set(Vector2 value)
   {
-    m_RB.velocity = value;
+    m_RB.linearVelocity = value;
   }
 }
 

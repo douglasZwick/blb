@@ -105,7 +105,7 @@ public class UiHistoryTab : UiTab
       {
         var errorString = $"Failed to get data from file path: {m_FileInfo.FullFilePath}. {e.Message}";
         StatusBar.Warning($"Error: Could not load file history.", errorString);
-        FindObjectOfType<UiFileInfo>().CloseWindow();
+        FindAnyObjectByType<UiFileInfo>().CloseWindow();
         return;
       }
 
@@ -123,7 +123,7 @@ public class UiHistoryTab : UiTab
       if (items.Count == 0)
       {
         StatusBar.Warning($"Error: File is empty", $"No versions found in file: {m_FileInfo.FullFilePath}");
-        FindObjectOfType<UiFileInfo>().CloseWindow();
+        FindAnyObjectByType<UiFileInfo>().CloseWindow();
         return;
       }
 
@@ -143,7 +143,7 @@ public class UiHistoryTab : UiTab
     catch (Exception e)
     {
       StatusBar.Error($"Error: Could not load file history due to an unexpected error.", $"{e.Message} ({e.GetType()})");
-      FindObjectOfType<UiFileInfo>().CloseWindow();
+      FindAnyObjectByType<UiFileInfo>().CloseWindow();
     }
   }
 
@@ -277,7 +277,7 @@ public class UiHistoryTab : UiTab
 
   private void DeleteFile()
   {
-    FindObjectOfType<UiFileInfo>().DeleteFile();
+    FindAnyObjectByType<UiFileInfo>().DeleteFile();
   }
 
   // TODO: If deleting last manual save ask if want to delete whole file.

@@ -47,7 +47,7 @@ public class DoorLogic : MonoBehaviour
   private void Awake()
   {
     m_ColorCode = GetComponent<ColorCode>();
-    m_TileGrid = FindObjectOfType<TileGrid>();
+    m_TileGrid = FindAnyObjectByType<TileGrid>();
     m_cTransform = transform;
 
     GlobalData.PlayModeToggled += OnPlayModeToggled;

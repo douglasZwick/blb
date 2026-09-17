@@ -63,6 +63,7 @@ public class ColorCode : MonoBehaviour
   [HideInInspector]
   public TileColor m_TileColor;
   [HideInInspector]
+  [System.NonSerialized]
   public Element m_Element;
 
   [System.Serializable]

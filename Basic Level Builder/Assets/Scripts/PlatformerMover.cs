@@ -44,7 +44,7 @@ public class PlatformerMover : MonoBehaviour
 
     m_PreviousX = m_Transform.position.x;
     enabled = false;
-    m_Rigidbody.isKinematic = true;
+    m_Rigidbody.bodyType = RigidbodyType2D.Kinematic;
 
     GlobalData.ModeStarted += OnModeStarted;
   }
@@ -53,7 +53,7 @@ public class PlatformerMover : MonoBehaviour
   public void OnModeStarted(bool isInPlayMode)
   {
     enabled = true;
-    m_Rigidbody.isKinematic = false;
+    m_Rigidbody.bodyType = RigidbodyType2D.Dynamic;
   }
 
 
@@ -80,7 +80,7 @@ public class PlatformerMover : MonoBehaviour
 
   void HandleRising()
   {
-    if (m_Rising && m_Rigidbody.velocity.y <= 0)
+    if (m_Rising && m_Rigidbody.linearVelocity.y <= 0)
     {
       m_Rising = false;
       m_Events.ReachedApex.Invoke();
@@ -93,7 +93,7 @@ public class PlatformerMover : MonoBehaviour
     if (!m_Boosting)
       return;
 
-    var xVelocity = m_Rigidbody.velocity.x;
+    var xVelocity = m_Rigidbody.linearVelocity.x;
 
     // Early out if you hit a wall
     if (Mathf.Abs(xVelocity) < m_BoostWallDetectionEpsilon)
@@ -126,7 +126,7 @@ public class PlatformerMover : MonoBehaviour
       {
         // "Input alignment" is basically the 1D dot product of the X velocity
         // and the movement input
-        var xVelocity = m_Rigidbody.velocity.x;
+        var xVelocity = m_Rigidbody.linearVelocity.x;
         var inputAlignment = xVelocity * input;
 
         if (inputAlignment < 0)
@@ -135,9 +135,9 @@ public class PlatformerMover : MonoBehaviour
     }
     else  // if not boosting
     {
-      var velocity = m_Rigidbody.velocity;
+      var velocity = m_Rigidbody.linearVelocity;
       velocity.x = input * m_MovementSpeed;
-      m_Rigidbody.velocity = velocity;
+      m_Rigidbody.linearVelocity = velocity;
 
       if (Mathf.Abs(input) > 0)
       {
@@ -173,9 +173,9 @@ public class PlatformerMover : MonoBehaviour
 
   void Jump()
   {
-    var velocity = m_Rigidbody.velocity;
+    var velocity = m_Rigidbody.linearVelocity;
     velocity.y = m_JumpSpeed;
-    m_Rigidbody.velocity = velocity;
+    m_Rigidbody.linearVelocity = velocity;
 
     m_Rising = true;
 
@@ -197,9 +197,9 @@ public class PlatformerMover : MonoBehaviour
 
   public void OnStompedEnemy(HealthEventData eventData)
   {
-    var velocity = m_Rigidbody.velocity;
+    var velocity = m_Rigidbody.linearVelocity;
     velocity.y = m_StompBounceSpeed;
-    m_Rigidbody.velocity = velocity;
+    m_Rigidbody.linearVelocity = velocity;
   }
 
 
@@ -207,7 +207,7 @@ public class PlatformerMover : MonoBehaviour
   {
     var direction = eventData.m_TileDirection.Get();
     var boostSpeed = eventData.m_BoostLogic.m_Speed;
-    var velocity = m_Rigidbody.velocity;
+    var velocity = m_Rigidbody.linearVelocity;
     var preventMovementInput = false;
 
     // You should only prevent movement input for
@@ -237,7 +237,7 @@ public class PlatformerMover : MonoBehaviour
     m_LatestBoostFullDuration = eventData.m_BoostLogic.m_FullDuration;
 
     BeginBoosting(preventMovementInput);
-    m_Rigidbody.velocity = velocity;
+    m_Rigidbody.linearVelocity = velocity;
   }
 
 

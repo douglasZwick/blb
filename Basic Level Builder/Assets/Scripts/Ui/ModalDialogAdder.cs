@@ -11,7 +11,7 @@ public class ModalDialogAdder : MonoBehaviour
 
   private void Awake()
   {
-    m_ModalDialogMaster = FindObjectOfType<ModalDialogMaster>();
+    m_ModalDialogMaster = FindAnyObjectByType<ModalDialogMaster>();
   }
 
   public void RequestDialogsAtTransform()

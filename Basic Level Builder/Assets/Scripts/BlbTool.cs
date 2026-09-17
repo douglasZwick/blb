@@ -46,7 +46,7 @@ public class BlbTool : MonoBehaviour
 
   private void Awake()
   {
-    m_ToolsPalette = FindObjectOfType<ToolsPalette>();
+    m_ToolsPalette = FindAnyObjectByType<ToolsPalette>();
   }
 
   /************************************************************************************/

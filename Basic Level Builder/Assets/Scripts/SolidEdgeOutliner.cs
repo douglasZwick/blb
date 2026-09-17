@@ -462,7 +462,7 @@ public class SolidEdgeOutliner : MonoBehaviour
   static public void Load()
   {
     // Finds and stores a reference to the TileGrid
-    s_TileGrid = FindObjectOfType<TileGrid>();
+    s_TileGrid = FindAnyObjectByType<TileGrid>();
 
     // Grabs the square outline sprites
     var sprites = LoadSpritesToArray("Sprites/SquareOutlines");

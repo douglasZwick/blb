@@ -23,6 +23,7 @@ public class TileDirection : MonoBehaviour
 
   public Events m_Events;
   [HideInInspector]
+  [System.NonSerialized]
   public Element m_Element;
 
   private Direction m_Direction;

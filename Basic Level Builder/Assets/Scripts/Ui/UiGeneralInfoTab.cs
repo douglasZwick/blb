@@ -61,7 +61,7 @@ public class UiGeneralInfoTab : UiTab
     {
       var errorString = $"Error: Could not load file history for file \"{Path.GetFileName(m_FileInfo.FullFilePath)}\".";
       StatusBar.Warning(errorString, $"{e.Message} ({e.GetType()})");
-      FindObjectOfType<UiFileInfo>().CloseWindow();
+      FindAnyObjectByType<UiFileInfo>().CloseWindow();
       fileInfo = new();
       return true;
     }
@@ -86,7 +86,7 @@ public class UiGeneralInfoTab : UiTab
     else
     {
       StatusBar.Warning($"Error: Could not load file history. No saves found in file \"{Path.GetFileName(m_FileInfo.FullFilePath)}\"");
-      FindObjectOfType<UiFileInfo>().CloseWindow();
+      FindAnyObjectByType<UiFileInfo>().CloseWindow();
       return;
     }
 

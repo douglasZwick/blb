@@ -68,7 +68,7 @@ public class EditorCameraController : MonoBehaviour
     m_Transform = GetComponent<Transform>();
     m_Camera = GetComponent<Camera>();
     m_AudioSource = GetComponent<AudioSource>();
-    m_ToolsPalette = FindObjectOfType<ToolsPalette>();
+    m_ToolsPalette = FindAnyObjectByType<ToolsPalette>();
 
     m_InitialSize = m_Camera.orthographicSize;
     m_InitialPosition = m_Transform.position;

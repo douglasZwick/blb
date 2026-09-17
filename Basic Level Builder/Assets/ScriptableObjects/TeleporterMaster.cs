@@ -5,7 +5,7 @@ using UnityEngine;
 [CreateAssetMenu]
 public class TeleporterMaster : ScriptableObject
 {
-  //[HideInInspector]
+  [System.NonSerialized]
   public List<List<TeleporterTileLogic>> m_Teleporters;
 
   int m_ColorCount;

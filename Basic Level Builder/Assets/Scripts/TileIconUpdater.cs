@@ -35,7 +35,7 @@ public class TileIconUpdater : MonoBehaviour
     GlobalData.PrimaryTileChanged += OnPrimaryTileChanged;
     GlobalData.SecondaryTileChanged += OnSecondaryTileChanged;
     GlobalData.TileRotated += OnTileRotated;
-    m_TilesPalette = FindObjectOfType<TilesPalette>();
+    m_TilesPalette = FindAnyObjectByType<TilesPalette>();
     m_PrimaryBaseRotation = m_PrimaryImage.transform.localRotation;
   }
 

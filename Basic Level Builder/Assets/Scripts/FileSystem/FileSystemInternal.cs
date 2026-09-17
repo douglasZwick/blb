@@ -93,7 +93,7 @@ public class FileSystemInternal : MonoBehaviour
   {
     s_MainThreadId = Thread.CurrentThread.ManagedThreadId;
     s_EditorVersion = new(Application.version);
-    m_ModalDialogMaster = FindObjectOfType<ModalDialogMaster>();
+    m_ModalDialogMaster = FindAnyObjectByType<ModalDialogMaster>();
 
     // Thumbnail generation init
     var tileHeight = (int)m_ThumbnailTileAtlas.rect.height;
