@@ -13,6 +13,7 @@ Copyright 2018-2019, DigiPen Institute of Technology
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 /**
 * CLASS NAME  : EditorCameraController
@@ -74,6 +75,16 @@ public class EditorCameraController : MonoBehaviour
     m_InitialPosition = m_Transform.position;
 
     m_Speed = m_MinSpeed;
+  }
+
+  void OnEnable()
+  {
+    InputSystem.actions["Reset Camera"].performed += OnResetCamera;
+  }
+
+  void OnDisable()
+  {
+    InputSystem.actions["Reset Camera"].performed -= OnResetCamera;
   }
 
   /**
@@ -172,22 +183,6 @@ public class EditorCameraController : MonoBehaviour
   }
 
 
-  void ResetCamera()
-  {
-    var seq = ActionMaster.Actions.Sequence();
-    var grp = seq.Group();
-    grp.Move(gameObject, m_InitialPosition, m_ResetDuration, new Ease(Ease.Quad.InOut));
-    grp.OrthographicZoom(gameObject, m_InitialSize, m_ResetDuration, new Ease(Ease.Quad.InOut));
-    seq.Call(EndCameraReset, gameObject);
-  }
-
-
-  void EndCameraReset()
-  {
-    m_ZoomInput = 0;
-  }
-
-
   /**
   * FUNCTION NAME: CameraMovement
   * DESCRIPTION  : Manage movement of the camera.
@@ -196,12 +191,7 @@ public class EditorCameraController : MonoBehaviour
   **/
   public void HandleMovement()
   {
-    if (Input.GetButtonDown("ResetCamera"))
-      ResetCamera();
-
-    var input = Vector2.zero;
-    input.x = Input.GetAxis("Horizontal");
-    input.y = Input.GetAxis("Vertical");
+    var input = InputSystem.actions["Move"].ReadValue<Vector2>();
 
     var zeroInput = input.sqrMagnitude == 0;
 
@@ -236,8 +226,8 @@ public class EditorCameraController : MonoBehaviour
     else
       return;
 
-    te.EventScreenPosition = Input.mousePosition;
-    Vector3 eventScreenPositionVector3 = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0);
+    te.EventScreenPosition = Mouse.current.position.ReadValue();
+    Vector3 eventScreenPositionVector3 = new Vector3(te.EventScreenPosition.x, te.EventScreenPosition.y, 0);
     te.EventWorldPosition = m_Camera.ScreenToWorldPoint(eventScreenPositionVector3);
     int xInt = Mathf.RoundToInt(te.EventWorldPosition.x);
     int yInt = Mathf.RoundToInt(te.EventWorldPosition.y);
@@ -248,5 +238,21 @@ public class EditorCameraController : MonoBehaviour
       m_ToolsPalette.UpdateLeftDrag(te);
     else if (te.Button == PointerEventData.InputButton.Right)
       m_ToolsPalette.UpdateRightDrag(te);
+  }
+
+
+    void OnResetCamera(InputAction.CallbackContext _context)
+  {
+    var seq = ActionMaster.Actions.Sequence();
+    var grp = seq.Group();
+    grp.Move(gameObject, m_InitialPosition, m_ResetDuration, new Ease(Ease.Quad.InOut));
+    grp.OrthographicZoom(gameObject, m_InitialSize, m_ResetDuration, new Ease(Ease.Quad.InOut));
+    seq.Call(EndCameraReset, gameObject);
+  }
+
+
+  void EndCameraReset()
+  {
+    m_ZoomInput = 0;
   }
 }

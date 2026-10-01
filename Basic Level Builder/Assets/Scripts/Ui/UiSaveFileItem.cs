@@ -10,6 +10,7 @@ using System.IO;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using NewestFileData;
 using FileInfo = NewestFileData.FileInfo;
@@ -58,7 +59,7 @@ public class UiSaveFileItem : MonoBehaviour, IPointerEnterHandler, IPointerExitH
   {
     // This check is nessesary because the file info button is ontop of this button, but only the top most button contains the mouse,
     // IE, OnPointerExit will trigger if the mouse leaves the button, or enters the ui button
-    bool hovering = RectTransformUtility.RectangleContainsScreenPoint((RectTransform)transform, Input.mousePosition);
+    bool hovering = RectTransformUtility.RectangleContainsScreenPoint((RectTransform)transform, Mouse.current.position.ReadValue());
 
     // If the mouse is still over the file button
     if (hovering)
@@ -74,7 +75,7 @@ public class UiSaveFileItem : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
   public void Update()
   {
-    bool hovering = RectTransformUtility.RectangleContainsScreenPoint((RectTransform)transform, Input.mousePosition);
+    bool hovering = RectTransformUtility.RectangleContainsScreenPoint((RectTransform)transform, Mouse.current.position.ReadValue());
 
     // If the mouse moved outside the file button, but we are still in the hovered state; unselect button
     // This case is mainly for when the mouse was over the info button and just left
