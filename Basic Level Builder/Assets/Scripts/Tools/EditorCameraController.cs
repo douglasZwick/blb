@@ -219,9 +219,9 @@ public class EditorCameraController : MonoBehaviour
     ToolEvent te = new ToolEvent();
 
     //Button setting.
-    if (Input.GetMouseButton((int)PointerEventData.InputButton.Left))
+    if (Mouse.current != null && Mouse.current.leftButton.isPressed)
       te.Button = PointerEventData.InputButton.Left;
-    else if (Input.GetMouseButton((int)PointerEventData.InputButton.Right))
+    else if (Mouse.current != null && Mouse.current.rightButton.isPressed)
       te.Button = PointerEventData.InputButton.Right;
     else
       return;

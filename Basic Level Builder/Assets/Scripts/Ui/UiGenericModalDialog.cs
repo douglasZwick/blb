@@ -10,6 +10,7 @@ Description:    Generic modal dialog that supports Confirm, Deny, and Cancel but
 
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class UiGenericModalDialog : ModalDialog
 {
@@ -37,10 +38,19 @@ public class UiGenericModalDialog : ModalDialog
 
   private ButtonOptions m_ButtonOptions = ButtonOptions.ConfirmDenyCancel;
 
-  private void Update()
+  private void OnEnable()
   {
-    if (Input.GetButtonDown("Cancel"))
-      CancelPressed();
+    InputSystem.actions["Cancel"].performed += OnCancel;
+  }
+
+  private void OnDisable()
+  {
+    InputSystem.actions["Cancel"].performed -= OnCancel;
+  }
+
+  private void OnCancel(InputAction.CallbackContext context)
+  {
+    CancelPressed();
   }
 
   public void SetUpGeneric(ButtonOptions options, TaskCompletionSource<DialogResult> task)

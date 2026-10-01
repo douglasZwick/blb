@@ -11,6 +11,7 @@ Copyright 2018-2019, DigiPen Institute of Technology
 ***************************************************/
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 using NewestFileData;
 
 public class ColorCodePickerDialog : ModalDialog
@@ -33,21 +34,25 @@ public class ColorCodePickerDialog : ModalDialog
 
   void HandleKeyboardInput()
   {
-    if      (Input.GetKeyDown(KeyCode.A))
+    var keyboard = Keyboard.current;
+    if (keyboard == null)
+      return;
+
+    if      (keyboard.aKey.wasPressedThisFrame)
       SetAndClose(ColorCode.KeyCodes[KeyCode.A]);
-    else if (Input.GetKeyDown(KeyCode.B))
+    else if (keyboard.bKey.wasPressedThisFrame)
       SetAndClose(ColorCode.KeyCodes[KeyCode.B]);
-    else if (Input.GetKeyDown(KeyCode.C))
+    else if (keyboard.cKey.wasPressedThisFrame)
       SetAndClose(ColorCode.KeyCodes[KeyCode.C]);
-    else if (Input.GetKeyDown(KeyCode.D))
+    else if (keyboard.dKey.wasPressedThisFrame)
       SetAndClose(ColorCode.KeyCodes[KeyCode.D]);
-    else if (Input.GetKeyDown(KeyCode.E))
+    else if (keyboard.eKey.wasPressedThisFrame)
       SetAndClose(ColorCode.KeyCodes[KeyCode.E]);
-    else if (Input.GetKeyDown(KeyCode.F))
+    else if (keyboard.fKey.wasPressedThisFrame)
       SetAndClose(ColorCode.KeyCodes[KeyCode.F]);
-    else if (Input.GetKeyDown(KeyCode.G))
+    else if (keyboard.gKey.wasPressedThisFrame)
       SetAndClose(ColorCode.KeyCodes[KeyCode.G]);
-    else if (Input.GetKeyDown(KeyCode.H))
+    else if (keyboard.hKey.wasPressedThisFrame)
       SetAndClose(ColorCode.KeyCodes[KeyCode.H]);
   }
 

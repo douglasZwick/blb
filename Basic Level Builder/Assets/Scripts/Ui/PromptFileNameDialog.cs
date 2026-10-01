@@ -11,6 +11,7 @@ Copyright 2018-2025, DigiPen Institute of Technology
 
 using UnityEngine;
 using TMPro;
+using UnityEngine.InputSystem;
 
 public class PromptFileNameDialog : ModalDialog
 {
@@ -22,6 +23,16 @@ public class PromptFileNameDialog : ModalDialog
   private void Awake()
   {
     m_InputField.onSubmit.AddListener(OnSubmit);
+  }
+
+  private void OnEnable()
+  {
+    InputSystem.actions["Cancel"].performed += OnCancel;
+  }
+
+  private void OnDisable()
+  {
+    InputSystem.actions["Cancel"].performed -= OnCancel;
   }
 
   public override void Open()
@@ -52,9 +63,11 @@ public class PromptFileNameDialog : ModalDialog
       m_FirstUpdate = false;
       m_InputField.ActivateInputField();
     }
+  }
 
-    if (Input.GetButtonDown("Cancel"))
-      Cancel();
+  private void OnCancel(InputAction.CallbackContext context)
+  {
+    Cancel();
   }
 
   public virtual void Confirm() {}
