@@ -43,17 +43,44 @@ public class UiButtonHotkey : MonoBehaviour
 
   public string GetHotkeyString()
   {
-    if (m_List == null || m_List.Count == 0 || m_List[0].m_Action == null || m_List[0].m_Action.action == null)
+    if (m_List == null || m_List.Count == 0)
+      return null;
+      
+    InputAction action = m_List.FirstOrDefault().m_Action.action;
+    if (action == null)
       return string.Empty;
 
-    InputAction action = m_List[0].m_Action.action;
     List<string> bindings = new();
+    List<string> compositeKeys = new();
 
     foreach (InputBinding binding in action.bindings)
-    {       
+    {
+      if (binding.isComposite)
+        continue;
+
       string display = binding.ToDisplayString();
-      if (!string.IsNullOrWhiteSpace(display))
-        bindings.Add(display);
+      if (string.IsNullOrWhiteSpace(display))
+        continue;
+
+      if (binding.isPartOfComposite)
+      {
+        compositeKeys.Add(display);
+        continue;
+      }
+
+      if (compositeKeys.Count > 0)
+      {
+        bindings.Add(string.Join(" + ", compositeKeys));
+        compositeKeys.Clear();
+      }
+
+      bindings.Add(display);
+    }
+
+    if (compositeKeys.Count > 0)
+    {
+      bindings.Add(string.Join(" + ", compositeKeys));
+      compositeKeys.Clear();
     }
 
     if (bindings.Count == 0)
