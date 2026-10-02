@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ public class AxisMappingEntry
   public List<string> m_buttons = new();
 }
 
+[Obsolete("Use New Input System instead")]
 public class AxisMapping : ScriptableObject
 {
   public List<AxisMappingEntry> m_entries = new();

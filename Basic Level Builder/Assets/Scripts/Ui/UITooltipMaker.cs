@@ -14,6 +14,7 @@ Copyright 2018-2025, DigiPen Institute of Technology
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems; //Pointer over and exit.
+using UnityEngine.InputSystem;
 
 public class UITooltipMaker : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
@@ -111,7 +112,7 @@ public class UITooltipMaker : MonoBehaviour, IPointerEnterHandler, IPointerExitH
   {
     m_Tooltip = Instantiate(m_TooltipPrefab);
     var tooltipRT = m_Tooltip.GetComponent<RectTransform>();
-    var tooltipPosition = ScreenPointToRectPoint(Input.mousePosition);
+    var tooltipPosition = ScreenPointToRectPoint(Mouse.current.position.ReadValue());
     var desiredPosition = tooltipPosition + s_OffsetVector;
     m_RootPositioner.AttachAtSafePosition(tooltipRT, desiredPosition);
 
