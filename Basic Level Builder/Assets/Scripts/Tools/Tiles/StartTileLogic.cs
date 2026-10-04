@@ -15,7 +15,6 @@ using UnityEngine;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(TileDirection))]
-[RequireComponent(typeof(Transform))]
 public class StartTileLogic : MonoBehaviour
 {
   /************************************************************************************/
