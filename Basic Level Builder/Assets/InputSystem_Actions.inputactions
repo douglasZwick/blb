@@ -14,7 +14,7 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true,
-                    "priority": 5
+                    "priority": 0
                 },
                 {
                     "name": "Jump",
@@ -24,7 +24,7 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false,
-                    "priority": 5
+                    "priority": 0
                 }
             ],
             "bindings": [
@@ -518,7 +518,7 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false,
-                    "priority": 5
+                    "priority": 4
                 },
                 {
                     "name": "Rotate Right",
@@ -528,7 +528,7 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false,
-                    "priority": 5
+                    "priority": 4
                 }
             ],
             "bindings": [
@@ -1286,7 +1286,7 @@
                     "path": "<Keyboard>/ctrl",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Keyboard&Mouse",
                     "action": "Save As",
                     "isComposite": false,
                     "isPartOfComposite": true
@@ -1297,7 +1297,7 @@
                     "path": "<Keyboard>/shift",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Keyboard&Mouse",
                     "action": "Save As",
                     "isComposite": false,
                     "isPartOfComposite": true
@@ -1308,7 +1308,7 @@
                     "path": "<Keyboard>/s",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Keyboard&Mouse",
                     "action": "Save As",
                     "isComposite": false,
                     "isPartOfComposite": true

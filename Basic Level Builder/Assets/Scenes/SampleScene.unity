@@ -1682,7 +1682,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ModalDialogPrefabs:
-  - {fileID: 4091760769637621016, guid: 044e4efc8be490548ab92417d6acd3e8, type: 3}
+  - {fileID: 0}
 --- !u!114 &128438543
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1816,7 +1816,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ModalDialogPrefabs:
-  - {fileID: 1365369660276513726, guid: c055dc06e69fabb46a2481863b1f6256, type: 3}
+  - {fileID: 0}
 --- !u!1 &146315540
 GameObject:
   m_ObjectHideFlags: 0
