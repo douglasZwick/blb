@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 using NewestFileData;
 
 [RequireComponent(typeof(PlatformerMover))]
@@ -38,8 +39,8 @@ public class PlatformerController : MonoBehaviour
 
   void GatherInput()
   {
-    m_InputAxis = Input.GetAxis("Horizontal");
-    m_JumpRequested = Input.GetButtonDown("Jump");
+    m_InputAxis = InputSystem.actions["Move"].ReadValue<Vector2>().x;
+    m_JumpRequested = InputSystem.actions["Jump"].triggered;
   }
 
 

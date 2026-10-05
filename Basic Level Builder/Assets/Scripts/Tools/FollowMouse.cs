@@ -12,6 +12,7 @@ Copyright 2018-2019, DigiPen Institute of Technology
 
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 
 /**
 * CLASS NAME  : FollowMouse
@@ -73,7 +74,7 @@ public class FollowMouse : MonoBehaviour
     if (m_FollowMode == FollowMode.DIRECT)
     {
       //Get mouse position with z axis of 0.
-      Vector3 vecMousePosition = Input.mousePosition;
+      Vector3 vecMousePosition = Mouse.current.position.ReadValue();
       vecMousePosition = m_cMainCamera.ScreenToWorldPoint(vecMousePosition);
       vecMousePosition.z = -9.0f;
 
@@ -84,7 +85,7 @@ public class FollowMouse : MonoBehaviour
     else if (m_FollowMode == FollowMode.ROUNDED)
     {
       //Get mouse position.
-      Vector3 vecMousePosition = Input.mousePosition;
+      Vector3 vecMousePosition = Mouse.current.position.ReadValue();
       vecMousePosition = m_cMainCamera.ScreenToWorldPoint(vecMousePosition);
 
       //Rounding time!

@@ -583,8 +583,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: RotateRight
-    m_Modifiers: 0
+  - m_Action: {fileID: 5668763249370965419, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -1683,7 +1682,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ModalDialogPrefabs:
-  - {fileID: 4091760769637621016, guid: 044e4efc8be490548ab92417d6acd3e8, type: 3}
+  - {fileID: 0}
 --- !u!114 &128438543
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1817,7 +1816,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ModalDialogPrefabs:
-  - {fileID: 1365369660276513726, guid: c055dc06e69fabb46a2481863b1f6256, type: 3}
+  - {fileID: 0}
 --- !u!1 &146315540
 GameObject:
   m_ObjectHideFlags: 0
@@ -2230,8 +2229,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: Redo
-    m_Modifiers: 1
+  - m_Action: {fileID: -5433341160404916094, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -5719,8 +5717,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: Select Hand Tool
-    m_Modifiers: 0
+  - m_Action: {fileID: 1554326880452898071, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -8811,8 +8808,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: Colorblind Mode
-    m_Modifiers: 2
+  - m_Action: {fileID: -8592543150385764069, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -15475,8 +15471,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: Quit
-    m_Modifiers: 1
+  - m_Action: {fileID: 8165015959264116441, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -15850,8 +15845,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: Select Selector Tool
-    m_Modifiers: 0
+  - m_Action: {fileID: 8055401153010129419, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -15870,8 +15864,7 @@ MonoBehaviour:
     m_SubjectToHotkeyDisabling: 1
     m_AllowedInPlayMode: 0
     m_AllowedInUiPopups: 0
-  - m_Button: Cut
-    m_Modifiers: 1
+  - m_Action: {fileID: -710194331475047248, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -15890,8 +15883,7 @@ MonoBehaviour:
     m_SubjectToHotkeyDisabling: 1
     m_AllowedInPlayMode: 0
     m_AllowedInUiPopups: 0
-  - m_Button: Copy
-    m_Modifiers: 1
+  - m_Action: {fileID: -8185567601988124587, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -15910,8 +15902,7 @@ MonoBehaviour:
     m_SubjectToHotkeyDisabling: 1
     m_AllowedInPlayMode: 0
     m_AllowedInUiPopups: 0
-  - m_Button: Paste
-    m_Modifiers: 1
+  - m_Action: {fileID: -7533174510393457747, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -19466,8 +19457,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: Save
-    m_Modifiers: 1
+  - m_Action: {fileID: -5261167648948269957, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -20434,8 +20424,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: Select Path Tool
-    m_Modifiers: 0
+  - m_Action: {fileID: -5158417570025971497, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -20454,8 +20443,7 @@ MonoBehaviour:
     m_SubjectToHotkeyDisabling: 1
     m_AllowedInPlayMode: 0
     m_AllowedInUiPopups: 0
-  - m_Button: Cancel
-    m_Modifiers: 0
+  - m_Action: {fileID: 7727032971491509709, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -20474,8 +20462,7 @@ MonoBehaviour:
     m_SubjectToHotkeyDisabling: 1
     m_AllowedInPlayMode: 0
     m_AllowedInUiPopups: 0
-  - m_Button: Submit
-    m_Modifiers: 0
+  - m_Action: {fileID: 392368643174621059, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -20494,8 +20481,7 @@ MonoBehaviour:
     m_SubjectToHotkeyDisabling: 1
     m_AllowedInPlayMode: 0
     m_AllowedInUiPopups: 0
-  - m_Button: Delete
-    m_Modifiers: 0
+  - m_Action: {fileID: 7247218895327335233, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -27119,7 +27105,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe1392e5df51153418a23c4e1f4b946e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UseAdaptiveHotkeyText: 0
+  m_UseAdaptiveHotkeyText: 1
   m_PrefaceText: Play
   m_Text: Play (Enter)
   m_TooltipPrefab: {fileID: 3956001862937307442, guid: 13d12636cc140d346b13d5ca53a5625d, type: 3}
@@ -27148,8 +27134,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: Play
-    m_Modifiers: 0
+  - m_Action: {fileID: -3131893218130738416, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -29148,8 +29133,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: Select Brush Tool
-    m_Modifiers: 0
+  - m_Action: {fileID: -5182349334021067431, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -29594,8 +29578,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: CreateNewLevel
-    m_Modifiers: 1
+  - m_Action: {fileID: -5749312558867925676, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -29881,7 +29864,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1698264790}
   - component: {fileID: 1698264789}
-  - component: {fileID: 1698264788}
+  - component: {fileID: 1698264792}
   - component: {fileID: 1698264791}
   m_Layer: 0
   m_Name: EventSystem
@@ -29890,26 +29873,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1698264788
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1698264787}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SendPointerHoverToParent: 1
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
 --- !u!114 &1698264789
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29991,6 +29954,37 @@ MonoBehaviour:
   m_EditModeStarted:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1698264792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1698264787}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.UI.InputSystemUIInputModule
+  m_SendPointerHoverToParent: 1
+  m_MoveRepeatDelay: 0.5
+  m_MoveRepeatRate: 0.1
+  m_XRTrackingOrigin: {fileID: 0}
+  m_ActionsAsset: {fileID: -944628639613478452, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_PointAction: {fileID: -1654692200621890270, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_MoveAction: {fileID: -8784545083839296357, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_SubmitAction: {fileID: 392368643174621059, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_CancelAction: {fileID: 7727032971491509709, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_LeftClickAction: {fileID: 3001919216989983466, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_MiddleClickAction: {fileID: -2185481485913320682, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_RightClickAction: {fileID: -4090225696740746782, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_ScrollWheelAction: {fileID: 6240969308177333660, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_TrackedDevicePositionAction: {fileID: 6564999863303420839, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_TrackedDeviceOrientationAction: {fileID: 7970375526676320489, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_DeselectOnBackgroundClick: 1
+  m_PointerBehavior: 0
+  m_CursorLockBehavior: 0
+  m_ScrollDeltaPerTick: 1
 --- !u!1 &1699637423
 GameObject:
   m_ObjectHideFlags: 0
@@ -30177,8 +30171,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: Select Box Tool
-    m_Modifiers: 0
+  - m_Action: {fileID: -7017501336918202972, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -30398,8 +30391,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: Ghost Mode
-    m_Modifiers: 2
+  - m_Action: {fileID: 849025188628379425, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -35527,8 +35519,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: Save
-    m_Modifiers: 3
+  - m_Action: {fileID: -321481794197250803, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -37719,8 +37710,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: Undo
-    m_Modifiers: 1
+  - m_Action: {fileID: -341511184125444345, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -38043,8 +38033,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: Select Dropper Tool
-    m_Modifiers: 0
+  - m_Action: {fileID: 6414728475097545789, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -38828,8 +38817,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: RotateLeft
-    m_Modifiers: 0
+  - m_Action: {fileID: 8443611582282808992, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
@@ -39380,8 +39368,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_List:
-  - m_Button: Open Directory
-    m_Modifiers: 2
+  - m_Action: {fileID: -1712618416079462172, guid: b7128b6c707f0fe748a4f5e9afca70e4, type: 3}
     m_Event:
       m_PersistentCalls:
         m_Calls:
