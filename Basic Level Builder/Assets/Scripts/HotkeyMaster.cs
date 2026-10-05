@@ -15,20 +15,12 @@ public class HotkeyMaster : MonoBehaviour
 
   public static bool IsMultiSelectHeld()
   {
-    var keyboard = Keyboard.current;
-    if (keyboard == null)
-      return false;
-
-    return keyboard.ctrlKey.isPressed || keyboard.leftCommandKey.isPressed || keyboard.rightCommandKey.isPressed;
+    return IsPrimaryModifierHeld();
   }
 
   public static bool IsRangeSelectHeld()
   {
-    var keyboard = Keyboard.current;
-    if (keyboard == null)
-      return false;
-
-    return keyboard.shiftKey.isPressed;
+    return IsSecondaryModifierHeld();
   }
 
   public static bool IsPrimaryModifierHeld()
@@ -43,25 +35,12 @@ public class HotkeyMaster : MonoBehaviour
 
   private static bool IsPrimaryModifierHeldEx()
   {
-    var keyboard = Keyboard.current;
-    if (keyboard == null)
-      return false;
-
-    var altHeld = keyboard.altKey.isPressed;
-
-    if (Application.isEditor || Application.platform == RuntimePlatform.WebGLPlayer)
-      return altHeld;
-
-    return keyboard.ctrlKey.isPressed || keyboard.leftCommandKey.isPressed || keyboard.rightCommandKey.isPressed;
+    return InputSystem.actions["Primary Modifier"].ReadValue<float>() > 0;
   }
 
   private static bool IsSecondaryModifierHeldEx()
   {
-    var keyboard = Keyboard.current;
-    if (keyboard == null)
-      return false;
-
-    return keyboard.shiftKey.isPressed;
+    return InputSystem.actions["Secondary Modifier"].ReadValue<float>() > 0;
   }
 
   public static bool IsPairedModifierHeld()
