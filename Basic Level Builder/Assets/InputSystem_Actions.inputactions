@@ -291,6 +291,16 @@
                     "priority": 5
                 },
                 {
+                    "name": "Path Submit",
+                    "type": "Button",
+                    "id": "cc4e9be7-e144-4b97-acba-58499592b69e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 5
+                },
+                {
                     "name": "Cancel",
                     "type": "Button",
                     "id": "15cef263-9014-4fd5-94d9-4e4a6234a6ef",
@@ -571,6 +581,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "Submit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "86eda1f5-96e3-4f95-9032-d1a3f887dd22",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Path Submit",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
