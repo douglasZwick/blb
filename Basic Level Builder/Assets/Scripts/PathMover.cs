@@ -1,4 +1,10 @@
-﻿using System.Collections;
+﻿/***************************************************
+Authors:        Douglas Zwick, Brenden Epp
+Last Updated:   10/24/2026
+
+Copyright 2018-2026, DigiPen Institute of Technology
+***************************************************/
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -28,6 +34,7 @@ public class PathMover : MonoBehaviour
     {
       var icon = Instantiate(PathTool.s_PathIconPrefab, m_Transform);
       icon.transform.localPosition = s_IconLocalPosition;
+      icon.transform.rotation = Quaternion.identity;
     }
 
     enabled = false;

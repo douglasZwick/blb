@@ -139,6 +139,9 @@ public class TileIconUpdater : MonoBehaviour
 
   void OnPrimaryTileChanged(TileType type)
   {
+    // Reset tile rotation
+    GlobalData.SetSelectedTileRotation(Direction.RIGHT);
+
     m_PrimaryTileType = type;
     ApplyTileVisual(type, m_PrimaryImage, GetTileDirection(type));
     ToggleRotateArrows();
@@ -148,21 +151,24 @@ public class TileIconUpdater : MonoBehaviour
   {
     // Remove rotate arrows on tiles without a rotator
     GameObject tilePrefab = m_TilesPalette.GetPrefabFromType(m_PrimaryTileType);
-    if (tilePrefab != null && !tilePrefab.TryGetComponent(out TileDirection _))
-    {
-      m_RotateArrowLeft.SetActive(false);
-      m_RotateArrowRight.SetActive(false);
-    }
-    else
+    if (tilePrefab != null && tilePrefab.TryGetComponent(out TileDirection _))
     {
       m_RotateArrowLeft.SetActive(true);
       m_RotateArrowRight.SetActive(true);
+    }
+    else
+    {
+      m_RotateArrowLeft.SetActive(false);
+      m_RotateArrowRight.SetActive(false);
     }
   }
 
 
   void OnSecondaryTileChanged(TileType type)
   {
+    // Reset tile rotation
+    GlobalData.SetSelectedTileRotation(Direction.RIGHT);
+    
     m_SecondaryTileType = type;
     ApplyTileVisual(type, m_SecondaryImage, GetTileDirection(type));
   }

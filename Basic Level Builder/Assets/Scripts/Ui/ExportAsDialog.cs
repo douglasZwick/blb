@@ -6,15 +6,23 @@ Copyright 2018-2025, DigiPen Institute of Technology
 ***************************************************/
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class ExportAsDialog : PromptFileNameDialog
 {
-  private void Update()
+  private void OnEnable()
   {
-    if (Input.GetButtonDown("Cancel"))
-    {
-      Close();
-    }
+    InputSystem.actions["Cancel"].performed += OnCancel;
+  }
+
+  private void OnDisable()
+  {
+    InputSystem.actions["Cancel"].performed -= OnCancel;
+  }
+
+  private void OnCancel(InputAction.CallbackContext context)
+  {
+    Close();
   }
 
   public override void Confirm()

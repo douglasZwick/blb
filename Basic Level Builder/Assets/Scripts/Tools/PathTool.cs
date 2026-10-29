@@ -389,16 +389,12 @@ public class PathTool : BlbTool
 
     if (delta.x < 0)
     {
-      var temp = min.x;
-      min.x = max.x;
-      max.x = temp;
+      (max.x, min.x) = (min.x, max.x);
     }
 
     if (delta.y < 0)
     {
-      var temp = min.y;
-      min.y = max.y;
-      max.y = temp;
+      (max.y, min.y) = (min.y, max.y);
     }
 
     m_SelectedElements = new List<Element>();
@@ -628,16 +624,12 @@ public class PathTool : BlbTool
 
     if (delta.x < 0)
     {
-      var temp = min.x;
-      min.x = max.x;
-      max.x = temp;
+      (max.x, min.x) = (min.x, max.x);
     }
 
     if (delta.y < 0)
     {
-      var temp = min.y;
-      min.y = max.y;
-      max.y = temp;
+      (max.y, min.y) = (min.y, max.y);
     }
 
     var minBounds = new Vector3(min.x, min.y);

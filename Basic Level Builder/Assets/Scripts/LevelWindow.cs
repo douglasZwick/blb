@@ -7,6 +7,7 @@ Copyright 2018-2026, DigiPen Institute of Technology
 
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public class LevelWindow : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IBeginDragHandler,
   IDragHandler, IEndDragHandler, IScrollHandler
@@ -30,9 +31,8 @@ public class LevelWindow : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     var te = PrepareEvent(e);
     //m_ToolsPalette.OnPointerDown(te);
 
-    var leftAlt = Input.GetKey(KeyCode.LeftAlt);
-    var rightAlt = Input.GetKey(KeyCode.RightAlt);
-    var alt = leftAlt || rightAlt;
+    var keyboard = Keyboard.current;
+    var alt = keyboard != null && keyboard.altKey.isPressed;
 
     if (alt)
       return;
@@ -61,9 +61,8 @@ public class LevelWindow : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     var te = PrepareEvent(e);
     //m_ToolsPalette.OnPointerUp(te);
 
-    var leftAlt = Input.GetKey(KeyCode.LeftAlt);
-    var rightAlt = Input.GetKey(KeyCode.RightAlt);
-    var alt = leftAlt || rightAlt;
+    var keyboard = Keyboard.current;
+    var alt = keyboard != null && keyboard.altKey.isPressed;
 
     if (alt)
       return;
@@ -92,9 +91,8 @@ public class LevelWindow : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     var te = PrepareEvent(e);
     //m_ToolsPalette.OnBeginDrag(te);
 
-    var leftAlt = Input.GetKey(KeyCode.LeftAlt);
-    var rightAlt = Input.GetKey(KeyCode.RightAlt);
-    var alt = leftAlt || rightAlt;
+    var keyboard = Keyboard.current;
+    var alt = keyboard != null && keyboard.altKey.isPressed;
 
     if (alt)
     {
@@ -125,9 +123,8 @@ public class LevelWindow : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     var te = PrepareEvent(e);
     //m_ToolsPalette.OnDrag(te);
 
-    var leftAlt = Input.GetKey(KeyCode.LeftAlt);
-    var rightAlt = Input.GetKey(KeyCode.RightAlt);
-    var alt = leftAlt || rightAlt;
+    var keyboard = Keyboard.current;
+    var alt = keyboard != null && keyboard.altKey.isPressed;
 
     if (alt)
     {
@@ -159,9 +156,8 @@ public class LevelWindow : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     var te = PrepareEvent(e);
     //m_ToolsPalette.OnEndDrag(te);
 
-    var leftAlt = Input.GetKey(KeyCode.LeftAlt);
-    var rightAlt = Input.GetKey(KeyCode.RightAlt);
-    var alt = leftAlt || rightAlt;
+    var keyboard = Keyboard.current;
+    var alt = keyboard != null && keyboard.altKey.isPressed;
 
     if (alt)
     {
