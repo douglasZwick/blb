@@ -411,7 +411,13 @@ namespace B83.Win32
     public class UnityDragAndDropHook
     {
         public delegate void DroppedFilesEvent(List<string> aPathNames, POINT aDropPoint);
+#if !UNITY_STANDALONE_WIN && !UNITY_EDITOR_WIN
+#pragma warning disable CS0067
+#endif
         public event DroppedFilesEvent OnDroppedFiles;
+#if !UNITY_STANDALONE_WIN && !UNITY_EDITOR_WIN
+#pragma warning restore CS0067
+#endif
 
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
 
