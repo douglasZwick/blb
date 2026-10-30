@@ -46,8 +46,8 @@ public class BrushTool : BlbTool
   void Start()
   {
     m_OperationName = m_OperationNameOverride;
-    m_TileGrid = FindObjectOfType<TileGrid>();
-    m_TilesPalette = FindObjectOfType<TilesPalette>();
+    m_TileGrid = FindAnyObjectByType<TileGrid>();
+    m_TilesPalette = FindAnyObjectByType<TilesPalette>();
     m_cAudioSource = GetComponent<AudioSource>();
 
     m_ToolID = Tools.BRUSH;

@@ -1,12 +1,13 @@
 ﻿/***************************************************
-Authors:        Douglas Zwick
-Last Updated:   ???
+Authors:        Brenden Epp
+Last Updated:   9/30/2026
 
-Copyright 2018-2025, DigiPen Institute of Technology
+Copyright 2018-2026, DigiPen Institute of Technology
 ***************************************************/
 
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class HotkeyMaster : MonoBehaviour
 {
@@ -14,17 +15,16 @@ public class HotkeyMaster : MonoBehaviour
 
   public static bool IsMultiSelectHeld()
   {
-    return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand);
+    return IsPrimaryModifierHeld();
   }
 
   public static bool IsRangeSelectHeld()
   {
-    return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+    return IsSecondaryModifierHeld();
   }
 
   public static bool IsPrimaryModifierHeld()
   {
-
     return IsPrimaryModifierHeldEx() && !IsSecondaryModifierHeldEx();
   }
 
@@ -35,17 +35,12 @@ public class HotkeyMaster : MonoBehaviour
 
   private static bool IsPrimaryModifierHeldEx()
   {
-    var altHeld = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
-
-    if (Application.isEditor || Application.platform == RuntimePlatform.WebGLPlayer)
-      return altHeld;
-
-    return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand);
+    return InputSystem.actions["Primary Modifier"].ReadValue<float>() > 0;
   }
 
   private static bool IsSecondaryModifierHeldEx()
   {
-    return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+    return InputSystem.actions["Secondary Modifier"].ReadValue<float>() > 0;
   }
 
   public static bool IsPairedModifierHeld()

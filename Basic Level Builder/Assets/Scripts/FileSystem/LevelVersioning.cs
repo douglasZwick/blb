@@ -477,7 +477,7 @@ public static class LevelVersioning
   public static Sprite GetThumbnailSprite(LevelData levelData)
   {
     byte[] bytes = Convert.FromBase64String(levelData.m_Thumbnail);
-    Texture2D tex = new(0, 0, TextureFormat.RGBA32, false) // No real reason for the width/height values in the constructor, they will be overwritten anyways in LoadImage
+    Texture2D tex = new(1, 1, TextureFormat.RGBA32, false) // No real reason for the width/height values in the constructor, they will be overwritten anyways in LoadImage
     {
       filterMode = FilterMode.Point
     };

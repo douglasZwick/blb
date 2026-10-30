@@ -6,7 +6,7 @@ Copyright 2018-2025, DigiPen Institute of Technology
 ***************************************************/
 
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.InputSystem;
 
 public class UiConfirmDestructiveActionModalDialog : ModalDialog
 {
@@ -18,12 +18,19 @@ public class UiConfirmDestructiveActionModalDialog : ModalDialog
   public delegate void RemoveSub();
   public static event RemoveSub OnRemoveSub;
 
-  private void Update()
+    private void OnEnable()
   {
-    if (Input.GetButtonDown("Cancel"))
-    {
-      Cancel();
-    }
+    InputSystem.actions["Cancel"].performed += OnCancel;
+  }
+
+  private void OnDisable()
+  {
+    InputSystem.actions["Cancel"].performed -= OnCancel;
+  }
+
+  private void OnCancel(InputAction.CallbackContext context)
+  {
+    Cancel();
   }
 
   public override void StringsSetup(string[] strings = null)

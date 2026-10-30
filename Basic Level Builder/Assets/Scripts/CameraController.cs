@@ -52,7 +52,7 @@ public class CameraController : MonoBehaviour
   {
     m_Transform = transform;
     m_Camera = GetComponent<Camera>();
-    m_TileGrid = FindObjectOfType<TileGrid>();
+    m_TileGrid = FindAnyObjectByType<TileGrid>();
 
     m_CameraZ = transform.position.z;
     m_Offset = m_RightFacingOffset;
@@ -115,7 +115,7 @@ public class CameraController : MonoBehaviour
   {
     CancelOffsetMove();
 
-    m_Target = FindObjectOfType<CameraTarget>();
+    m_Target = FindAnyObjectByType<CameraTarget>();
 
     if (m_Target != null)
     {
@@ -182,7 +182,7 @@ public class CameraController : MonoBehaviour
     if (rb == null)
       return;
 
-    var velocity = rb.velocity;
+    var velocity = rb.linearVelocity;
     var newOffset = velocity * m_OffsetMultiplier;
 
     m_VelocityOffset = Vector3.Lerp(m_VelocityOffset, newOffset, m_VelocityOffsetSnappiness);

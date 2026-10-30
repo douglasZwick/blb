@@ -57,9 +57,9 @@ public class SelectorTool : BlbTool
   **/
   void Start()
   {
-    m_TileGrid = FindObjectOfType<TileGrid>();
-    m_TilesPalette = FindObjectOfType<TilesPalette>();
-    m_ToolsPalette = FindObjectOfType<ToolsPalette>();
+    m_TileGrid = FindAnyObjectByType<TileGrid>();
+    m_TilesPalette = FindAnyObjectByType<TilesPalette>();
+    m_ToolsPalette = FindAnyObjectByType<ToolsPalette>();
     m_Cursor = GameObject.FindGameObjectWithTag("Cursor").transform;
 
     m_ToolID = Tools.SELECTOR;

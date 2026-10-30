@@ -61,7 +61,7 @@ public class DoorTileLogic : MonoBehaviour
         var thatPathMover = m_pCreatedDoor.AddComponent<PathMover>();
         thatPathMover.Setup(thisPathMover.m_IndexList);
         var thatRigidbody2D = m_pCreatedDoor.AddComponent<Rigidbody2D>();
-        thatRigidbody2D.isKinematic = true;
+        thatRigidbody2D.bodyType = RigidbodyType2D.Kinematic;
         m_pCreatedDoor.AddComponent<ContactParent>();
       }
     }

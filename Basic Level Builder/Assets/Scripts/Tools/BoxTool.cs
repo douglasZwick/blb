@@ -40,9 +40,9 @@ public class BoxTool : BlbTool
   void Start()
   {
     m_OperationName = m_OperationNameOverride;
-    m_TileGrid = FindObjectOfType<TileGrid>();
-    m_TilesPalette = FindObjectOfType<TilesPalette>();
-    m_ToolsPalette = FindObjectOfType<ToolsPalette>();
+    m_TileGrid = FindAnyObjectByType<TileGrid>();
+    m_TilesPalette = FindAnyObjectByType<TilesPalette>();
+    m_ToolsPalette = FindAnyObjectByType<ToolsPalette>();
 
     m_ToolID = Tools.BOX;
 

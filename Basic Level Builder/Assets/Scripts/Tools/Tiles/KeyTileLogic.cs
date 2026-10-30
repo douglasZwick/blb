@@ -62,7 +62,7 @@ public class KeyTileLogic : MonoBehaviour
         var thatPathMover = m_pCreatedKey.AddComponent<PathMover>();
         thatPathMover.Setup(thisPathMover.m_IndexList);
         var thatRigidbody2D = m_pCreatedKey.AddComponent<Rigidbody2D>();
-        thatRigidbody2D.isKinematic = true;
+        thatRigidbody2D.bodyType = RigidbodyType2D.Kinematic;
       }
     }
     else

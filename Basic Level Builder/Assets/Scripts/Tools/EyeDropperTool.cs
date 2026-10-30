@@ -21,8 +21,8 @@ public class EyeDropperTool : BlbTool
   **/
   void Start()
   {
-    m_TileGrid = FindObjectOfType<TileGrid>();
-    m_TilesPalette = FindObjectOfType<TilesPalette>();
+    m_TileGrid = FindAnyObjectByType<TileGrid>();
+    m_TilesPalette = FindAnyObjectByType<TilesPalette>();
 
     m_ToolID = Tools.EYE_DROPPER;
   }

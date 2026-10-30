@@ -13,7 +13,7 @@ public class ScoreSprite : MonoBehaviour
 
   void Start()
   {
-    m_Rigidbody.velocity = m_InitialVelocity;
+    m_Rigidbody.linearVelocity = m_InitialVelocity;
 
     var endColor = m_SpriteRenderer.color;
     endColor.a = 0;

@@ -23,7 +23,7 @@ public class KeyCollector : MonoBehaviour
 
   private void Awake()
   {
-    m_KeyHolder = FindObjectOfType<KeysDisplay>();
+    m_KeyHolder = FindAnyObjectByType<KeysDisplay>();
 
     GlobalData.DoorSectionOpened += OnDoorSectionOpened;
   }

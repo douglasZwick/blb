@@ -49,7 +49,7 @@ public class TileGrid : MonoBehaviour
     m_MinBounds.z = m_GridZ;
     m_MaxBounds.z = m_GridZ;
 
-    m_TilesPalette = FindObjectOfType<TilesPalette>();
+    m_TilesPalette = FindAnyObjectByType<TilesPalette>();
 
     m_Mask = m_MaskTransform.GetComponent<SpriteMask>();
     m_ColoredOutlineRenderer = m_ColoredOutlineTransform.GetComponent<SpriteRenderer>();
@@ -478,7 +478,7 @@ public class TileGrid : MonoBehaviour
 
       if (!newTile.TryGetComponent<Rigidbody2D>(out var rigidbody))
         rigidbody = newTile.AddComponent<Rigidbody2D>();
-      rigidbody.isKinematic = true;
+      rigidbody.bodyType = RigidbodyType2D.Kinematic;
 
       if (newTile.TryGetComponent<Collider2D>(out var collider) && !collider.isTrigger)
       {

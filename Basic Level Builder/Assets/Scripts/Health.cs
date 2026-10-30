@@ -38,7 +38,7 @@ public class Health : MonoBehaviour
 
   private void OnTriggerEnter2D(Collider2D collider)
   {
-    var relativeVelocity = m_Stomper ? -m_StomperRB.velocity : Vector2.zero;
+    var relativeVelocity = m_Stomper ? -m_StomperRB.linearVelocity : Vector2.zero;
 
     OnCollision(collider, relativeVelocity);
   }

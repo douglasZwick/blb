@@ -30,7 +30,7 @@ public class BoundsChecker : MonoBehaviour
     m_Transform = transform;
 
     if (m_RelativeToGridBounds)
-      m_ReferenceGrid = FindObjectOfType<TileGrid>();
+      m_ReferenceGrid = FindAnyObjectByType<TileGrid>();
   }
 
 

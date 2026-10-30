@@ -44,10 +44,10 @@ public class PlatformerCharacterDeathEffects : MonoBehaviour
       GlobalData.DispatchHeroDied();
 
     m_Rigidbody.freezeRotation = false;
-    var velocity = m_Rigidbody.velocity;
+    var velocity = m_Rigidbody.linearVelocity;
     velocity.y = m_DeathSpeed;
     var angularVelocity = Random.Range(-m_DeathAngularVelocity, m_DeathAngularVelocity);
-    m_Rigidbody.velocity = velocity;
+    m_Rigidbody.linearVelocity = velocity;
     m_Rigidbody.angularVelocity = angularVelocity;
 
     m_DeathSequence.Cancel();
@@ -67,7 +67,7 @@ public class PlatformerCharacterDeathEffects : MonoBehaviour
   {
     enabled = true;
 
-    m_Rigidbody.velocity = Vector2.zero;
+    m_Rigidbody.linearVelocity = Vector2.zero;
     m_Rigidbody.angularVelocity = 0;
     m_Rigidbody.freezeRotation = true;
     m_Rigidbody.SetRotation(0);

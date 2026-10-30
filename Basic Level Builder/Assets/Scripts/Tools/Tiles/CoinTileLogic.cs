@@ -91,7 +91,7 @@ public class CoinTileLogic : MonoBehaviour
       var thatPathMover = m_CreatedCoin.AddComponent<PathMover>();
       thatPathMover.Setup(thisPathMover.m_IndexList);
       var thatRigidbody2D = m_CreatedCoin.AddComponent<Rigidbody2D>();
-      thatRigidbody2D.isKinematic = true;
+      thatRigidbody2D.bodyType = RigidbodyType2D.Kinematic;
     }
   }
 

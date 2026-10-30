@@ -36,7 +36,7 @@ public class TilePicker : MonoBehaviour, IPointerClickHandler
 
   private void Awake()
   {
-    var tileGrids = FindObjectsOfType<TileGrid>();
+    var tileGrids = FindObjectsByType<TileGrid>();
 
     foreach (var tileGrid in tileGrids)
     {

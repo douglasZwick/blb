@@ -20,20 +20,21 @@ public class FileDirUtilities : MonoBehaviour
   readonly static public string s_DefaultDirectoryName = "Levels";
   readonly static public string s_FilenameExtension = ".blb";
   readonly static public string s_TempFilePrefix = "backup_file_";
+  readonly static private Version s_OldestSupportedVersion = new(1, 2, 1, 0);
 
   public GameObject m_FileItemPrefab;
   public UiListView m_SaveList;
 
   private string m_CurrentDirectoryPath;
   private string m_AppName;
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
   private System.IntPtr m_WindowPtr;
 #endif
 
   private void Awake()
   {
     m_AppName = Application.productName;
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
     m_WindowPtr = FindWindow(null, m_AppName);
     if (m_WindowPtr == System.IntPtr.Zero)
     {
@@ -143,7 +144,7 @@ public class FileDirUtilities : MonoBehaviour
     return m_CurrentDirectoryPath;
   }
 
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
   [DllImport("user32.dll", EntryPoint = "SetWindowText")]
   public static extern bool SetWindowText(System.IntPtr hwnd, string lpString);
   [DllImport("user32.dll", EntryPoint = "FindWindow")]
@@ -152,7 +153,7 @@ public class FileDirUtilities : MonoBehaviour
 
   public void SetTitleBarFileName(string filePath)
   {
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
     if (m_WindowPtr == System.IntPtr.Zero ||FileSystem.Instance.m_IsAppQuitting)
       return;
 
@@ -275,7 +276,7 @@ public class FileDirUtilities : MonoBehaviour
 
   static public bool IsSupportedVersion(string fullFilePath)
   {
-    return GetFileVersion(fullFilePath) >= new Version(1, 2, 1, 0);
+    return GetFileVersion(fullFilePath) >= s_OldestSupportedVersion;
   }
 
   // Returns version 0 if not found

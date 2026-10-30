@@ -50,9 +50,9 @@ public class PathTool : BlbTool
 
   void Start()
   {
-    m_TileGrid = FindObjectOfType<TileGrid>();
-    m_TilesPalette = FindObjectOfType<TilesPalette>();
-    m_ToolsPalette = FindObjectOfType<ToolsPalette>();
+    m_TileGrid = FindAnyObjectByType<TileGrid>();
+    m_TilesPalette = FindAnyObjectByType<TilesPalette>();
+    m_ToolsPalette = FindAnyObjectByType<ToolsPalette>();
 
     m_ToolID = Tools.PATH;
 
@@ -389,16 +389,12 @@ public class PathTool : BlbTool
 
     if (delta.x < 0)
     {
-      var temp = min.x;
-      min.x = max.x;
-      max.x = temp;
+      (max.x, min.x) = (min.x, max.x);
     }
 
     if (delta.y < 0)
     {
-      var temp = min.y;
-      min.y = max.y;
-      max.y = temp;
+      (max.y, min.y) = (min.y, max.y);
     }
 
     m_SelectedElements = new List<Element>();
@@ -628,16 +624,12 @@ public class PathTool : BlbTool
 
     if (delta.x < 0)
     {
-      var temp = min.x;
-      min.x = max.x;
-      max.x = temp;
+      (max.x, min.x) = (min.x, max.x);
     }
 
     if (delta.y < 0)
     {
-      var temp = min.y;
-      min.y = max.y;
-      max.y = temp;
+      (max.y, min.y) = (min.y, max.y);
     }
 
     var minBounds = new Vector3(min.x, min.y);
