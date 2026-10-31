@@ -45,19 +45,29 @@
                 return o;
             }
 
+            float GridLine(float2 worldPosition, float gridSize)
+            {
+                float2 gridPosition = worldPosition / gridSize;
+                float2 distanceToLine = min(frac(gridPosition), 1.0 - frac(gridPosition));
+                float2 lineWidth = max(fwidth(gridPosition) * 1.5, float2(0.001, 0.001));
+                float2 lineMask = 1.0 - smoothstep(0.0, lineWidth, distanceToLine);
+                return max(lineMask.x, lineMask.y);
+            }
+
             fixed4 frag (v2f i) : SV_Target
             {
                 // unity_OrthoParams.xy is the camera's visible world width and height.
                 float2 cameraWorldSize = unity_OrthoParams.xy;
                 float2 worldPosition = _WorldSpaceCameraPos.xy +
                     (i.uv - 0.5) * (cameraWorldSize / 0.5) + (TILE_SIZE * 0.5);
-                float2 gridPosition = worldPosition / TILE_SIZE;
-                float2 distanceToLine = min(frac(gridPosition), 1.0 - frac(gridPosition));
-                float2 lineWidth = fwidth(gridPosition) * 1.5;
-                lineWidth.x = max(lineWidth.x, 0.001);
-                lineWidth.y = max(lineWidth.y, 0.001);
-                float2 lineMask = 1.0 - smoothstep(0.0, lineWidth, distanceToLine);
-                float grid = max(lineMask.x, lineMask.y);
+                float gridLevel = max(log10(max(cameraWorldSize.x / (TILE_SIZE * 10.0), 0.0001)), 0.0);
+                float fineGridSize = TILE_SIZE * pow(10.0, floor(gridLevel));
+                float coarseGridSize = fineGridSize * 10.0;
+                float coarseGridOpacity = frac(gridLevel);
+                float fineGridOpacity = 1.0 - coarseGridOpacity;
+                float fineGrid = GridLine(worldPosition, fineGridSize) * fineGridOpacity;
+                float coarseGrid = GridLine(worldPosition, coarseGridSize) * coarseGridOpacity;
+                float grid = fineGrid + coarseGrid * (1.0 - fineGrid);
 
                 return lerp(_BackgroundColor, _GridColor, grid);
             }
