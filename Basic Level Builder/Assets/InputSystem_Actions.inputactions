@@ -559,6 +559,16 @@
                     "interactions": "",
                     "initialStateCheck": false,
                     "priority": 0
+                },
+                {
+                    "name": "Grid View",
+                    "type": "Button",
+                    "id": "cccc42af-2ff1-47e0-ab55-f320e393319a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
                 }
             ],
             "bindings": [
@@ -1494,6 +1504,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "Secondary Modifier",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a9f371d1-6396-4ef9-86d8-d92004af95c5",
+                    "path": "<Keyboard>/g",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Grid View",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
