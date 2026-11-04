@@ -41,9 +41,6 @@ public class EditorCameraController : MonoBehaviour
   //Camera of this game object.
   Camera m_Camera;
 
-  //Audio source of this game object.
-  AudioSource m_AudioSource;
-
   //Tools palette.
   ToolsPalette m_ToolsPalette;
 
@@ -68,23 +65,12 @@ public class EditorCameraController : MonoBehaviour
   {
     m_Transform = GetComponent<Transform>();
     m_Camera = GetComponent<Camera>();
-    m_AudioSource = GetComponent<AudioSource>();
     m_ToolsPalette = FindAnyObjectByType<ToolsPalette>();
 
     m_InitialSize = m_Camera.orthographicSize;
     m_InitialPosition = m_Transform.position;
 
     m_Speed = m_MinSpeed;
-  }
-
-  void OnEnable()
-  {
-    InputSystem.actions["Reset Camera"].performed += OnResetCamera;
-  }
-
-  void OnDisable()
-  {
-    InputSystem.actions["Reset Camera"].performed -= OnResetCamera;
   }
 
   /**
@@ -241,7 +227,7 @@ public class EditorCameraController : MonoBehaviour
   }
 
 
-    void OnResetCamera(InputAction.CallbackContext _context)
+  public void ResetCamera()
   {
     var seq = ActionMaster.Actions.Sequence();
     var grp = seq.Group();
