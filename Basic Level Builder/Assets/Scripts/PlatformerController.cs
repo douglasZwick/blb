@@ -39,7 +39,13 @@ public class PlatformerController : MonoBehaviour
 
   void GatherInput()
   {
-    m_InputAxis = InputSystem.actions["Move"].ReadValue<Vector2>().x;
+    float horizontalInput = InputSystem.actions["Move"].ReadValue<Vector2>().x;
+    // If the input is close to zero, gradually reduce the input axis to zero for smoother stopping
+    m_InputAxis = Mathf.Lerp(m_InputAxis, horizontalInput, 12 * Time.deltaTime);
+    if (Mathf.Abs(m_InputAxis) < 0.01f)
+    {
+      m_InputAxis = 0;
+    }
     m_JumpRequested = InputSystem.actions["Jump"].triggered;
   }
 
@@ -52,6 +58,7 @@ public class PlatformerController : MonoBehaviour
     HandleFacing();
 
     m_Mover.Move(m_InputAxis);
+    print($"Input Axis: {m_InputAxis}, Facing Direction: {m_FacingDirection}");
   }
 
 
@@ -105,7 +112,7 @@ public class PlatformerController : MonoBehaviour
   {
     if (TryGetComponent(out TileDirection tileDirection))
       tileDirection.Initialize(tileDirection.Get());
-      
+
     m_CanMove = true;
     m_CanJump = true;
   }
