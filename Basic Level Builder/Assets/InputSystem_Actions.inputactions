@@ -24,7 +24,7 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false,
-                    "priority": 0
+                    "priority": 5
                 }
             ],
             "bindings": [
