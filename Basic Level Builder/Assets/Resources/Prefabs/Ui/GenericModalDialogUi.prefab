@@ -117,7 +117,7 @@ MonoBehaviour:
     m_Bottom: 4
   m_ChildAlignment: 1
   m_Spacing: 4
-  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
   m_ChildControlHeight: 1
@@ -205,9 +205,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'The level <i>{level}</i> has unsaved changes.<br> Would you like to save?
-
-    hjkhjkhjkhjkhjkhjkhjkhjkhjkhjkhjkhjkhjkg g hgjk ghjk ghjk ghjk ghjk hj hhhhhh dfg '
+  m_text: 'The level <i>{level}</i> has unsaved changes.<br> Would you like to save? '
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -251,7 +249,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 0
+  m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -293,10 +291,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
   m_MinWidth: -1
-  m_MinHeight: 44
+  m_MinHeight: 80
   m_PreferredWidth: -1
   m_PreferredHeight: -1
-  m_FlexibleWidth: -1
+  m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
   m_MaxWidth: Infinity
@@ -434,10 +432,10 @@ MonoBehaviour:
     m_Top: 8
     m_Bottom: 8
   m_ChildAlignment: 4
-  m_Spacing: 0
-  m_ChildForceExpandWidth: 1
+  m_Spacing: 20
+  m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 0
+  m_ChildControlWidth: 1
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
@@ -459,7 +457,7 @@ MonoBehaviour:
   m_MinHeight: -1
   m_PreferredWidth: -1
   m_PreferredHeight: -1
-  m_FlexibleWidth: -1
+  m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
   m_MaxWidth: -1
@@ -506,7 +504,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8320027039918689912, guid: ea4794da28b5d084fad42ef1fddc27ce, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 64
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8320027039918689912, guid: ea4794da28b5d084fad42ef1fddc27ce, type: 3}
       propertyPath: m_SizeDelta.y
@@ -659,14 +657,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: -1
+  m_MinWidth: 64
   m_MinHeight: -1
   m_PreferredWidth: -1
   m_PreferredHeight: -1
-  m_FlexibleWidth: 1
+  m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
-  m_MaxWidth: -1
+  m_MaxWidth: Infinity
   m_MaxHeight: -1
 --- !u!224 &7639999584719802228 stripped
 RectTransform:
@@ -726,7 +724,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8320027039918689912, guid: ea4794da28b5d084fad42ef1fddc27ce, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 64
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8320027039918689912, guid: ea4794da28b5d084fad42ef1fddc27ce, type: 3}
       propertyPath: m_SizeDelta.y
@@ -879,14 +877,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: -1
+  m_MinWidth: 64
   m_MinHeight: -1
   m_PreferredWidth: -1
   m_PreferredHeight: -1
-  m_FlexibleWidth: 1
+  m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
-  m_MaxWidth: -1
+  m_MaxWidth: Infinity
   m_MaxHeight: -1
 --- !u!114 &4950811493649648742 stripped
 MonoBehaviour:
@@ -946,7 +944,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8320027039918689912, guid: ea4794da28b5d084fad42ef1fddc27ce, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 64
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8320027039918689912, guid: ea4794da28b5d084fad42ef1fddc27ce, type: 3}
       propertyPath: m_SizeDelta.y
@@ -1099,14 +1097,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: -1
+  m_MinWidth: 64
   m_MinHeight: -1
   m_PreferredWidth: -1
   m_PreferredHeight: -1
-  m_FlexibleWidth: 1
+  m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
-  m_MaxWidth: -1
+  m_MaxWidth: Infinity
   m_MaxHeight: -1
 --- !u!114 &2436793361585347404 stripped
 MonoBehaviour:
