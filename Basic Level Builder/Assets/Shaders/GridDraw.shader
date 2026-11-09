@@ -33,6 +33,7 @@
             };
 
             static const float TILE_SIZE = 1;
+            static const int COARSE_GRID_RATIO = 10;
 
             fixed4 _GridColor;
             fixed4 _BackgroundColor;
@@ -73,10 +74,12 @@
                 float2 worldPosition = _WorldSpaceCameraPos.xy +
                     (i.uv - 0.5) * (cameraWorldSize / 0.5) + (TILE_SIZE * 0.5);
 
-                // Move between grid sizes by powers of ten as the camera zooms.
-                float gridLevel = max(log10(max(cameraWorldSize.x / (TILE_SIZE * 10.0), 0.0001)), 0.0);
-                float fineGridSize = TILE_SIZE * pow(10.0, floor(gridLevel));
-                float coarseGridSize = fineGridSize * 10.0;
+                float logInput = max(cameraWorldSize.x / (TILE_SIZE * COARSE_GRID_RATIO), 0.0001);
+                float logOutput = log10(logInput) / log10(COARSE_GRID_RATIO);
+                // Move between grid sizes by powers of COARSE_GRID_RATIO as the camera zooms.
+                float gridLevel = max(logOutput, 0.0);
+                float fineGridSize = TILE_SIZE * pow(COARSE_GRID_RATIO, floor(gridLevel));
+                float coarseGridSize = fineGridSize * COARSE_GRID_RATIO;
 
                 // Cross-fade between fine and coarse grids to avoid abrupt level changes.
                 float coarseGridOpacity = frac(gridLevel);
