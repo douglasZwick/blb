@@ -23,7 +23,7 @@ public class TileIconUpdater : MonoBehaviour
   private Image m_PrimaryImage, m_SecondaryImage;
   private TileType m_PrimaryTileType = TileType.SOLID, m_SecondaryTileType;
   [SerializeField]
-  private List<TileSpriteRotations> m_TileRoationSprites;
+  private List<TileSpriteRotations> m_TileRotationSprites;
   [SerializeField]
   private GameObject m_RotateArrowLeft, m_RotateArrowRight;
   private TilesPalette m_TilesPalette;
@@ -93,7 +93,7 @@ public class TileIconUpdater : MonoBehaviour
     Quaternion targetRotation = Quaternion.identity;
     bool hasRotatedSprite = false;
 
-    foreach (TileSpriteRotations tileSpriteRotations in m_TileRoationSprites)
+    foreach (TileSpriteRotations tileSpriteRotations in m_TileRotationSprites)
     {
       if (tileSpriteRotations.m_tileType == tileType)
       {
