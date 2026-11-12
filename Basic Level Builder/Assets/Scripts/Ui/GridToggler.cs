@@ -13,7 +13,7 @@ public class GridToggler: MonoBehaviour
   [SerializeField] private GameObject m_Grid;
   [SerializeField] private Image m_GridToggleImage;
 
-  private bool m_gridWasActive = false;
+  private bool m_GridWasActive = false;
 
   private void OnEnable()
   {
@@ -30,7 +30,7 @@ public class GridToggler: MonoBehaviour
     if (enteringPlay)
       SetGridActive(false);
     else
-      SetGridActive(m_gridWasActive);
+      SetGridActive(m_GridWasActive);
   }
 
   private void SetGridActive(bool value)
@@ -44,6 +44,6 @@ public class GridToggler: MonoBehaviour
   public void ToggleGrid()
   {
     SetGridActive(!m_Grid.activeSelf);
-    m_gridWasActive = m_Grid.activeSelf;
+    m_GridWasActive = m_Grid.activeSelf;
   }
 }
