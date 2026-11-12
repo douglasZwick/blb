@@ -14,11 +14,6 @@ using NewestFileData;
 public class TileGrid : MonoBehaviour
 {
   Dictionary<Vector2Int, Element> m_Grid = new();
-  public Transform m_BoundsRoot;
-  public Transform m_MaskTransform;
-  public Transform m_ColoredOutlineTransform;
-  public Transform m_DarkOutlineTransform;
-  public Camera m_EditorCamera;
   public Outliner m_WorldExtentsOutliner;
 
   Transform m_Transform;
@@ -26,9 +21,6 @@ public class TileGrid : MonoBehaviour
   Dictionary<TileType, Transform> m_Roots = new();
 
   TilesPalette m_TilesPalette;
-  SpriteMask m_Mask;
-  SpriteRenderer m_ColoredOutlineRenderer;
-  SpriteRenderer m_DarkOutlineRenderer;
 
   // The Z depth of objects placed in the grid.
   // NOTE: Is there any potential reason for this to be public...?
@@ -50,10 +42,6 @@ public class TileGrid : MonoBehaviour
     m_MaxBounds.z = m_GridZ;
 
     m_TilesPalette = FindAnyObjectByType<TilesPalette>();
-
-    m_Mask = m_MaskTransform.GetComponent<SpriteMask>();
-    m_ColoredOutlineRenderer = m_ColoredOutlineTransform.GetComponent<SpriteRenderer>();
-    m_DarkOutlineRenderer = m_DarkOutlineTransform.GetComponent<SpriteRenderer>();
   }
 
 
