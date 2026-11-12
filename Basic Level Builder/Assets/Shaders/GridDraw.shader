@@ -79,7 +79,7 @@
                 float2 cameraWorldSize = unity_OrthoParams.xy;
                 // Map this fragment's UV to a world position centered on the camera.
                 float2 worldPosition = _WorldSpaceCameraPos.xy +
-                    (i.uv - 0.5) * (cameraWorldSize / 0.5) + (TILE_SIZE * 0.5);
+                    (i.uv - 0.5) * (cameraWorldSize * 2) + (TILE_SIZE * 0.5);
 
                 float logInput = max(cameraWorldSize.x / (TILE_SIZE * COARSE_GRID_RATIO), 0.0001);
                 float logOutput = log10(logInput) / log10(COARSE_GRID_RATIO);
