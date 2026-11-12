@@ -6446,7 +6446,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PrimaryImage: {fileID: 1141910373}
   m_SecondaryImage: {fileID: 586901556}
-  m_TileRotationSprites: []
+  m_TileRotationSprites:
+  - m_RightSprite: {fileID: -85902224, guid: b7c25aeb576688440917656338c4656b, type: 3}
+    m_UpSprite: {fileID: 0}
+    m_LeftSprite: {fileID: -85469965, guid: b7c25aeb576688440917656338c4656b, type: 3}
+    m_DownSprite: {fileID: 0}
+    m_tileType: 3
+  - m_RightSprite: {fileID: 1875097249, guid: 17830e5629525a349b9bb085efe4351d, type: 3}
+    m_UpSprite: {fileID: 0}
+    m_LeftSprite: {fileID: 1065114976, guid: 17830e5629525a349b9bb085efe4351d, type: 3}
+    m_DownSprite: {fileID: 0}
+    m_tileType: 18
   m_RotateArrowLeft: {fileID: 4270609269699308202}
   m_RotateArrowRight: {fileID: 36968177}
 --- !u!1 &318728520
