@@ -22,6 +22,7 @@ public class PlatformerController : MonoBehaviour
   bool m_JumpRequested = false;
   Direction m_FacingDirection = Direction.RIGHT;
 
+  const float c_MovementSpeed = 3;
 
   private void Awake()
   {
@@ -39,7 +40,12 @@ public class PlatformerController : MonoBehaviour
 
   void GatherInput()
   {
-    m_InputAxis = InputSystem.actions["Move"].ReadValue<Vector2>().x;
+    float horizontalInput = InputSystem.actions["Move"].ReadValue<Vector2>().x;
+    if (Mathf.Sign(horizontalInput) == Mathf.Sign(m_InputAxis) || Mathf.Approximately(m_InputAxis, 0) || Mathf.Approximately(horizontalInput, 0))
+      m_InputAxis = Mathf.MoveTowards(m_InputAxis, horizontalInput, c_MovementSpeed * Time.deltaTime);
+    else
+      m_InputAxis = 0;
+
     m_JumpRequested = InputSystem.actions["Jump"].triggered;
   }
 
@@ -52,6 +58,7 @@ public class PlatformerController : MonoBehaviour
     HandleFacing();
 
     m_Mover.Move(m_InputAxis);
+    print($"Input Axis: {m_InputAxis}, Facing Direction: {m_FacingDirection}");
   }
 
 
@@ -105,7 +112,7 @@ public class PlatformerController : MonoBehaviour
   {
     if (TryGetComponent(out TileDirection tileDirection))
       tileDirection.Initialize(tileDirection.Get());
-      
+
     m_CanMove = true;
     m_CanJump = true;
   }
