@@ -201,6 +201,14 @@ public abstract class ActionSet : Action
     return action;
   }
 
+  public ActionRotate2DRTEuler Rotate2DRTEuler(GameObject go, float end, float duration, Ease ease = null)
+  {
+    var action = new ActionRotate2DRTEuler(go, end, duration, ease);
+    Add(action);
+
+    return action;
+  }
+
   public ActionUiColor UiColor(GameObject go, Color end, float duration, Ease ease = null)
   {
     var action = new ActionUiColor(go, end, duration, ease);
@@ -284,6 +292,14 @@ public abstract class ActionSet : Action
   public ActionRotate2D Rotate2D(GameObject go, float end, float duration, Ease ease = null)
   {
     var action = new ActionRotate2D(go, end, duration, ease);
+    Add(action);
+
+    return action;
+  }
+
+  public ActionRotate2DEuler Rotate2DEuler(GameObject go, float end, float duration, Ease ease = null)
+  {
+    var action = new ActionRotate2DEuler(go, end, duration, ease);
     Add(action);
 
     return action;
@@ -480,7 +496,7 @@ public abstract class ActionQuaternion : Action
 
   public ActionQuaternion(GameObject go, Quaternion end, float duration, Ease ease = null)
   {
-    Name = "Float";
+    Name = "Quaternion";
     GO = go;
     End = end;
     Remaining = Duration = duration;
@@ -612,8 +628,8 @@ public abstract class ActionVector3 : Action
       return ActionState.Completed;
   }
 
-  protected virtual void Initialize() {}
-  protected virtual void Set(Vector3 value) {}
+  protected virtual void Initialize() { }
+  protected virtual void Set(Vector3 value) { }
 }
 
 public abstract class ActionColor : Action
@@ -740,6 +756,38 @@ public class ActionMoveRTY : ActionFloat
   }
 }
 
+public class ActionRotate2DEuler : ActionFloat
+{
+  private Transform Tf;
+
+  public ActionRotate2DEuler(GameObject go, float end, float duration, Ease ease = null)
+    : base(go, end, duration, ease)
+  {
+    Name = "Rotate2DEuler";
+    Tf = go?.transform;
+  }
+
+  protected override void Initialize() { Start = Tf.localRotation.eulerAngles.z; }
+  protected override void Set(float value)
+  { Tf.localRotation = Quaternion.Euler(0, 0, value); }
+}
+
+public class ActionRotate2DRTEuler : ActionFloat
+{
+  private RectTransform RT;
+
+  public ActionRotate2DRTEuler(GameObject go, float end, float duration, Ease ease = null)
+    : base(go, end, duration, ease)
+  {
+    Name = "Rotate2DRTEuler";
+    RT = go?.GetComponent<RectTransform>();
+  }
+
+  protected override void Initialize() { Start = RT.localRotation.eulerAngles.z; }
+  protected override void Set(float value)
+  { RT.localRotation = Quaternion.Euler(0, 0, value); }
+}
+
 public class ActionRotate2D : ActionQuaternion
 {
   private Transform Tf;
@@ -761,7 +809,7 @@ public class ActionRotate2DRT : ActionQuaternion
   private RectTransform RT;
 
   public ActionRotate2DRT(GameObject go, float end, float duration, Ease ease = null)
-    : base(go, Quaternion.Euler(0,0,end), duration, ease)
+    : base(go, Quaternion.Euler(0, 0, end), duration, ease)
   {
     Name = "Rotate2DRT";
     RT = go?.GetComponent<RectTransform>();

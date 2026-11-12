@@ -91,7 +91,7 @@ public class ColorCodePickerDialog : ModalDialog
 
     m_RectTransform.localScale = Vector3.zero;
     ActionMaster.Actions.Scale(gameObject, Vector3.one, m_OpenDuration, new Ease(Ease.Back.Out));
-    ActionMaster.Actions.Rotate2DRT(gameObject, 360, m_OpenDuration, new Ease(Ease.Back.Out));
+    ActionMaster.Actions.Rotate2DRTEuler(gameObject, 360, m_OpenDuration, new Ease(Ease.Back.Out));
   }
 
 
@@ -104,7 +104,7 @@ public class ColorCodePickerDialog : ModalDialog
     var closeSeq = ActionMaster.Actions.Sequence();
     var closeGrp = closeSeq.Group();
     closeGrp.Scale(gameObject, Vector3.zero, m_OpenDuration, new Ease(Ease.Quad.In));
-    closeGrp.Rotate2DRT(gameObject, 360, m_OpenDuration, new Ease(Ease.Quad.In));
+    closeGrp.Rotate2DRTEuler(gameObject, 360, m_OpenDuration, new Ease(Ease.Quad.In));
     closeSeq.Call(Destroy, gameObject);
 
     //Disconnect all assigned tiles from responding to future color wheels.
