@@ -17,12 +17,12 @@ Shader "BLB/TileOutliner"
         Pass
         {
             CGPROGRAM
-// Upgrade NOTE: excluded shader from DX11 because it uses wrong array syntax (type[size] name)
-#pragma exclude_renderers d3d11
             #pragma vertex vert
             #pragma fragment frag
 
             #include "UnityCG.cginc"
+
+            #define POLYGON_MAX_POINTS 16
 
             struct appdata
             {
@@ -38,8 +38,6 @@ Shader "BLB/TileOutliner"
 
             static const float2 TILE_SIZE = float2(0.5, 0.5);
             static const float MAX_DISTANCE = float(1e6);
-            static const int N = 16;
-
             sampler2D _TileGridTex;
             float4 _TileGridTex_TexelSize;
             // The world position of the tile grid's origin cell
@@ -53,12 +51,12 @@ Shader "BLB/TileOutliner"
                 return o;
             }
 
-            float sdPolygon(float2 v[N], float2 p)
+            float sdPolygon(float2 v[POLYGON_MAX_POINTS], float2 p, int count)
             {
                 float d = dot(p - v[0], p - v[0]);
                 float s = 1.0;
 
-                for (int i = 0, j = N - 1; i < N; j = i, i++)
+                for (int i = 0, j = count - 1; i < count; j = i, i++)
                 {
                     float2 e = v[j] - v[i];
                     float2 w = p - v[i];
@@ -89,26 +87,26 @@ Shader "BLB/TileOutliner"
 
             bool isTileValidType(float4 tile, float typeValue)
             {
-                return abs(tile.g - typeValue) < 0.001;
+                return abs(tile.r - typeValue) < 0.001;
             }
 
 
-            void appendPoly(inout int index, inout float2 polyPoints[N], float2 a, float2 b)
+            void appendPoly(inout int index, inout float2 polyPoints[POLYGON_MAX_POINTS], float2 a, float2 b)
             {
                 polyPoints[index++] = a;
                 polyPoints[index++] = b;
             }
 
-            float2[N] getSdfPolygon(float4 currentTile, float2 cellcoord)
+            void getSdfPolygon(float4 currentTile, float2 cellcoord, out float2 polyPoints[POLYGON_MAX_POINTS], out int index)
             {
                 // Look at each 8 directional neighbor and create a polygon from them.
                 // Start at the top-left corner and loop clockwise back to the origin.
                 const float pathIndex = currentTile.g;
-                float2 polyPoints[N];
-                int index = 0;
+                index = 0;
+                float4 checkingTile;
 
                 // Top left corner valid tiles are solid or slope bottom right
-                float4 checkingTile = getTile(cellcoord + float2(-1.0, -1.0));
+                checkingTile = getTile(cellcoord + float2(-1.0, -1.0));
                 if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 5)))
                 {
                     appendPoly(index, polyPoints, float2(-1.5, -0.5), float2(-0.5, -1.5));
@@ -119,7 +117,7 @@ Shader "BLB/TileOutliner"
                 }
 
                 // Top middle valid tiles are solid or slope bottom right and bottom left
-                float4 checkingTile = getTile(cellcoord + float2(-1.0, -1.0));
+                checkingTile = getTile(cellcoord + float2(0.0, -1.0));
                 if (isTileValidPath(checkingTile, pathIndex))
                 {
                     if (isTileValidType(checkingTile, 1))
@@ -198,7 +196,7 @@ Shader "BLB/TileOutliner"
                     polyPoints[index++] = float2(-0.5, 0.5);
                 }
 
-                checkingTile = getTile(cellcoord + float2(1.0, 0.0));
+                checkingTile = getTile(cellcoord + float2(-1.0, 0.0));
                 if (isTileValidPath(checkingTile, pathIndex))
                 {
                     if (isTileValidType(checkingTile, 1))
@@ -214,7 +212,6 @@ Shader "BLB/TileOutliner"
                     polyPoints[index++] = float2(-0.5, -0.5);
                 }
 
-                return polyPoints;
             }
 
             float sdAtUv(float2 uv)
@@ -239,10 +236,10 @@ Shader "BLB/TileOutliner"
                 if (currentTile.r <= 0.01)
                     return MAX_DISTANCE;
 
-                float pathIndex = currentTile.g;
-
-
-                return sdPolygon(getSdfPolygon(currentTile, cellCoord), gridCellUv);
+                float2 polyPoints[POLYGON_MAX_POINTS];
+                int pointCount;
+                getSdfPolygon(currentTile, cellCoord, polyPoints, pointCount);
+                return sdPolygon(polyPoints, gridCellUv, pointCount);
             }
 
             fixed4 frag (v2f i) : SV_Target
