@@ -77,6 +77,27 @@ Shader "BLB/TileOutliner"
                 return MAX_DISTANCE;
             }
 
+            float getNeighborSdTile(float2 cellcoord, float2 uv, float pathIndex, float2 dir)
+            {
+                float4 tile = getTile(cellcoord + dir);
+                // If we have a tile here and the path indexs match
+                if (tile.r > 0.01 && abs(tile.g - pathIndex) < 0.001) {
+                    return sdBox(uv - (dir * TILE_SIZE), TILE_SIZE + TILE_SIZE * abs(dir));
+                }
+                return MAX_DISTANCE;
+            }
+
+            float getCornerNeighborSdTile(float2 cellcoord, float2 uv, float pathIndex, float2 dir)
+            {
+                float4 horizontalTile = getTile(cellcoord + float2(dir.x, 0));
+                float4 verticalTile = getTile(cellcoord + float2(0, dir.y));
+                if (horizontalTile.r > 0.01 && abs(horizontalTile.g - pathIndex) < 0.001 &&
+                    verticalTile.r > 0.01 && abs(verticalTile.g - pathIndex) < 0.001) {
+                    return getNeighborSdTile(cellcoord, uv, pathIndex, dir);
+                }
+                return MAX_DISTANCE;
+            }
+
             float sdAtUv(float2 uv)
             {
                 // Convert UV to coords on grid
@@ -102,10 +123,14 @@ Shader "BLB/TileOutliner"
                 float pathIndex = currentTile.g;
 
                 float distance = getSdTile(cellCoord, gridCellUv, pathIndex);
-                distance = min(distance, getSdTile(cellCoord + float2(1,0), gridCellUv + float2(-1,0), pathIndex));
-                distance = min(distance, getSdTile(cellCoord + float2(-1,0), gridCellUv + float2(1,0), pathIndex));
-                distance = min(distance, getSdTile(cellCoord + float2(0,1), gridCellUv + float2(0,-1), pathIndex));
-                distance = min(distance, getSdTile(cellCoord + float2(0,-1), gridCellUv + float2(0,1), pathIndex));
+                distance = min(distance, getNeighborSdTile(cellCoord, gridCellUv, pathIndex, float2(1,0)));
+                distance = min(distance, getNeighborSdTile(cellCoord, gridCellUv, pathIndex, float2(-1,0)));
+                distance = min(distance, getNeighborSdTile(cellCoord, gridCellUv, pathIndex, float2(0,1)));
+                distance = min(distance, getNeighborSdTile(cellCoord, gridCellUv, pathIndex, float2(0,-1)));
+                distance = min(distance, getCornerNeighborSdTile(cellCoord, gridCellUv, pathIndex, float2(1,1)));
+                distance = min(distance, getCornerNeighborSdTile(cellCoord, gridCellUv, pathIndex, float2(-1,1)));
+                distance = min(distance, getCornerNeighborSdTile(cellCoord, gridCellUv, pathIndex, float2(1,-1)));
+                distance = min(distance, getCornerNeighborSdTile(cellCoord, gridCellUv, pathIndex, float2(-1,-1)));
 
                 return distance;
             }
@@ -113,13 +138,11 @@ Shader "BLB/TileOutliner"
             fixed4 frag (v2f i) : SV_Target
             {
                 float d = sdAtUv(i.uv);
-                float3 col = (d>0.0) ? float3(0.9,0.6,0.3) : float3(0.65,0.85,1.0);
-	            col *= 1.0 - exp2(-20.0*abs(d));
-	            col *= 0.8 + 0.2*cos(120.0*abs(d));
-	            col = lerp(col, float3(1.0,1.0,1.0), 1.0-smoothstep(0.0,0.01,abs(d)));
-                // Keep empty cells transparent so path textures can layer.
-                //float alpha = smoothstep(0.0, 0.5, abs(d));
-                return fixed4(col, 1.0);
+                // alpha cut all the positive values outside of the shape but gradient blend 0.01 units outside of the shape till the proper edge
+                float alpha = smoothstep(-0.01, 0.00, -d);
+                // Cut out the inside of the shape to only get a 0.05 pixel thickness inside
+                alpha = min(alpha, smoothstep(-0.06, 0.05, d));
+                return fixed4(float3(0.6,0.6,0.6), alpha);
             }
             ENDCG
         }
