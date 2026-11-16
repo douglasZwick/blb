@@ -42,6 +42,7 @@ Shader "BLB/TileOutliner"
             float4 _TileGridTex_TexelSize;
             // The world position of the tile grid's origin cell
             float2 _TileGridStartPosition;
+            float _OutlineAlphaCap;
 
             v2f vert (appdata v)
             {
@@ -276,7 +277,7 @@ Shader "BLB/TileOutliner"
                 // Cut out the inside of the shape to only get a 0.05 pixel thickness inside
                 alpha = min(alpha, smoothstep(-0.11, -0.06, d));
                 float value = smoothstep(-0.01, 0.05, -d) + 0.7;
-                return fixed4(float3(value,value,value), alpha);
+                return fixed4(value, value, value, min(alpha, _OutlineAlphaCap));
 
 
 

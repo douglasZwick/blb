@@ -79,6 +79,9 @@ public class TileOutlineRenderer : MonoBehaviour
     m_SpriteRenderers.Add(backgroundRenderer);
     AddMaterial(backgroundRenderer);
 
+    m_Materials[0].SetFloat("_OutlineAlphaCap", 1.0f);
+    m_Materials[1].SetFloat("_OutlineAlphaCap", 0.1f);
+
     m_Camera = m_EditModeCamera;
   }
 
