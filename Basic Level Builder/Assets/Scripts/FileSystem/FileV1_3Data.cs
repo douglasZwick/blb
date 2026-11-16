@@ -239,13 +239,7 @@ namespace NewestFileData
 
         public bool PathsEqual(Element other)
         {
-            // If both paths don't exist or the paths are equal
-            if ((other.m_Path == null && m_Path == null) ||
-              (other.m_Path != null && m_Path != null && m_Path.SequenceEqual(other.m_Path)))
-            {
-                return true;
-            }
-            return false;
+            return ListValueComparer<Vector2Int>.Default.Equals(m_Path, other.m_Path);
         }
 
         public void SetState(TileState state)

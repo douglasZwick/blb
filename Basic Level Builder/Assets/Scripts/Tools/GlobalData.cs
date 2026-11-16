@@ -457,7 +457,7 @@ public class ListValueComparer<T> : IEqualityComparer<List<T>>
 {
   private ListValueComparer() { }
 
-  public static ListValueComparer<T> Default { get; }
+  public static ListValueComparer<T> Default { get; } = new();
 
   public bool Equals(List<T> x, List<T> y)
   {

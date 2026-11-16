@@ -145,80 +145,58 @@ public class TileGrid : MonoBehaviour
   // 0 for empty tile and 1 for solid tile
   public List<Texture2D> GetSolidTileMap()
   {
-    var solidTileMap = new List<Texture2D>();
-    var listOfHashedPaths = new List<int>();
-
-    // Create the first texture map for the solid tiles with no path
-    // We need to add 1 to the size of the texture map because the bounds are inclusive
-    // Even though the bounds are in world space, the tiles are 1 unit in size, so the bounds are also in tile space
-    solidTileMap.Add(new Texture2D((int)(m_MaxBounds.x - m_MinBounds.x + 1), (int)(m_MaxBounds.y - m_MinBounds.y + 1)));
-    // Clear the texture map to 0 for empty tiles
-    solidTileMap[0].SetPixels32(new Color32[solidTileMap[0].width * solidTileMap[0].height], 0);
-
-    foreach (var entry in m_Grid)
-    {
-      var tileType = entry.Value.m_Type;
-      if (tileType != TileType.SOLID && tileType != TileType.SLOPE && tileType != TileType.FALSE_SOLID)
-        continue;
-
-      var pathIndex = ListValueComparer<Vector2Int>.Default.GetHashCode(entry.Value.m_Path);
-      if (!listOfHashedPaths.Contains(pathIndex))
-      {
-        listOfHashedPaths.Add(pathIndex);
-        solidTileMap.Add(new Texture2D((int)(m_MaxBounds.x - m_MinBounds.x + 1), (int)(m_MaxBounds.y - m_MinBounds.y + 1)));
-        // Clear the texture map to 0 for empty tiles
-        solidTileMap[0].SetPixels32(new Color32[solidTileMap[0].width * solidTileMap[0].height], 0);
-      }
-
-      var textureMapIndex = listOfHashedPaths.IndexOf(pathIndex) + 1;
-      var color = entry.Value.m_Type == TileType.SLOPE ? new Color(2 + (int)entry.Value.m_Direction, 0, 0, 1) : new Color(1, 0, 0, 1);
-      solidTileMap[textureMapIndex].SetPixel(entry.Value.m_GridIndex.x, entry.Value.m_GridIndex.y, color);
-    }
-    for (int i = 0; i < solidTileMap.Count; i++)
-    {
-      solidTileMap[i].Apply();
-    }
-
-    return solidTileMap;
+    return GetTileMap(
+      tileType => tileType == TileType.SOLID || tileType == TileType.SLOPE || tileType == TileType.FALSE_SOLID,
+      TileType.SLOPE);
   }
 
   public List<Texture2D> GetBgTileMap()
   {
-    var bgTileMap = new List<Texture2D>();
-    var listOfHashedPaths = new List<int>();
+    return GetTileMap(
+      tileType => tileType == TileType.BG || tileType == TileType.BG_SLOPE,
+      TileType.BG_SLOPE);
+  }
 
-    // Create the first texture map for the solid tiles with no path
-    // We need to add 1 to the size of the texture map because the bounds are inclusive
-    // Even though the bounds are in world space, the tiles are 1 unit in size, so the bounds are also in tile space
-    bgTileMap.Add(new Texture2D((int)(m_MaxBounds.x - m_MinBounds.x + 1), (int)(m_MaxBounds.y - m_MinBounds.y + 1)));
-    // Clear the texture map to 0 for empty tiles
-    bgTileMap[0].SetPixels32(new Color32[bgTileMap[0].width * bgTileMap[0].height], 0);
+  List<Texture2D> GetTileMap(Func<TileType, bool> isIncludedTileType, TileType slopeType)
+  {
+    var textureMapWidth = (int)(m_MaxBounds.x - m_MinBounds.x + 1);
+    var textureMapHeight = (int)(m_MaxBounds.y - m_MinBounds.y + 1);
+    var textureMaps = new List<Texture2D> { CreateEmptyTileMap(textureMapWidth, textureMapHeight) };
+    var paths = new List<List<Vector2Int>>();
+    var pathComparer = ListValueComparer<Vector2Int>.Default;
 
     foreach (var entry in m_Grid)
     {
-      var tileType = entry.Value.m_Type;
-      if (tileType != TileType.BG && tileType != TileType.BG_SLOPE)
+      var element = entry.Value;
+      if (!isIncludedTileType(element.m_Type))
         continue;
 
-      var pathIndex = ListValueComparer<Vector2Int>.Default.GetHashCode(entry.Value.m_Path);
-      if (!listOfHashedPaths.Contains(pathIndex))
+      // Check if the path already exists in the list of paths
+      // If it doesn't exist, add it to the list of paths and create a new texture map for it
+      var pathIndex = paths.FindIndex(path => pathComparer.Equals(path, element.m_Path));
+      if (pathIndex < 0)
       {
-        listOfHashedPaths.Add(pathIndex);
-        bgTileMap.Add(new Texture2D((int)(m_MaxBounds.x - m_MinBounds.x + 1), (int)(m_MaxBounds.y - m_MinBounds.y + 1)));
-        // Clear the texture map to 0 for empty tiles
-        bgTileMap[0].SetPixels32(new Color32[bgTileMap[0].width * bgTileMap[0].height], 0);
+        pathIndex = paths.Count;
+        paths.Add(element.m_Path);
+        textureMaps.Add(CreateEmptyTileMap(textureMapWidth, textureMapHeight));
       }
 
-      var textureMapIndex = listOfHashedPaths.IndexOf(pathIndex) + 1;
-      var color = entry.Value.m_Type == TileType.BG_SLOPE ? new Color(2 + (int)entry.Value.m_Direction, 0, 0, 1) : new Color(1, 0, 0, 1);
-      bgTileMap[textureMapIndex].SetPixel(entry.Value.m_GridIndex.x, entry.Value.m_GridIndex.y, color);
-    }
-    for (int i = 0; i < bgTileMap.Count; i++)
-    {
-      bgTileMap[i].Apply();
+      var textureMapIndex = pathIndex + 1;
+      var value = element.m_Type == slopeType ? 2 + (int)element.m_Direction : 1;
+      textureMaps[textureMapIndex].SetPixel(element.m_GridIndex.x, element.m_GridIndex.y, new Color(value, 0, 0, 1));
     }
 
-    return bgTileMap;
+    foreach (var textureMap in textureMaps)
+      textureMap.Apply();
+
+    return textureMaps;
+  }
+
+  static Texture2D CreateEmptyTileMap(int width, int height)
+  {
+    var textureMap = new Texture2D(width, height);
+    textureMap.SetPixels32(new Color32[width * height], 0);
+    return textureMap;
   }
 
   public void LoadFromDictonary(Dictionary<Vector2Int, Element> grid)
