@@ -11,6 +11,7 @@ Description:
 Copyright 2018-2026, DigiPen Institute of Technology
 ***************************************************/
 
+using System.Collections.Generic;
 using NewestFileData;
 
 /**
@@ -52,6 +53,7 @@ public static class GlobalData
   public static event ParameterlessEvent EditingEnabled;
   public static event ParameterlessEvent EditingDisabled;
   public static event ParameterlessEvent DoorSectionOpened;
+  public static event ParameterlessEvent TileGridChanged;
 
   public static event PlayModeEvent PreToggleEffects;
   public static event PlayModeEvent PostToggleEffects;
@@ -267,6 +269,11 @@ public static class GlobalData
     EditingDisabled?.Invoke();
   }
 
+  public static void DispatchTileGridChanged()
+  {
+    TileGridChanged?.Invoke();
+  }
+
   public static void DispatchKeyCollected(TileColor keyColor)
   {
     KeyCollected?.Invoke(keyColor);
@@ -443,6 +450,43 @@ public static class MathExtensions
   public static int Mod(this int x, int m)
   {
     return (x % m + m) % m;
+  }
+}
+
+public class ListValueComparer<T> : IEqualityComparer<List<T>>
+{
+  private ListValueComparer() { }
+
+  public static ListValueComparer<T> Default { get; }
+
+  public bool Equals(List<T> x, List<T> y)
+  {
+    if (ReferenceEquals(x, y)) return true;
+    if (x is null || y is null || x.Count != y.Count) return false;
+
+    var comparer = EqualityComparer<T>.Default;
+    for (int i = 0; i < x.Count; i++)
+    {
+      if (!comparer.Equals(x[i], y[i])) return false;
+    }
+    return true;
+  }
+
+  public int GetHashCode(List<T> list)
+  {
+    if (list is null) return 0;
+
+    unchecked
+    {
+      int hash = 17;
+      var comparer = EqualityComparer<T>.Default;
+      for (int i = 0; i < list.Count; i++)
+      {
+        // Multiply by a prime (e.g., 31) to preserve element order
+        hash = hash * 31 + (list[i] == null ? 0 : comparer.GetHashCode(list[i]));
+      }
+      return hash;
+    }
   }
 }
 
