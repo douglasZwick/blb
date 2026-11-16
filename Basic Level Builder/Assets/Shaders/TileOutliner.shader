@@ -17,6 +17,8 @@ Shader "BLB/TileOutliner"
         Pass
         {
             CGPROGRAM
+// Upgrade NOTE: excluded shader from DX11 because it uses wrong array syntax (type[size] name)
+#pragma exclude_renderers d3d11
             #pragma vertex vert
             #pragma fragment frag
 
@@ -36,6 +38,7 @@ Shader "BLB/TileOutliner"
 
             static const float2 TILE_SIZE = float2(0.5, 0.5);
             static const float MAX_DISTANCE = float(1e6);
+            static const int N = 16;
 
             sampler2D _TileGridTex;
             float4 _TileGridTex_TexelSize;
@@ -50,22 +53,22 @@ Shader "BLB/TileOutliner"
                 return o;
             }
 
-            float sdPolygon(float2 v[20], float2 p)
+            float sdPolygon(float2 v[N], float2 p)
             {
                 float d = dot(p - v[0], p - v[0]);
                 float s = 1.0;
-                
+
                 for (int i = 0, j = N - 1; i < N; j = i, i++)
                 {
                     float2 e = v[j] - v[i];
                     float2 w = p - v[i];
-                    float2 b = w - e * clamp(dot(w, e) / dot(e, e), 0.0, 1.0);
+                    float2 b = w - e * clamp(dot(w, e) / max(dot(e, e), 0.0001), 0.0, 1.0);
                     d = min(d, dot(b, b));
-                    
+
                     bool3 c = bool3(p.y >= v[i].y, p.y < v[j].y, e.x * w.y > e.y * w.x);
                     if (all(c) || all(!c)) s *= -1.0;
                 }
-                
+
                 return s * sqrt(d);
             }
 
@@ -79,130 +82,139 @@ Shader "BLB/TileOutliner"
                 return tex2D(_TileGridTex, tileUv);
             }
 
-            float getSdTile(float2 cellcoord, float2 uv, float pathIndex)
+            bool isTileValidPath(float4 tile, float pathIndex)
             {
-                float4 tile = getTile(cellcoord);
-                // If we have a tile here and the path indexs match
-                if (tile.r > 0.01 && abs(tile.g - pathIndex) < 0.001) {
-                    return sdBox(uv, TILE_SIZE);
-                }
-                return MAX_DISTANCE;
+                return abs(tile.g - pathIndex) < 0.001;
             }
 
-            float getNeighborSdTile(float2 cellcoord, float2 uv, float pathIndex, float2 dir)
+            bool isTileValidType(float4 tile, float typeValue)
             {
-                float4 tile = getTile(cellcoord + dir);
-                // If we have a tile here and the path indexs match
-                if (tile.r > 0.01 && abs(tile.g - pathIndex) < 0.001) {
-                    return sdBox(uv - (dir * TILE_SIZE), TILE_SIZE + TILE_SIZE * abs(dir));
-                }
-                return MAX_DISTANCE;
+                return abs(tile.g - typeValue) < 0.001;
             }
 
-            float getCornerNeighborSdTile(float2 cellcoord, float2 uv, float pathIndex, float2 dir)
+
+            void appendPoly(inout int index, inout float2 polyPoints[N], float2 a, float2 b)
             {
-                float4 horizontalTile = getTile(cellcoord + float2(dir.x, 0));
-                float4 verticalTile = getTile(cellcoord + float2(0, dir.y));
-                if (horizontalTile.r > 0.01 && abs(horizontalTile.g - pathIndex) < 0.001 &&
-                    verticalTile.r > 0.01 && abs(verticalTile.g - pathIndex) < 0.001) {
-                    return getNeighborSdTile(cellcoord, uv, pathIndex, dir);
-                }
-                return MAX_DISTANCE;
+                polyPoints[index++] = a;
+                polyPoints[index++] = b;
             }
 
-            bool isTileValid(float4 tile, float pathIndex)
+            float2[N] getSdfPolygon(float4 currentTile, float2 cellcoord)
             {
-                return tile.r > 0.01 && abs(tile.g - pathIndex) < 0.001;
-            }
+                // Look at each 8 directional neighbor and create a polygon from them.
+                // Start at the top-left corner and loop clockwise back to the origin.
+                const float pathIndex = currentTile.g;
+                float2 polyPoints[N];
+                int index = 0;
 
-            float2[20] getSdfPolygon(float4 currentTile, float2 cellcoord)
-            {
-                // Look at each 8 directional neighbor and create a polygon from them
-                // Start at top left and loop back
-                float pathIndex = currentTile.g;
-
-
-                float2[20] polyPoints;
-                float4 checkingTile = getTile(cellCoord + float2(-1,-1));
-                int index = 0
-                if (isTileValid(checkingTile, pathIndex))
+                // Top left corner valid tiles are solid or slope bottom right
+                float4 checkingTile = getTile(cellcoord + float2(-1.0, -1.0));
+                if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 5)))
                 {
-                    // Slope solid bottom left
-                    if (abs(checkingTile.r - 2) < 0.001)
-                    {
-                        polyPoints[index++] = float2(-1.5, -0.5);
-                        polyPoints[index++] = float2(-1.5, -1.5);
-                        polyPoints[index++] = float2(-0.5, -0.5);
-                    }
-                    // Slope solid top left. Ignore, not part of this shape
-                    else if (abs(checkingTile.r - 3) < 0.001)
-                    {
-                        polyPoints[index++] = float2(-0.5, -0.5);
-                    }
-                    // Slope solid top right.
-                    else if (abs(checkingTile.r - 4) < 0.001)
-                    {
-                        polyPoints[index++] = float2(-0.5, -0.5);
-                        polyPoints[index++] = float2(-1.5, -1.5);
-                        polyPoints[index++] = float2(-0.5, -1.5);
-                    }
-                    // Slope solid bottom right.
-                    else if (abs(checkingTile.r - 5) < 0.001)
-                    {
-                        polyPoints[index++] = float2(-1.5, -0.5);
-                        polyPoints[index++] = float2(-0.5, -1.5);
-                    }
-                    // Solid tile
-                    else
-                    {
-                        polyPoints[index++] = float2(-1.5, -0.5);
-                        polyPoints[index++] = float2(-1.5, -1.5);
-                        polyPoints[index++] = float2(-0.5, -1.5);
-                    }
+                    appendPoly(index, polyPoints, float2(-1.5, -0.5), float2(-0.5, -1.5));
                 }
                 else
                 {
                     polyPoints[index++] = float2(-0.5, -0.5);
                 }
-                checkingTile = getTile(cellCoord + float2(0,-1));
-                if (isTileValid(checkingTile, pathIndex))
+
+                // Top middle valid tiles are solid or slope bottom right and bottom left
+                float4 checkingTile = getTile(cellcoord + float2(-1.0, -1.0));
+                if (isTileValidPath(checkingTile, pathIndex))
                 {
-                    // Slope solid bottom left
-                    if (abs(checkingTile.r - 2) < 0.001)
-                    {
-                        polyPoints[index++] = float2(-0.5, -1.5);
-                        polyPoints[index++] = float2(0.5, -0.5);
-                    }
-                    // Slope solid top left. Unconnected, default case
-                    else if (abs(checkingTile.r - 3) < 0.001)
-                    {
-                        polyPoints[index++] = float2(-0.5, -0.5);
-                        polyPoints[index++] = float2(0.5, -0.5);
-                    }
-                    // Slope solid top right. Unconnected, default case
-                    else if (abs(checkingTile.r - 4) < 0.001)
-                    {
-                        polyPoints[index++] = float2(-0.5, -0.5);
-                        polyPoints[index++] = float2(0.5, -0.5);
-                    }
-                    // Slope solid bottom right.
-                    else if (abs(checkingTile.r - 5) < 0.001)
-                    {
-                        polyPoints[index++] = float2(-0.5, -0.5);
-                        polyPoints[index++] = float2(0.5, -1.5);
-                    }
-                    // Solid tile
-                    else
-                    {
-                        polyPoints[index++] = float2(-0.5, -1.5);
-                        polyPoints[index++] = float2(0.5, -1.5);
-                    }
+                    if (isTileValidType(checkingTile, 1))
+                        appendPoly(index, polyPoints, float2(-0.5, -1.5), float2(0.5, -1.5));
+                    else if (isTileValidType(checkingTile, 2))
+                        appendPoly(index, polyPoints, float2(-0.5, -1.5), float2(0.5, -0.5));
+                    else if (isTileValidType(checkingTile, 5))
+                        appendPoly(index, polyPoints, float2(-0.5, -0.5), float2(0.5, -1.5));
                 }
                 else
                 {
                     polyPoints[index++] = float2(-0.5, -0.5);
                     polyPoints[index++] = float2(0.5, -0.5);
                 }
+      
+
+                checkingTile = getTile(cellcoord + float2(1.0, -1.0));
+                if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 2)))
+                {
+                    appendPoly(index, polyPoints, float2(0.5, -1.5), float2(1.5, -0.5));
+                }
+                else
+                {
+                    polyPoints[index++] = float2(0.5, -0.5);
+                }
+
+                checkingTile = getTile(cellcoord + float2(1.0, 0.0));
+                if (isTileValidPath(checkingTile, pathIndex))
+                {
+                    if (isTileValidType(checkingTile, 1))
+                        appendPoly(index, polyPoints, float2(1.5, -0.5), float2(1.5, 0.5));
+                    else if (isTileValidType(checkingTile, 2))
+                        appendPoly(index, polyPoints, float2(0.5, -0.5), float2(1.5, 0.5));
+                    else if (isTileValidType(checkingTile, 3))
+                        appendPoly(index, polyPoints, float2(1.5, -0.5), float2(0.5, 0.5));
+                }
+                else
+                {
+                    polyPoints[index++] = float2(0.5, -0.5);
+                    polyPoints[index++] = float2(0.5, 0.5);
+                }
+
+                checkingTile = getTile(cellcoord + float2(1.0, 1.0));
+                if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 3)))
+                {
+                    appendPoly(index, polyPoints, float2(1.5, 0.5), float2(0.5, 1.5));
+                }
+                else
+                {
+                    polyPoints[index++] = float2(0.5, 0.5);
+                }
+
+                checkingTile = getTile(cellcoord + float2(0.0, 1.0));
+                if (isTileValidPath(checkingTile, pathIndex))
+                {
+                    if (isTileValidType(checkingTile, 1))
+                        appendPoly(index, polyPoints, float2(0.5, 1.5), float2(-0.5, 1.5));
+                    else if (isTileValidType(checkingTile, 3))
+                        appendPoly(index, polyPoints, float2(0.5, 0.5), float2(-0.5, 1.5));
+                    else if (isTileValidType(checkingTile, 4))
+                        appendPoly(index, polyPoints, float2(0.5, 1.5), float2(-0.5, 0.5));
+                }
+                else
+                {
+                    polyPoints[index++] = float2(0.5, 0.5);
+                    polyPoints[index++] = float2(-0.5, 0.5);
+                }
+
+                checkingTile = getTile(cellcoord + float2(-1.0, 1.0));
+                if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 4)))
+                {
+                    appendPoly(index, polyPoints, float2(-0.5, 1.5), float2(-1.5, 0.5));
+                }
+                else
+                {
+                    polyPoints[index++] = float2(-0.5, 0.5);
+                }
+
+                checkingTile = getTile(cellcoord + float2(1.0, 0.0));
+                if (isTileValidPath(checkingTile, pathIndex))
+                {
+                    if (isTileValidType(checkingTile, 1))
+                        appendPoly(index, polyPoints, float2(-1.5, 0.5), float2(-1.5, -0.5));
+                    else if (isTileValidType(checkingTile, 4))
+                        appendPoly(index, polyPoints, float2(-0.5, 0.5), float2(-1.5, -0.5));
+                    else if (isTileValidType(checkingTile, 5))
+                        appendPoly(index, polyPoints, float2(-1.5, 0.5), float2(-0.5, -0.5));
+                }
+                else
+                {
+                    polyPoints[index++] = float2(-0.5, 0.5);
+                    polyPoints[index++] = float2(-0.5, -0.5);
+                }
+
+                return polyPoints;
             }
 
             float sdAtUv(float2 uv)
@@ -229,17 +241,8 @@ Shader "BLB/TileOutliner"
 
                 float pathIndex = currentTile.g;
 
-                float distance = getSdTile(cellCoord, gridCellUv, pathIndex);
-                distance = min(distance, getNeighborSdTile(cellCoord, gridCellUv, pathIndex, float2(1,0)));
-                distance = min(distance, getNeighborSdTile(cellCoord, gridCellUv, pathIndex, float2(-1,0)));
-                distance = min(distance, getNeighborSdTile(cellCoord, gridCellUv, pathIndex, float2(0,1)));
-                distance = min(distance, getNeighborSdTile(cellCoord, gridCellUv, pathIndex, float2(0,-1)));
-                distance = min(distance, getCornerNeighborSdTile(cellCoord, gridCellUv, pathIndex, float2(1,1)));
-                distance = min(distance, getCornerNeighborSdTile(cellCoord, gridCellUv, pathIndex, float2(-1,1)));
-                distance = min(distance, getCornerNeighborSdTile(cellCoord, gridCellUv, pathIndex, float2(1,-1)));
-                distance = min(distance, getCornerNeighborSdTile(cellCoord, gridCellUv, pathIndex, float2(-1,-1)));
 
-                return distance;
+                return sdPolygon(getSdfPolygon(currentTile, cellCoord), gridCellUv);
             }
 
             fixed4 frag (v2f i) : SV_Target
