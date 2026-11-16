@@ -50,11 +50,23 @@ Shader "BLB/TileOutliner"
                 return o;
             }
 
-            // uv is the position of this pixel in uv space, wh is the width and height of the box
-            float sdBox(float2 uv, float2 wh)
+            float sdPolygon(float2 v[20], float2 p)
             {
-                float2 d = abs(uv)-wh;
-                return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
+                float d = dot(p - v[0], p - v[0]);
+                float s = 1.0;
+                
+                for (int i = 0, j = N - 1; i < N; j = i, i++)
+                {
+                    float2 e = v[j] - v[i];
+                    float2 w = p - v[i];
+                    float2 b = w - e * clamp(dot(w, e) / dot(e, e), 0.0, 1.0);
+                    d = min(d, dot(b, b));
+                    
+                    bool3 c = bool3(p.y >= v[i].y, p.y < v[j].y, e.x * w.y > e.y * w.x);
+                    if (all(c) || all(!c)) s *= -1.0;
+                }
+                
+                return s * sqrt(d);
             }
 
             float4 getTile(float2 cellcoord)
@@ -96,6 +108,101 @@ Shader "BLB/TileOutliner"
                     return getNeighborSdTile(cellcoord, uv, pathIndex, dir);
                 }
                 return MAX_DISTANCE;
+            }
+
+            bool isTileValid(float4 tile, float pathIndex)
+            {
+                return tile.r > 0.01 && abs(tile.g - pathIndex) < 0.001;
+            }
+
+            float2[20] getSdfPolygon(float4 currentTile, float2 cellcoord)
+            {
+                // Look at each 8 directional neighbor and create a polygon from them
+                // Start at top left and loop back
+                float pathIndex = currentTile.g;
+
+
+                float2[20] polyPoints;
+                float4 checkingTile = getTile(cellCoord + float2(-1,-1));
+                int index = 0
+                if (isTileValid(checkingTile, pathIndex))
+                {
+                    // Slope solid bottom left
+                    if (abs(checkingTile.r - 2) < 0.001)
+                    {
+                        polyPoints[index++] = float2(-1.5, -0.5);
+                        polyPoints[index++] = float2(-1.5, -1.5);
+                        polyPoints[index++] = float2(-0.5, -0.5);
+                    }
+                    // Slope solid top left. Ignore, not part of this shape
+                    else if (abs(checkingTile.r - 3) < 0.001)
+                    {
+                        polyPoints[index++] = float2(-0.5, -0.5);
+                    }
+                    // Slope solid top right.
+                    else if (abs(checkingTile.r - 4) < 0.001)
+                    {
+                        polyPoints[index++] = float2(-0.5, -0.5);
+                        polyPoints[index++] = float2(-1.5, -1.5);
+                        polyPoints[index++] = float2(-0.5, -1.5);
+                    }
+                    // Slope solid bottom right.
+                    else if (abs(checkingTile.r - 5) < 0.001)
+                    {
+                        polyPoints[index++] = float2(-1.5, -0.5);
+                        polyPoints[index++] = float2(-0.5, -1.5);
+                    }
+                    // Solid tile
+                    else
+                    {
+                        polyPoints[index++] = float2(-1.5, -0.5);
+                        polyPoints[index++] = float2(-1.5, -1.5);
+                        polyPoints[index++] = float2(-0.5, -1.5);
+                    }
+                }
+                else
+                {
+                    polyPoints[index++] = float2(-0.5, -0.5);
+                }
+                checkingTile = getTile(cellCoord + float2(0,-1));
+                if (isTileValid(checkingTile, pathIndex))
+                {
+                    // Slope solid bottom left
+                    if (abs(checkingTile.r - 2) < 0.001)
+                    {
+                        polyPoints[index++] = float2(-0.5, -1.5);
+                        polyPoints[index++] = float2(0.5, -0.5);
+                    }
+                    // Slope solid top left. Unconnected, default case
+                    else if (abs(checkingTile.r - 3) < 0.001)
+                    {
+                        polyPoints[index++] = float2(-0.5, -0.5);
+                        polyPoints[index++] = float2(0.5, -0.5);
+                    }
+                    // Slope solid top right. Unconnected, default case
+                    else if (abs(checkingTile.r - 4) < 0.001)
+                    {
+                        polyPoints[index++] = float2(-0.5, -0.5);
+                        polyPoints[index++] = float2(0.5, -0.5);
+                    }
+                    // Slope solid bottom right.
+                    else if (abs(checkingTile.r - 5) < 0.001)
+                    {
+                        polyPoints[index++] = float2(-0.5, -0.5);
+                        polyPoints[index++] = float2(0.5, -1.5);
+                    }
+                    // Solid tile
+                    else
+                    {
+                        polyPoints[index++] = float2(-0.5, -1.5);
+                        polyPoints[index++] = float2(0.5, -1.5);
+                    }
+                }
+                else
+                {
+                    polyPoints[index++] = float2(-0.5, -0.5);
+                    polyPoints[index++] = float2(0.5, -0.5);
+                }
             }
 
             float sdAtUv(float2 uv)
