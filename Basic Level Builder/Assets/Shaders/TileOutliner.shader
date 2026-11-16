@@ -35,6 +35,7 @@ Shader "BLB/TileOutliner"
             };
 
             static const float2 TILE_SIZE = float2(0.5, 0.5);
+            static const float MAX_DISTANCE = float(1e6);
 
             sampler2D _TileGridTex;
             float4 _TileGridTex_TexelSize;
@@ -56,19 +57,24 @@ Shader "BLB/TileOutliner"
                 return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
             }
 
-            float getSdTile(float2 cellcoord, float2 uv)
+            float4 getTile(float2 cellcoord)
             {
                 if (any(cellcoord < 0.0) || any(cellcoord >= _TileGridTex_TexelSize.zw)) {
-                    return float(1e6);
+                    return float4(0.0, 0.0, 0.0, 0.0);
                 }
 
                 float2 tileUv = (cellcoord + 0.5) * _TileGridTex_TexelSize.xy;
-                float tile = tex2D(_TileGridTex, tileUv).r;
-                // If we have a tile here
-                if (tile > 0.01) {
+                return tex2D(_TileGridTex, tileUv);
+            }
+
+            float getSdTile(float2 cellcoord, float2 uv, float pathIndex)
+            {
+                float4 tile = getTile(cellcoord);
+                // If we have a tile here and the path indexs match
+                if (tile.r > 0.01 && abs(tile.g - pathIndex) < 0.001) {
                     return sdBox(uv, TILE_SIZE);
                 }
-                return float(1e6);
+                return MAX_DISTANCE;
             }
 
             float sdAtUv(float2 uv)
@@ -87,11 +93,19 @@ Shader "BLB/TileOutliner"
                 // Get the position of this pixel in the cell since the sdfs are defined in the range [-0.5, 0.5] for each cell
                 float2 gridCellUv = gridPosition - cellCoord - 0.5;
 
-                float distance = getSdTile(cellCoord, gridCellUv);
-                distance = min(distance, getSdTile(cellCoord + float2(1,0), gridCellUv + float2(-1,0)));
-                distance = min(distance, getSdTile(cellCoord + float2(-1,0), gridCellUv + float2(1,0)));
-                distance = min(distance, getSdTile(cellCoord + float2(0,1), gridCellUv + float2(0,-1)));
-                distance = min(distance, getSdTile(cellCoord + float2(0,-1), gridCellUv + float2(0,1)));
+                float4 currentTile = getTile(cellCoord);
+
+                // If there is no tile here, return a large distance so we don't draw anything
+                if (currentTile.r <= 0.01)
+                    return MAX_DISTANCE;
+
+                float pathIndex = currentTile.g;
+
+                float distance = getSdTile(cellCoord, gridCellUv, pathIndex);
+                distance = min(distance, getSdTile(cellCoord + float2(1,0), gridCellUv + float2(-1,0), pathIndex));
+                distance = min(distance, getSdTile(cellCoord + float2(-1,0), gridCellUv + float2(1,0), pathIndex));
+                distance = min(distance, getSdTile(cellCoord + float2(0,1), gridCellUv + float2(0,-1), pathIndex));
+                distance = min(distance, getSdTile(cellCoord + float2(0,-1), gridCellUv + float2(0,1), pathIndex));
 
                 return distance;
             }

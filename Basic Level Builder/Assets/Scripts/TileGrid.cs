@@ -139,69 +139,76 @@ public class TileGrid : MonoBehaviour
     return m_Grid.ToDictionary(entry => entry.Key, entry => (Element)entry.Value.Clone());
   }
 
-  // Returns a texture map of all the solid tiles of each path in a different list index
-  // The texture map stores all the data in the red channel
+  // Returns one texture map of all solid tiles, with each path index stored in the green channel.
+  // The red channel stores the tile type.
   // Sloped tiles return 2-5 for their rotation
   // 0 for empty tile and 1 for solid tile
-  public List<Texture2D> GetSolidTileMap()
+  public Texture2D GetSolidTileMap()
   {
     return GetTileMap(
       tileType => tileType == TileType.SOLID || tileType == TileType.SLOPE || tileType == TileType.FALSE_SOLID,
       TileType.SLOPE);
   }
 
-  public List<Texture2D> GetBgTileMap()
+  public Texture2D GetBgTileMap()
   {
     return GetTileMap(
       tileType => tileType == TileType.BG || tileType == TileType.BG_SLOPE,
       TileType.BG_SLOPE);
   }
 
-  List<Texture2D> GetTileMap(Func<TileType, bool> isIncludedTileType, TileType slopeType)
+  Texture2D GetTileMap(Func<TileType, bool> isIncludedTileType, TileType slopeType)
   {
     var hasBounds = m_MinBounds.x <= m_MaxBounds.x && m_MinBounds.y <= m_MaxBounds.y;
     var minX = hasBounds ? (int)m_MinBounds.x : 0;
     var minY = hasBounds ? (int)m_MinBounds.y : 0;
     var textureMapWidth = hasBounds ? (int)(m_MaxBounds.x - m_MinBounds.x + 1) : 1;
     var textureMapHeight = hasBounds ? (int)(m_MaxBounds.y - m_MinBounds.y + 1) : 1;
-    var textureMaps = new List<Texture2D>();
+
+    var pixels = new Color[textureMapWidth * textureMapHeight];
     var paths = new List<List<Vector2Int>>();
     var pathComparer = ListValueComparer<Vector2Int>.Default;
+    var hasTiles = false;
 
     foreach (var entry in m_Grid)
     {
       var element = entry.Value;
       if (!isIncludedTileType(element.m_Type))
         continue;
+      hasTiles = true;
 
       // Check if the path already exists in the list of paths
-      // If it doesn't exist, add it to the list of paths and create a new texture map for it
-      // Null paths are treated as a unique path, so they will always be added to the list of paths
+      // If it doesn't exist, add it to the list of paths
+      // Paths are grouped by value, including null paths.
       var pathIndex = paths.FindIndex(path => pathComparer.Equals(path, element.m_Path));
       if (pathIndex < 0)
       {
         pathIndex = paths.Count;
         paths.Add(element.m_Path);
-        textureMaps.Add(CreateEmptyTileMap(textureMapWidth, textureMapHeight));
       }
 
-      var textureMapIndex = pathIndex;
       var value = element.m_Type == slopeType ? 2 + (int)element.m_Direction : 1;
       var x = element.m_GridIndex.x - minX;
       var y = element.m_GridIndex.y - minY;
-      textureMaps[textureMapIndex].SetPixel(x, y, new Color(value, 0, 0, 1));
+      pixels[y * textureMapWidth + x] = new Color(value, pathIndex, 0, 1);
     }
 
-    foreach (var textureMap in textureMaps)
-      textureMap.Apply();
+    if (!hasTiles)
+      return null;
 
-    return textureMaps;
+    var textureMap = CreateEmptyTileMap(textureMapWidth, textureMapHeight);
+    textureMap.SetPixelData(pixels, 0);
+    textureMap.Apply();
+    return textureMap;
   }
 
   static Texture2D CreateEmptyTileMap(int width, int height)
   {
-    var textureMap = new Texture2D(width, height);
-    textureMap.SetPixels32(new Color32[width * height], 0);
+    var textureMap = new Texture2D(width, height, TextureFormat.RGBAFloat, false)
+    {
+      filterMode = FilterMode.Point,
+      wrapMode = TextureWrapMode.Clamp,
+    };
     return textureMap;
   }
 

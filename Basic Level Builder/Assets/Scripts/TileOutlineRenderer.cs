@@ -67,6 +67,18 @@ public class TileOutlineRenderer : MonoBehaviour
     m_SpriteRenderers.Add(spriteRenderer);
     m_BaseSortingOrder = spriteRenderer.sortingOrder;
     AddMaterial(spriteRenderer);
+
+    var backgroundObject = new GameObject("Background Tile Map");
+    backgroundObject.transform.SetParent(transform, false);
+    var backgroundRenderer = backgroundObject.AddComponent<SpriteRenderer>();
+    backgroundRenderer.sprite = spriteRenderer.sprite;
+    backgroundRenderer.color = spriteRenderer.color;
+    backgroundRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+    backgroundRenderer.sortingOrder = m_BaseSortingOrder - 1;
+    backgroundRenderer.maskInteraction = spriteRenderer.maskInteraction;
+    m_SpriteRenderers.Add(backgroundRenderer);
+    AddMaterial(backgroundRenderer);
+
     m_Camera = m_EditModeCamera;
   }
 
@@ -105,9 +117,9 @@ public class TileOutlineRenderer : MonoBehaviour
 
   void OnTileGridChanged()
   {
-    var tileMapTextures = m_TileGrid.GetSolidTileMap();
-    //tileMapTextures.AddRange(m_TileGrid.GetBgTileMap());
-    EnsureSpriteRendererCount(tileMapTextures.Count);
+    var solidTileMap = m_TileGrid.GetSolidTileMap();
+    var bgTileMap = m_TileGrid.GetBgTileMap();
+    var tileMapTextures = new List<Texture2D> { solidTileMap, bgTileMap };
 
     var minBounds = m_TileGrid.m_MinBounds;
     var maxBounds = m_TileGrid.m_MaxBounds;
@@ -115,44 +127,21 @@ public class TileOutlineRenderer : MonoBehaviour
       ? new Vector4(minBounds.x, minBounds.y, 0, 0)
       : Vector4.zero;
 
-    for (var i = 0; i < tileMapTextures.Count; ++i)
+    for (var i = 0; i < m_SpriteRenderers.Count; ++i)
     {
       var renderer = m_SpriteRenderers[i];
-      renderer.enabled = true;
-      renderer.sortingOrder = m_BaseSortingOrder + i;
+      renderer.enabled = tileMapTextures[i] != null;
+      renderer.sortingOrder = i == 0 ? m_BaseSortingOrder : m_BaseSortingOrder - 1;
 
       var material = m_Materials[i];
       material.SetTexture(s_TileGridTextureId, tileMapTextures[i]);
       material.SetVector(s_TileGridStartPositionId, startPosition);
     }
 
-    for (var i = tileMapTextures.Count; i < m_SpriteRenderers.Count; ++i)
-      m_SpriteRenderers[i].enabled = false;
-
     foreach (var texture in m_TileMapTextures)
       Destroy(texture);
 
     m_TileMapTextures = tileMapTextures;
-  }
-
-  void EnsureSpriteRendererCount(int requiredCount)
-  {
-    while (m_SpriteRenderers.Count < requiredCount)
-    {
-      var spriteRenderer = m_SpriteRenderers[0];
-      var child = new GameObject($"Tile Map {m_SpriteRenderers.Count}");
-      child.transform.SetParent(transform, false);
-
-      var newSpriteRenderer = child.AddComponent<SpriteRenderer>();
-      newSpriteRenderer.sprite = spriteRenderer.sprite;
-      newSpriteRenderer.color = spriteRenderer.color;
-      newSpriteRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
-      newSpriteRenderer.sortingOrder = m_BaseSortingOrder + m_SpriteRenderers.Count;
-      newSpriteRenderer.maskInteraction = spriteRenderer.maskInteraction;
-
-      m_SpriteRenderers.Add(newSpriteRenderer);
-      AddMaterial(newSpriteRenderer);
-    }
   }
 
   void AddMaterial(SpriteRenderer spriteRenderer)
