@@ -431,6 +431,7 @@ public class TileGrid : MonoBehaviour
         // that bounds computation has already accounted for
       }
     }
+    GlobalData.DispatchTileGridChanged();
   }
 
 
@@ -446,7 +447,6 @@ public class TileGrid : MonoBehaviour
     }
 
     m_BatchedIndices = null;
-    GlobalData.DispatchTileGridChanged();
 
     // now, any modal dialogs that want to be spawned by the most
     // recently placed tile will be pushed onto a stack. as long as

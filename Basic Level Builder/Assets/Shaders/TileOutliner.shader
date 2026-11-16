@@ -90,139 +90,153 @@ Shader "BLB/TileOutliner"
                 return abs(tile.r - typeValue) < 0.001;
             }
 
-
             void appendPoly(inout int index, inout float2 polyPoints[POLYGON_MAX_POINTS], float2 a, float2 b)
             {
                 polyPoints[index++] = a;
                 polyPoints[index++] = b;
             }
 
+            void appendCorner(float2 cellcoord, float pathIndex, float2 direction,
+                inout float2 polyPoints[POLYGON_MAX_POINTS], inout int index)
+            {
+                float4 tile = getTile(cellcoord + direction);
+                float slopeType = direction.y < 0.0
+                    ? (direction.x < 0.0 ? 4.0 : 3.0)
+                    : (direction.x > 0.0 ? 2.0 : 5.0);
+
+                if (isTileValidPath(tile, pathIndex) &&
+                    (isTileValidType(tile, 1.0) || isTileValidType(tile, slopeType)))
+                {
+                    float2 xEdge = float2(direction.x * 1.5, direction.y * 0.5);
+                    float2 yEdge = float2(direction.x * 0.5, direction.y * 1.5);
+                    if (direction.x * direction.y > 0.0)
+                        appendPoly(index, polyPoints, xEdge, yEdge);
+                    else
+                        appendPoly(index, polyPoints, yEdge, xEdge);
+                }
+                else
+                {
+                    polyPoints[index++] = direction * 0.5;
+                }
+            }
+
+            float2 rotateEdgePoint(float2 edgePoint, float2 direction)
+            {
+                float2 tangent = float2(-direction.y, direction.x);
+                return tangent * edgePoint.x - direction * edgePoint.y;
+            }
+
+            void appendEdge(float2 cellcoord, float pathIndex, float2 direction,
+                inout float2 polyPoints[POLYGON_MAX_POINTS], inout int index)
+            {
+                float4 tile = getTile(cellcoord + direction);
+                float typeValue = tile.r;
+
+                // Map each edge's slope orientation to the bottom-edge orientation.
+                if (direction.x > 0.0)
+                {
+                    if (isTileValidType(tile, 2.0)) typeValue = 3.0;
+                    else if (isTileValidType(tile, 3.0)) typeValue = 4.0;
+                    else if (isTileValidType(tile, 4.0)) typeValue = 0.0;
+                }
+                else if (direction.y > 0.0)
+                {
+                    if (isTileValidType(tile, 5.0)) typeValue = 3.0;
+                    else if (isTileValidType(tile, 2.0)) typeValue = 4.0;
+                    else if (isTileValidType(tile, 3.0) || isTileValidType(tile, 4.0)) typeValue = 0.0;
+                }
+                else if (direction.x < 0.0)
+                {
+                    if (isTileValidType(tile, 4.0)) typeValue = 3.0;
+                    else if (isTileValidType(tile, 5.0)) typeValue = 4.0;
+                    else if (isTileValidType(tile, 3.0)) typeValue = 0.0;
+                }
+
+                float2 a = float2(-0.5, -0.5);
+                float2 b = float2(0.5, -0.5);
+                if (isTileValidPath(tile, pathIndex))
+                {
+                    if (isTileValidType(tile, 1.0))
+                    {
+                        a = float2(-0.5, -1.5);
+                        b = float2(0.5, -1.5);
+                    }
+                    else if (abs(typeValue - 3.0) < 0.001)
+                    {
+                        a = float2(-0.5, -1.5);
+                        b = float2(0.5, -0.5);
+                    }
+                    else if (abs(typeValue - 4.0) < 0.001)
+                    {
+                        a = float2(-0.5, -0.5);
+                        b = float2(0.5, -1.5);
+                    }
+                }
+
+                appendPoly(index, polyPoints,
+                    rotateEdgePoint(a, direction), rotateEdgePoint(b, direction));
+            }
+
+            void getSdfPolygonFromSlope(float4 currentTile, float2 cellcoord, inout float2 polyPoints[POLYGON_MAX_POINTS], inout int index)
+            {
+                const float pathIndex = currentTile.g;
+                index = 0;
+
+                if (isTileValidType(currentTile, 2.0))
+                {
+                    appendCorner(cellcoord, pathIndex, float2(-1.0, -1.0), polyPoints, index);
+                    appendEdge(cellcoord, pathIndex, float2(0.0, -1.0), polyPoints, index);
+                    appendPoly(index, polyPoints, float2(0.5, -0.5), float2(-0.5, 0.5));
+                    appendEdge(cellcoord, pathIndex, float2(-1.0, 0.0), polyPoints, index);
+                }
+                else if (isTileValidType(currentTile, 3.0))
+                {
+                    appendCorner(cellcoord, pathIndex, float2(-1.0, 1.0), polyPoints, index);
+                    appendEdge(cellcoord, pathIndex, float2(-1.0, 0.0), polyPoints, index);
+                    appendPoly(index, polyPoints, float2(-0.5, -0.5), float2(0.5, 0.5));
+                    appendEdge(cellcoord, pathIndex, float2(0.0, 1.0), polyPoints, index);
+                }
+                else if (isTileValidType(currentTile, 4.0))
+                {
+                    appendCorner(cellcoord, pathIndex, float2(1.0, 1.0), polyPoints, index);
+                    appendEdge(cellcoord, pathIndex, float2(0.0, 1.0), polyPoints, index);
+                    appendPoly(index, polyPoints, float2(-0.5, 0.5), float2(0.5, -0.5));
+                    appendEdge(cellcoord, pathIndex, float2(1.0, 0.0), polyPoints, index);
+                }
+                else if (isTileValidType(currentTile, 5.0))
+                {
+                    appendCorner(cellcoord, pathIndex, float2(1.0, -1.0), polyPoints, index);
+                    appendEdge(cellcoord, pathIndex, float2(1.0, 0.0), polyPoints, index);
+                    appendPoly(index, polyPoints, float2(0.5, 0.5), float2(-0.5, -0.5));
+                    appendEdge(cellcoord, pathIndex, float2(0.0, -1.0), polyPoints, index);
+                }
+            }
+
+            void getSdfPolygonFromSquare(float pathIndex, float2 cellcoord, inout float2 polyPoints[POLYGON_MAX_POINTS], inout int index)
+            {
+                index = 0;
+                appendCorner(cellcoord, pathIndex, float2(-1.0, -1.0), polyPoints, index);
+                appendEdge(cellcoord, pathIndex, float2(0.0, -1.0), polyPoints, index);
+                appendCorner(cellcoord, pathIndex, float2(1.0, -1.0), polyPoints, index);
+                appendEdge(cellcoord, pathIndex, float2(1.0, 0.0), polyPoints, index);
+                appendCorner(cellcoord, pathIndex, float2(1.0, 1.0), polyPoints, index);
+                appendEdge(cellcoord, pathIndex, float2(0.0, 1.0), polyPoints, index);
+                appendCorner(cellcoord, pathIndex, float2(-1.0, 1.0), polyPoints, index);
+                appendEdge(cellcoord, pathIndex, float2(-1.0, 0.0), polyPoints, index);
+            }
+
             void getSdfPolygon(float4 currentTile, float2 cellcoord, out float2 polyPoints[POLYGON_MAX_POINTS], out int index)
             {
-                // Look at each 8 directional neighbor and create a polygon from them.
-                // Start at the top-left corner and loop clockwise back to the origin.
                 const float pathIndex = currentTile.g;
                 index = 0;
                 for (int i = 0; i < POLYGON_MAX_POINTS; i++)
                     polyPoints[i] = float2(0.0, 0.0);
 
-                float4 checkingTile;
-
-                // Bottom left corner valid tiles
-                checkingTile = getTile(cellcoord + float2(-1.0, -1.0));
-                if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 4)))
-                {
-                    appendPoly(index, polyPoints, float2(-1.5, -0.5), float2(-0.5, -1.5));
-                }
+                // If solid tile
+                if (abs(currentTile.r - 1.0) < 0.001)
+                    getSdfPolygonFromSquare(pathIndex, cellcoord, polyPoints, index);
                 else
-                {
-                    polyPoints[index++] = float2(-0.5, -0.5);
-                }
-
-                // Bottom middle valid tiles
-                checkingTile = getTile(cellcoord + float2(0.0, -1.0));
-                if (isTileValidPath(checkingTile, pathIndex))
-                {
-                    if (isTileValidType(checkingTile, 1))
-                        appendPoly(index, polyPoints, float2(-0.5, -1.5), float2(0.5, -1.5));
-                    else if (isTileValidType(checkingTile, 3))
-                        appendPoly(index, polyPoints, float2(-0.5, -1.5), float2(0.5, -0.5));
-                    else if (isTileValidType(checkingTile, 4))
-                        appendPoly(index, polyPoints, float2(-0.5, -0.5), float2(0.5, -1.5));
-                    else
-                        appendPoly(index, polyPoints, float2(-0.5, -0.5), float2(0.5, -0.5));
-                }
-                else
-                {
-                    polyPoints[index++] = float2(-0.5, -0.5);
-                    polyPoints[index++] = float2(0.5, -0.5);
-                }
-      
-                // Bottom Right
-                checkingTile = getTile(cellcoord + float2(1.0, -1.0));
-                if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 3)))
-                {
-                    appendPoly(index, polyPoints, float2(0.5, -1.5), float2(1.5, -0.5));
-                }
-                else
-                {
-                    polyPoints[index++] = float2(0.5, -0.5);
-                }
-
-                checkingTile = getTile(cellcoord + float2(1.0, 0.0));
-                if (isTileValidPath(checkingTile, pathIndex))
-                {
-                    if (isTileValidType(checkingTile, 1))
-                        appendPoly(index, polyPoints, float2(1.5, -0.5), float2(1.5, 0.5));
-                    else if (isTileValidType(checkingTile, 3))
-                        appendPoly(index, polyPoints, float2(0.5, -0.5), float2(1.5, 0.5));
-                    else if (isTileValidType(checkingTile, 2))
-                        appendPoly(index, polyPoints, float2(1.5, -0.5), float2(0.5, 0.5));
-                    else
-                        appendPoly(index, polyPoints, float2(0.5, -0.5), float2(0.5, 0.5));
-                }
-                else
-                {
-                    polyPoints[index++] = float2(0.5, -0.5);
-                    polyPoints[index++] = float2(0.5, 0.5);
-                }
-
-                checkingTile = getTile(cellcoord + float2(1.0, 1.0));
-                if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 2)))
-                {
-                    appendPoly(index, polyPoints, float2(1.5, 0.5), float2(0.5, 1.5));
-                }
-                else
-                {
-                    polyPoints[index++] = float2(0.5, 0.5);
-                }
-
-                checkingTile = getTile(cellcoord + float2(0.0, 1.0));
-                if (isTileValidPath(checkingTile, pathIndex))
-                {
-                    if (isTileValidType(checkingTile, 1))
-                        appendPoly(index, polyPoints, float2(0.5, 1.5), float2(-0.5, 1.5));
-                    else if (isTileValidType(checkingTile, 2))
-                        appendPoly(index, polyPoints, float2(0.5, 0.5), float2(-0.5, 1.5));
-                    else if (isTileValidType(checkingTile, 5))
-                        appendPoly(index, polyPoints, float2(0.5, 1.5), float2(-0.5, 0.5));
-                    else
-                        appendPoly(index, polyPoints, float2(0.5, 0.5), float2(-0.5, 0.5));
-                }
-                else
-                {
-                    polyPoints[index++] = float2(0.5, 0.5);
-                    polyPoints[index++] = float2(-0.5, 0.5);
-                }
-
-                checkingTile = getTile(cellcoord + float2(-1.0, 1.0));
-                if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 5)))
-                {
-                    appendPoly(index, polyPoints, float2(-0.5, 1.5), float2(-1.5, 0.5));
-                }
-                else
-                {
-                    polyPoints[index++] = float2(-0.5, 0.5);
-                }
-
-                checkingTile = getTile(cellcoord + float2(-1.0, 0.0));
-                if (isTileValidPath(checkingTile, pathIndex))
-                {
-                    if (isTileValidType(checkingTile, 1))
-                        appendPoly(index, polyPoints, float2(-1.5, 0.5), float2(-1.5, -0.5));
-                    else if (isTileValidType(checkingTile, 5))
-                        appendPoly(index, polyPoints, float2(-0.5, 0.5), float2(-1.5, -0.5));
-                    else if (isTileValidType(checkingTile, 4))
-                        appendPoly(index, polyPoints, float2(-1.5, 0.5), float2(-0.5, -0.5));
-                    else
-                        appendPoly(index, polyPoints, float2(-0.5, 0.5), float2(-0.5, -0.5));
-                }
-                else
-                {
-                    polyPoints[index++] = float2(-0.5, 0.5);
-                    polyPoints[index++] = float2(-0.5, -0.5);
-                }
-
+                    getSdfPolygonFromSlope(currentTile, cellcoord, polyPoints, index);
             }
 
             float sdAtUv(float2 uv)
@@ -237,16 +251,16 @@ Shader "BLB/TileOutliner"
                 // Convert the uv to be scaled by the tile size and ofset by the _TileGridStartPosition and world position
                 float2 gridPosition = worldPosition - _TileGridStartPosition;
                 // Testing: sample the distance relative to tile (0, 0) for every fragment.
-                float2 cellCoord = float2(1.0, 1.0);
-                //float2 cellCoord = floor(gridPosition);
+                //float2 cellCoord = float2(1.0, 1.0);
+                float2 cellCoord = floor(gridPosition);
                 // Get the position of this pixel in the cell since the sdfs are defined in the range [-0.5, 0.5] for each cell
                 float2 gridCellUv = gridPosition - cellCoord - 0.5;
 
                 float4 currentTile = getTile(cellCoord);
 
                 // If there is no tile here, return a large distance so we don't draw anything
-                // if (currentTile.r <= 0.01)
-                //    return MAX_DISTANCE;
+                if (currentTile.r <= 0.01)
+                   return MAX_DISTANCE;
 
                 float2 polyPoints[POLYGON_MAX_POINTS];
                 int pointCount;
@@ -257,19 +271,20 @@ Shader "BLB/TileOutliner"
             fixed4 frag (v2f i) : SV_Target
             {
                 float d = sdAtUv(i.uv);
-                // // alpha cut all the positive values outside of the shape but gradient blend 0.01 units outside of the shape till the proper edge
-                // float alpha = smoothstep(-0.01, 0.00, -d);
-                // // Cut out the inside of the shape to only get a 0.05 pixel thickness inside
-                // alpha = min(alpha, smoothstep(-0.11, -0.1, d));
-                // return fixed4(float3(1.0,1.0,1.0), alpha);
+                // alpha cut all the positive values outside of the shape but gradient blend 0.01 units outside of the shape till the proper edge
+                float alpha = smoothstep(-0.01, 0.00, -d);
+                // Cut out the inside of the shape to only get a 0.05 pixel thickness inside
+                alpha = min(alpha, smoothstep(-0.11, -0.06, d));
+                float value = smoothstep(-0.01, 0.05, -d) + 0.7;
+                return fixed4(float3(value,value,value), alpha);
 
 
 
-                float3 col = (d>0.0) ? float3(0.9,0.6,0.3) : float3(0.65,0.85,1.0);
-	            col *= 1.0 - exp2(-20.0*abs(d));
-	            col *= 0.8 + 0.2*cos(120.0*abs(d));
-	            col = lerp(col, float3(1.0,1.0,1.0), 1.0-smoothstep(0.0,0.01,abs(d)));
-                return fixed4(col, 1.0);
+                // float3 col = (d>0.0) ? float3(0.9,0.6,0.3) : float3(0.65,0.85,1.0);
+	            // col *= 1.0 - exp2(-20.0*abs(d));
+	            // col *= 0.8 + 0.2*cos(120.0*abs(d));
+	            // col = lerp(col, float3(1.0,1.0,1.0), 1.0-smoothstep(0.0,0.01,abs(d)));
+                // return fixed4(col, 1.0);
             }
             ENDCG
         }
