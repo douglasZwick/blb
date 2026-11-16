@@ -2,6 +2,8 @@ Shader "BLB/TileOutliner"
 {
     Properties
     {
+        _TileGridTex("Tile Grid", 2D) = "black" {}
+        _TileGridStartPosition("Tile Grid Start Position", Vector) = (0, 0, 0, 0)
     }
     SubShader
     {
@@ -32,11 +34,11 @@ Shader "BLB/TileOutliner"
                 float4 vertex : SV_POSITION;
             };
 
-            static const float2 TILE_SIZE = float2(1.01, 1.01);
+            static const float2 TILE_SIZE = float2(0.5, 0.5);
 
             sampler2D _TileGridTex;
             float4 _TileGridTex_TexelSize;
-            // The world position of the top left pixel of the tile grid
+            // The world position of the tile grid's origin cell
             float2 _TileGridStartPosition;
 
             v2f vert (appdata v)
@@ -57,7 +59,7 @@ Shader "BLB/TileOutliner"
             float getSdTile(float2 cellcoord, float2 uv)
             {
                 if (any(cellcoord < 0.0) || any(cellcoord >= _TileGridTex_TexelSize.zw)) {
-                    return 0.0;
+                    return float(1e6);
                 }
 
                 float2 tileUv = (cellcoord + 0.5) * _TileGridTex_TexelSize.xy;
@@ -66,7 +68,7 @@ Shader "BLB/TileOutliner"
                 if (tile > 0.01) {
                     return sdBox(uv, TILE_SIZE);
                 }
-                return 0.0;
+                return float(1e6);
             }
 
             float sdAtUv(float2 uv)
@@ -86,10 +88,10 @@ Shader "BLB/TileOutliner"
                 float2 gridCellUv = gridPosition - cellCoord - 0.5;
 
                 float distance = getSdTile(cellCoord, gridCellUv);
-                distance = min(distance, getSdTile(cellCoord + float2(1,0), gridCellUv + float2(1,0)));
-                distance = min(distance, getSdTile(cellCoord + float2(-1,0), gridCellUv + float2(-1,0)));
-                distance = min(distance, getSdTile(cellCoord + float2(0,1), gridCellUv + float2(0,1)));
-                distance = min(distance, getSdTile(cellCoord + float2(0,-1), gridCellUv + float2(0,-1)));
+                distance = min(distance, getSdTile(cellCoord + float2(1,0), gridCellUv + float2(-1,0)));
+                distance = min(distance, getSdTile(cellCoord + float2(-1,0), gridCellUv + float2(1,0)));
+                distance = min(distance, getSdTile(cellCoord + float2(0,1), gridCellUv + float2(0,-1)));
+                distance = min(distance, getSdTile(cellCoord + float2(0,-1), gridCellUv + float2(0,1)));
 
                 return distance;
             }
@@ -101,6 +103,8 @@ Shader "BLB/TileOutliner"
 	            col *= 1.0 - exp2(-20.0*abs(d));
 	            col *= 0.8 + 0.2*cos(120.0*abs(d));
 	            col = lerp(col, float3(1.0,1.0,1.0), 1.0-smoothstep(0.0,0.01,abs(d)));
+                // Keep empty cells transparent so path textures can layer.
+                //float alpha = smoothstep(0.0, 0.5, abs(d));
                 return fixed4(col, 1.0);
             }
             ENDCG

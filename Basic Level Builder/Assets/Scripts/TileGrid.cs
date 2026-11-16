@@ -159,9 +159,12 @@ public class TileGrid : MonoBehaviour
 
   List<Texture2D> GetTileMap(Func<TileType, bool> isIncludedTileType, TileType slopeType)
   {
-    var textureMapWidth = (int)(m_MaxBounds.x - m_MinBounds.x + 1);
-    var textureMapHeight = (int)(m_MaxBounds.y - m_MinBounds.y + 1);
-    var textureMaps = new List<Texture2D> { CreateEmptyTileMap(textureMapWidth, textureMapHeight) };
+    var hasBounds = m_MinBounds.x <= m_MaxBounds.x && m_MinBounds.y <= m_MaxBounds.y;
+    var minX = hasBounds ? (int)m_MinBounds.x : 0;
+    var minY = hasBounds ? (int)m_MinBounds.y : 0;
+    var textureMapWidth = hasBounds ? (int)(m_MaxBounds.x - m_MinBounds.x + 1) : 1;
+    var textureMapHeight = hasBounds ? (int)(m_MaxBounds.y - m_MinBounds.y + 1) : 1;
+    var textureMaps = new List<Texture2D>();
     var paths = new List<List<Vector2Int>>();
     var pathComparer = ListValueComparer<Vector2Int>.Default;
 
@@ -173,6 +176,7 @@ public class TileGrid : MonoBehaviour
 
       // Check if the path already exists in the list of paths
       // If it doesn't exist, add it to the list of paths and create a new texture map for it
+      // Null paths are treated as a unique path, so they will always be added to the list of paths
       var pathIndex = paths.FindIndex(path => pathComparer.Equals(path, element.m_Path));
       if (pathIndex < 0)
       {
@@ -181,9 +185,11 @@ public class TileGrid : MonoBehaviour
         textureMaps.Add(CreateEmptyTileMap(textureMapWidth, textureMapHeight));
       }
 
-      var textureMapIndex = pathIndex + 1;
+      var textureMapIndex = pathIndex;
       var value = element.m_Type == slopeType ? 2 + (int)element.m_Direction : 1;
-      textureMaps[textureMapIndex].SetPixel(element.m_GridIndex.x, element.m_GridIndex.y, new Color(value, 0, 0, 1));
+      var x = element.m_GridIndex.x - minX;
+      var y = element.m_GridIndex.y - minY;
+      textureMaps[textureMapIndex].SetPixel(x, y, new Color(value, 0, 0, 1));
     }
 
     foreach (var textureMap in textureMaps)
@@ -433,6 +439,7 @@ public class TileGrid : MonoBehaviour
     }
 
     m_BatchedIndices = null;
+    GlobalData.DispatchTileGridChanged();
 
     // now, any modal dialogs that want to be spawned by the most
     // recently placed tile will be pushed onto a stack. as long as
