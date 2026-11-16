@@ -103,11 +103,14 @@ Shader "BLB/TileOutliner"
                 // Start at the top-left corner and loop clockwise back to the origin.
                 const float pathIndex = currentTile.g;
                 index = 0;
+                for (int i = 0; i < POLYGON_MAX_POINTS; i++)
+                    polyPoints[i] = float2(0.0, 0.0);
+
                 float4 checkingTile;
 
-                // Top left corner valid tiles are solid or slope bottom right
+                // Bottom left corner valid tiles
                 checkingTile = getTile(cellcoord + float2(-1.0, -1.0));
-                if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 5)))
+                if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 4)))
                 {
                     appendPoly(index, polyPoints, float2(-1.5, -0.5), float2(-0.5, -1.5));
                 }
@@ -116,16 +119,18 @@ Shader "BLB/TileOutliner"
                     polyPoints[index++] = float2(-0.5, -0.5);
                 }
 
-                // Top middle valid tiles are solid or slope bottom right and bottom left
+                // Bottom middle valid tiles
                 checkingTile = getTile(cellcoord + float2(0.0, -1.0));
                 if (isTileValidPath(checkingTile, pathIndex))
                 {
                     if (isTileValidType(checkingTile, 1))
                         appendPoly(index, polyPoints, float2(-0.5, -1.5), float2(0.5, -1.5));
-                    else if (isTileValidType(checkingTile, 2))
+                    else if (isTileValidType(checkingTile, 3))
                         appendPoly(index, polyPoints, float2(-0.5, -1.5), float2(0.5, -0.5));
-                    else if (isTileValidType(checkingTile, 5))
+                    else if (isTileValidType(checkingTile, 4))
                         appendPoly(index, polyPoints, float2(-0.5, -0.5), float2(0.5, -1.5));
+                    else
+                        appendPoly(index, polyPoints, float2(-0.5, -0.5), float2(0.5, -0.5));
                 }
                 else
                 {
@@ -133,9 +138,9 @@ Shader "BLB/TileOutliner"
                     polyPoints[index++] = float2(0.5, -0.5);
                 }
       
-
+                // Bottom Right
                 checkingTile = getTile(cellcoord + float2(1.0, -1.0));
-                if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 2)))
+                if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 3)))
                 {
                     appendPoly(index, polyPoints, float2(0.5, -1.5), float2(1.5, -0.5));
                 }
@@ -149,10 +154,12 @@ Shader "BLB/TileOutliner"
                 {
                     if (isTileValidType(checkingTile, 1))
                         appendPoly(index, polyPoints, float2(1.5, -0.5), float2(1.5, 0.5));
-                    else if (isTileValidType(checkingTile, 2))
-                        appendPoly(index, polyPoints, float2(0.5, -0.5), float2(1.5, 0.5));
                     else if (isTileValidType(checkingTile, 3))
+                        appendPoly(index, polyPoints, float2(0.5, -0.5), float2(1.5, 0.5));
+                    else if (isTileValidType(checkingTile, 2))
                         appendPoly(index, polyPoints, float2(1.5, -0.5), float2(0.5, 0.5));
+                    else
+                        appendPoly(index, polyPoints, float2(0.5, -0.5), float2(0.5, 0.5));
                 }
                 else
                 {
@@ -161,7 +168,7 @@ Shader "BLB/TileOutliner"
                 }
 
                 checkingTile = getTile(cellcoord + float2(1.0, 1.0));
-                if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 3)))
+                if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 2)))
                 {
                     appendPoly(index, polyPoints, float2(1.5, 0.5), float2(0.5, 1.5));
                 }
@@ -175,10 +182,12 @@ Shader "BLB/TileOutliner"
                 {
                     if (isTileValidType(checkingTile, 1))
                         appendPoly(index, polyPoints, float2(0.5, 1.5), float2(-0.5, 1.5));
-                    else if (isTileValidType(checkingTile, 3))
+                    else if (isTileValidType(checkingTile, 2))
                         appendPoly(index, polyPoints, float2(0.5, 0.5), float2(-0.5, 1.5));
-                    else if (isTileValidType(checkingTile, 4))
+                    else if (isTileValidType(checkingTile, 5))
                         appendPoly(index, polyPoints, float2(0.5, 1.5), float2(-0.5, 0.5));
+                    else
+                        appendPoly(index, polyPoints, float2(0.5, 0.5), float2(-0.5, 0.5));
                 }
                 else
                 {
@@ -187,7 +196,7 @@ Shader "BLB/TileOutliner"
                 }
 
                 checkingTile = getTile(cellcoord + float2(-1.0, 1.0));
-                if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 4)))
+                if (isTileValidPath(checkingTile, pathIndex) && (isTileValidType(checkingTile, 1) || isTileValidType(checkingTile, 5)))
                 {
                     appendPoly(index, polyPoints, float2(-0.5, 1.5), float2(-1.5, 0.5));
                 }
@@ -201,10 +210,12 @@ Shader "BLB/TileOutliner"
                 {
                     if (isTileValidType(checkingTile, 1))
                         appendPoly(index, polyPoints, float2(-1.5, 0.5), float2(-1.5, -0.5));
-                    else if (isTileValidType(checkingTile, 4))
-                        appendPoly(index, polyPoints, float2(-0.5, 0.5), float2(-1.5, -0.5));
                     else if (isTileValidType(checkingTile, 5))
+                        appendPoly(index, polyPoints, float2(-0.5, 0.5), float2(-1.5, -0.5));
+                    else if (isTileValidType(checkingTile, 4))
                         appendPoly(index, polyPoints, float2(-1.5, 0.5), float2(-0.5, -0.5));
+                    else
+                        appendPoly(index, polyPoints, float2(-0.5, 0.5), float2(-0.5, -0.5));
                 }
                 else
                 {
@@ -225,16 +236,17 @@ Shader "BLB/TileOutliner"
                 (uv - 0.5) * (cameraWorldSize * 2) + 0.5;
                 // Convert the uv to be scaled by the tile size and ofset by the _TileGridStartPosition and world position
                 float2 gridPosition = worldPosition - _TileGridStartPosition;
-                // Get the cell position our world position then check it and the neighbor cells
-                float2 cellCoord = floor(gridPosition);
+                // Testing: sample the distance relative to tile (0, 0) for every fragment.
+                float2 cellCoord = float2(1.0, 1.0);
+                //float2 cellCoord = floor(gridPosition);
                 // Get the position of this pixel in the cell since the sdfs are defined in the range [-0.5, 0.5] for each cell
                 float2 gridCellUv = gridPosition - cellCoord - 0.5;
 
                 float4 currentTile = getTile(cellCoord);
 
                 // If there is no tile here, return a large distance so we don't draw anything
-                if (currentTile.r <= 0.01)
-                    return MAX_DISTANCE;
+                // if (currentTile.r <= 0.01)
+                //    return MAX_DISTANCE;
 
                 float2 polyPoints[POLYGON_MAX_POINTS];
                 int pointCount;
@@ -245,11 +257,19 @@ Shader "BLB/TileOutliner"
             fixed4 frag (v2f i) : SV_Target
             {
                 float d = sdAtUv(i.uv);
-                // alpha cut all the positive values outside of the shape but gradient blend 0.01 units outside of the shape till the proper edge
-                float alpha = smoothstep(-0.01, 0.00, -d);
-                // Cut out the inside of the shape to only get a 0.05 pixel thickness inside
-                alpha = min(alpha, smoothstep(-0.11, -0.1, d));
-                return fixed4(float3(1.0,1.0,1.0), alpha);
+                // // alpha cut all the positive values outside of the shape but gradient blend 0.01 units outside of the shape till the proper edge
+                // float alpha = smoothstep(-0.01, 0.00, -d);
+                // // Cut out the inside of the shape to only get a 0.05 pixel thickness inside
+                // alpha = min(alpha, smoothstep(-0.11, -0.1, d));
+                // return fixed4(float3(1.0,1.0,1.0), alpha);
+
+
+
+                float3 col = (d>0.0) ? float3(0.9,0.6,0.3) : float3(0.65,0.85,1.0);
+	            col *= 1.0 - exp2(-20.0*abs(d));
+	            col *= 0.8 + 0.2*cos(120.0*abs(d));
+	            col = lerp(col, float3(1.0,1.0,1.0), 1.0-smoothstep(0.0,0.01,abs(d)));
+                return fixed4(col, 1.0);
             }
             ENDCG
         }
