@@ -141,8 +141,8 @@ Shader "BLB/TileOutliner"
                 // alpha cut all the positive values outside of the shape but gradient blend 0.01 units outside of the shape till the proper edge
                 float alpha = smoothstep(-0.01, 0.00, -d);
                 // Cut out the inside of the shape to only get a 0.05 pixel thickness inside
-                alpha = min(alpha, smoothstep(-0.06, 0.05, d));
-                return fixed4(float3(0.6,0.6,0.6), alpha);
+                alpha = min(alpha, smoothstep(-0.11, -0.1, d));
+                return fixed4(float3(1.0,1.0,1.0), alpha);
             }
             ENDCG
         }
