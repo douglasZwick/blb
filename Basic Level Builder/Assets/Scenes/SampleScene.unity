@@ -23364,23 +23364,23 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1335229421}
-  - {fileID: 1039304561}
   - {fileID: 267319745}
+  - {fileID: 752470541}
+  - {fileID: 1039304561}
   - {fileID: 1261008450}
+  - {fileID: 1183389125}
+  - {fileID: 2025204840}
+  - {fileID: 121617528}
+  - {fileID: 887415597}
   - {fileID: 677530819}
   - {fileID: 1465359432}
   - {fileID: 1336583589}
   - {fileID: 595378194}
   - {fileID: 1280159689}
-  - {fileID: 342872245}
+  - {fileID: 473976747}
   - {fileID: 1922234821}
   - {fileID: 1496645992}
-  - {fileID: 473976747}
-  - {fileID: 887415597}
-  - {fileID: 1183389125}
-  - {fileID: 121617528}
-  - {fileID: 2025204840}
-  - {fileID: 752470541}
+  - {fileID: 342872245}
   m_Father: {fileID: 2084976339}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -37701,6 +37701,7 @@ MonoBehaviour:
   m_PlayModeCamera: {fileID: 1647835276}
   m_TileGrid: {fileID: 2031376952}
   m_TileOutlinerShader: {fileID: 4800000, guid: 0ed0b509e864c62e78fb6b50cbbc319e, type: 3}
+  m_BaseSortingOrder: 0
 --- !u!1 &1992142805
 GameObject:
   m_ObjectHideFlags: 0
