@@ -462,6 +462,8 @@ public class ListValueComparer<T> : IEqualityComparer<List<T>>
   public bool Equals(List<T> x, List<T> y)
   {
     if (ReferenceEquals(x, y)) return true;
+    if (x is null && y is not null && y.Count == 0) return true;
+    if (y is null && x is not null && x.Count == 0) return true;
     if (x is null || y is null || x.Count != y.Count) return false;
 
     var comparer = EqualityComparer<T>.Default;
