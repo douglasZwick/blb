@@ -25,7 +25,7 @@ public class TileOutlineRenderer : MonoBehaviour
   List<Texture2D> m_TileMapTextures = new();
 
   Camera m_Camera;
-  int m_BaseSortingOrder;
+  [SerializeField] int m_BaseSortingOrder;
 
   void Awake()
   {
@@ -65,7 +65,6 @@ public class TileOutlineRenderer : MonoBehaviour
     }
 
     m_SpriteRenderers.Add(spriteRenderer);
-    m_BaseSortingOrder = spriteRenderer.sortingOrder;
     AddMaterial(spriteRenderer);
 
     var backgroundObject = new GameObject("Background Tile Map");
@@ -74,7 +73,7 @@ public class TileOutlineRenderer : MonoBehaviour
     backgroundRenderer.sprite = spriteRenderer.sprite;
     backgroundRenderer.color = spriteRenderer.color;
     backgroundRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
-    backgroundRenderer.sortingOrder = m_BaseSortingOrder - 1;
+    backgroundRenderer.sortingOrder = m_BaseSortingOrder;
     backgroundRenderer.maskInteraction = spriteRenderer.maskInteraction;
     m_SpriteRenderers.Add(backgroundRenderer);
     AddMaterial(backgroundRenderer);
