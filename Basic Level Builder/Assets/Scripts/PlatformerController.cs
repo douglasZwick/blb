@@ -58,7 +58,6 @@ public class PlatformerController : MonoBehaviour
     HandleFacing();
 
     m_Mover.Move(m_InputAxis);
-    print($"Input Axis: {m_InputAxis}, Facing Direction: {m_FacingDirection}");
   }
 
 
