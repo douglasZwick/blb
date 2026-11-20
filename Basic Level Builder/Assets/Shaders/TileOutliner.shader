@@ -2,12 +2,16 @@ Shader "BLB/TileOutliner"
 {
     Properties
     {
+        [PerRendererData] _MainTex("Sprite Texture", 2D) = "white" {}
+        [PerRendererData] _AlphaTex("External Alpha", 2D) = "white" {}
+        _Color("Tint", Color) = (1, 1, 1, 1)
         _TileGridTex("Tile Grid", 2D) = "black" {}
         _TileGridStartPosition("Tile Grid Start Position", Vector) = (0, 0, 0, 0)
+        [PerRendererData] _TileWorldPositionOffset("Tile World Position Offset", Vector) = (0, 0, 0, 0)
     }
     SubShader
     {
-        Tags { "Queue" = "Transparent" "RenderType" = "Transparent" "RenderPipeline" = "UniversalPipeline" }
+        Tags { "Queue" = "Transparent" "RenderType" = "Transparent" "RenderPipeline" = "UniversalPipeline" "CanUseSpriteAtlas" = "True" }
 
         Cull Off
         ZWrite Off
@@ -19,6 +23,7 @@ Shader "BLB/TileOutliner"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile _ ETC1_EXTERNAL_ALPHA
 
             #include "UnityCG.cginc"
 
@@ -30,28 +35,35 @@ Shader "BLB/TileOutliner"
             {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
+                fixed4 color : COLOR;
             };
 
             struct v2f
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
+                float2 worldPosition : TEXCOORD1;
+                fixed4 color : COLOR;
             };
 
-            static const float2 TILE_SIZE = float2(0.5, 0.5);
             static const float MAX_DISTANCE = float(1e6);
             static const float BG_OUTLINE_ALPHA_CAP = 0.1;
             static const float SOLID_OUTLINE_ALPHA_CAP = 1.0;
+            sampler2D _MainTex;
+            sampler2D _AlphaTex;
+            fixed4 _Color;
             sampler2D _TileGridTex;
             float4 _TileGridTex_TexelSize;
-            // The world position of the tile grid's origin cell
             float2 _TileGridStartPosition;
+            float2 _TileWorldPositionOffset;
 
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
+                o.worldPosition = mul(unity_ObjectToWorld, v.vertex).xy + _TileWorldPositionOffset;
+                o.color = v.color;
                 return o;
             }
 
@@ -249,19 +261,9 @@ Shader "BLB/TileOutliner"
                     getSdfPolygonFromSlope(currentTile, cellcoord, polyPoints, index);
             }
 
-            float sdAtUv(float2 uv, out float outlineAlpha)
+            float sdAtWorldPosition(float2 worldPosition, out float outlineAlpha)
             {
-                // Convert UV to coords on grid
-
-                // unity_OrthoParams.xy is the camera's visible world width and height.
-                float2 cameraWorldSize = unity_OrthoParams.xy;
-                // Map this fragment's UV to a world position centered on the camera.
-                float2 worldPosition = _WorldSpaceCameraPos.xy +
-                (uv - 0.5) * (cameraWorldSize * 2) + 0.5;
-                // Convert the uv to be scaled by the tile size and ofset by the _TileGridStartPosition and world position
-                float2 gridPosition = worldPosition - _TileGridStartPosition;
-                // Testing: sample the distance relative to tile (0, 0) for every fragment.
-                //float2 cellCoord = float2(1.0, 1.0);
+                float2 gridPosition = worldPosition + 0.5 - _TileGridStartPosition;
                 float2 cellCoord = floor(gridPosition);
                 // Get the position of this pixel in the cell since the sdfs are defined in the range [-0.5, 0.5] for each cell
                 float2 gridCellUv = gridPosition - cellCoord - 0.5;
@@ -270,7 +272,10 @@ Shader "BLB/TileOutliner"
                 
                 // If there is no tile here, return a large distance so we don't draw anything
                 if (currentTile.r <= 0.01)
+                {
+                    outlineAlpha = 0.0;
                     return MAX_DISTANCE;
+                }
                 
                 // Get the alpha for the outline from the tile type. 1 = bg 0 = solid
                 outlineAlpha = lerp(SOLID_OUTLINE_ALPHA_CAP, BG_OUTLINE_ALPHA_CAP, currentTile.b);
@@ -281,16 +286,30 @@ Shader "BLB/TileOutliner"
                 return sdPolygon(polyPoints, gridCellUv, pointCount);
             }
 
+            fixed4 sampleSprite(float2 uv)
+            {
+                fixed4 sprite = tex2D(_MainTex, uv);
+                #if ETC1_EXTERNAL_ALPHA
+                sprite.a = tex2D(_AlphaTex, uv).r;
+                #endif
+                return sprite;
+            }
+
             fixed4 frag (v2f i) : SV_Target
             {
                 float outlineAlpha = 1;
-                float d = sdAtUv(i.uv, outlineAlpha);
+                float d = sdAtWorldPosition(i.worldPosition, outlineAlpha);
                 // alpha cut all the positive values outside of the shape but gradient blend 0.01 units outside of the shape till the proper edge
                 float alpha = smoothstep(-0.01, 0.00, -d);
                 // Cut out the inside of the shape to only get a 0.05 pixel thickness inside
                 alpha = min(alpha, smoothstep(-0.11, -0.06, d));
                 float value = smoothstep(-0.01, 0.05, -d) + 0.7;
-                return fixed4(value, value, value, min(alpha, outlineAlpha));
+                fixed4 outline = fixed4(value, value, value, min(alpha, outlineAlpha));
+                fixed4 sprite = sampleSprite(i.uv) * i.color * _Color;
+                fixed4 result;
+                result.a = outline.a + sprite.a * (1.0 - outline.a);
+                result.rgb = (outline.rgb * outline.a + sprite.rgb * sprite.a * (1.0 - outline.a)) / max(result.a, 1e-5);
+                return result;
 
                 // float3 col = (d>0.0) ? float3(0.9,0.6,0.3) : float3(0.65,0.85,1.0);
 	            // col *= 1.0 - exp2(-20.0*abs(d));

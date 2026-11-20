@@ -75,6 +75,11 @@ public class TileGrid : MonoBehaviour
     return m_Grid.ContainsKey(index);
   }
 
+  public IEnumerable<Element> GetElements()
+  {
+    return m_Grid.Values;
+  }
+
 
   void RecomputeBoundsGivenNewIndex(Vector2Int index)
   {
