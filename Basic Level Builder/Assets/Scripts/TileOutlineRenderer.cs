@@ -24,6 +24,7 @@ public class TileOutlineRenderer : MonoBehaviour
   readonly Dictionary<SpriteRenderer, MaterialPropertyBlock> m_OriginalPropertyBlocks = new();
   readonly Dictionary<SpriteRenderer, Vector2> m_GridPositions = new();
   MaterialPropertyBlock m_PropertyBlock;
+  bool m_IsTileGridDirty = false;
 
   void Awake()
   {
@@ -80,6 +81,12 @@ public class TileOutlineRenderer : MonoBehaviour
 
   void LateUpdate()
   {
+    if (m_IsTileGridDirty)
+    {
+      ComputeTileMapTexture();
+      m_IsTileGridDirty = false;
+    }
+    
     foreach (var entry in m_GridPositions)
     {
       var spriteRenderer = entry.Key;
@@ -96,7 +103,7 @@ public class TileOutlineRenderer : MonoBehaviour
     }
   }
 
-  void OnTileGridChanged()
+  void ComputeTileMapTexture()
   {
     Destroy(m_TileMapTexture);
     m_TileMapTexture = m_TileGrid.GetTileMap();
@@ -149,6 +156,11 @@ public class TileOutlineRenderer : MonoBehaviour
       m_OriginalPropertyBlocks.Remove(renderer);
       m_GridPositions.Remove(renderer);
     }
+  }
+
+  void OnTileGridChanged()
+  {
+    m_IsTileGridDirty = true;
   }
 
   static bool IsOutlinableTile(TileType tileType)
