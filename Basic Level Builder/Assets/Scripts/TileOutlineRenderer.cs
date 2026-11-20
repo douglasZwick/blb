@@ -5,7 +5,6 @@ Last Updated:   11/15/2026
 Copyright 2018-2026, DigiPen Institute of Technology
 ***************************************************/
 
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
@@ -20,9 +19,9 @@ public class TileOutlineRenderer : MonoBehaviour
   [SerializeField] TileGrid m_TileGrid;
   [SerializeField] Shader m_TileOutlinerShader;
 
-  readonly List<SpriteRenderer> m_SpriteRenderers = new();
-  readonly List<Material> m_Materials = new();
-  List<Texture2D> m_TileMapTextures = new();
+  SpriteRenderer m_SpriteRenderer;
+  Material m_Material;
+  Texture2D m_TileMapTexture;
 
   Camera m_Camera;
   [SerializeField] int m_BaseSortingOrder;
@@ -56,30 +55,16 @@ public class TileOutlineRenderer : MonoBehaviour
       return;
     }
 
-    var spriteRenderer = GetComponent<SpriteRenderer>();
-    if (spriteRenderer.sprite == null)
+    m_SpriteRenderer = GetComponent<SpriteRenderer>();
+    if (m_SpriteRenderer.sprite == null)
     {
       Debug.LogError("TileOutlineRenderer requires a SpriteRenderer with a sprite assigned.", this);
       enabled = false;
       return;
     }
 
-    m_SpriteRenderers.Add(spriteRenderer);
-    AddMaterial(spriteRenderer);
-
-    var backgroundObject = new GameObject("Background Tile Map");
-    backgroundObject.transform.SetParent(transform, false);
-    var backgroundRenderer = backgroundObject.AddComponent<SpriteRenderer>();
-    backgroundRenderer.sprite = spriteRenderer.sprite;
-    backgroundRenderer.color = spriteRenderer.color;
-    backgroundRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
-    backgroundRenderer.sortingOrder = m_BaseSortingOrder;
-    backgroundRenderer.maskInteraction = spriteRenderer.maskInteraction;
-    m_SpriteRenderers.Add(backgroundRenderer);
-    AddMaterial(backgroundRenderer);
-
-    m_Materials[0].SetFloat("_OutlineAlphaCap", 1.0f);
-    m_Materials[1].SetFloat("_OutlineAlphaCap", 0.1f);
+    m_Material = new Material(m_TileOutlinerShader);
+    m_SpriteRenderer.sharedMaterial = m_Material;
 
     m_Camera = m_EditModeCamera;
   }
@@ -99,11 +84,8 @@ public class TileOutlineRenderer : MonoBehaviour
 
   void OnDestroy()
   {
-    foreach (var texture in m_TileMapTextures)
-      Destroy(texture);
-
-    foreach (var material in m_Materials)
-      Destroy(material);
+    Destroy(m_TileMapTexture);
+    Destroy(m_Material);
   }
 
   void LateUpdate()
@@ -119,9 +101,8 @@ public class TileOutlineRenderer : MonoBehaviour
 
   void OnTileGridChanged()
   {
-    var solidTileMap = m_TileGrid.GetSolidTileMap();
-    var bgTileMap = m_TileGrid.GetBgTileMap();
-    var tileMapTextures = new List<Texture2D> { solidTileMap, bgTileMap };
+    Destroy(m_TileMapTexture);
+    m_TileMapTexture = m_TileGrid.GetTileMap();
 
     var minBounds = m_TileGrid.m_MinBounds;
     var maxBounds = m_TileGrid.m_MaxBounds;
@@ -129,28 +110,12 @@ public class TileOutlineRenderer : MonoBehaviour
       ? new Vector4(minBounds.x, minBounds.y, 0, 0)
       : Vector4.zero;
 
-    for (var i = 0; i < m_SpriteRenderers.Count; ++i)
-    {
-      var renderer = m_SpriteRenderers[i];
-      renderer.enabled = tileMapTextures[i] != null;
-      renderer.sortingOrder = i == 0 ? m_BaseSortingOrder : m_BaseSortingOrder - 1;
 
-      var material = m_Materials[i];
-      material.SetTexture(s_TileGridTextureId, tileMapTextures[i]);
-      material.SetVector(s_TileGridStartPositionId, startPosition);
-    }
+    m_SpriteRenderer.enabled = m_TileMapTexture != null;
 
-    foreach (var texture in m_TileMapTextures)
-      Destroy(texture);
-
-    m_TileMapTextures = tileMapTextures;
-  }
-
-  void AddMaterial(SpriteRenderer spriteRenderer)
-  {
-    var material = new Material(m_TileOutlinerShader);
-    spriteRenderer.sharedMaterial = material;
-    m_Materials.Add(material);
+    var material = m_Material;
+    material.SetTexture(s_TileGridTextureId, m_TileMapTexture);
+    material.SetVector(s_TileGridStartPositionId, startPosition);
   }
 
   void OnPlayModeToggled(bool isPlayMode)

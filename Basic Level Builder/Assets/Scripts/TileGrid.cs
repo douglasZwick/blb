@@ -139,26 +139,17 @@ public class TileGrid : MonoBehaviour
     return m_Grid.ToDictionary(entry => entry.Key, entry => (Element)entry.Value.Clone());
   }
 
-  // Returns one texture map of all solid tiles, with each path index stored in the green channel.
+  // Returns one texture map of all solid and bg tiles
   // The red channel stores the tile type.
   // Sloped tiles return 2-5 for their rotation
   // 0 for empty tile and 1 for solid tile
-  public Texture2D GetSolidTileMap()
+  // Green channel stores the path index
+  // Blue channel stores 0 if Solid and 1 is BG
+  public Texture2D GetTileMap()
   {
-    return GetTileMap(
-      tileType => tileType == TileType.SOLID || tileType == TileType.SLOPE || tileType == TileType.FALSE_SOLID,
-      TileType.SLOPE);
-  }
+    bool isIncludedTileTypeBG(TileType tileType) => tileType == TileType.BG || tileType == TileType.BG_SLOPE;
+    bool isIncludedTileTypeSolid(TileType tileType) => tileType == TileType.SOLID || tileType == TileType.SLOPE || tileType == TileType.FALSE_SOLID;
 
-  public Texture2D GetBgTileMap()
-  {
-    return GetTileMap(
-      tileType => tileType == TileType.BG || tileType == TileType.BG_SLOPE,
-      TileType.BG_SLOPE);
-  }
-
-  Texture2D GetTileMap(Func<TileType, bool> isIncludedTileType, TileType slopeType)
-  {
     var hasBounds = m_MinBounds.x <= m_MaxBounds.x && m_MinBounds.y <= m_MaxBounds.y;
     var minX = hasBounds ? (int)m_MinBounds.x : 0;
     var minY = hasBounds ? (int)m_MinBounds.y : 0;
@@ -173,7 +164,8 @@ public class TileGrid : MonoBehaviour
     foreach (var entry in m_Grid)
     {
       var element = entry.Value;
-      if (!isIncludedTileType(element.m_Type))
+      var isBgTile = isIncludedTileTypeBG(element.m_Type);
+      if (!isBgTile && !isIncludedTileTypeSolid(element.m_Type))
         continue;
       hasTiles = true;
 
@@ -187,10 +179,10 @@ public class TileGrid : MonoBehaviour
         paths.Add(element.m_Path);
       }
 
-      var value = element.m_Type == slopeType ? 2 + (int)element.m_Direction : 1;
+      var value = (element.m_Type == TileType.BG_SLOPE || element.m_Type == TileType.SLOPE) ? 2 + (int)element.m_Direction : 1;
       var x = element.m_GridIndex.x - minX;
       var y = element.m_GridIndex.y - minY;
-      pixels[y * textureMapWidth + x] = new Color(value, pathIndex, 0, 1);
+      pixels[y * textureMapWidth + x] = new Color(value, pathIndex, Convert.ToInt32(isBgTile), 1);
     }
 
     if (!hasTiles)

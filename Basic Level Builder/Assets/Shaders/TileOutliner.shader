@@ -23,6 +23,8 @@ Shader "BLB/TileOutliner"
             #include "UnityCG.cginc"
 
             #define POLYGON_MAX_POINTS 16
+            #define FLOAT_EQ(a, b) (abs((a) - (b)) < 1e-5)
+            #define FLOAT_EQ_STEP(a, b) (1.0 - step(1e-5, abs((a) - (b))))
 
             struct appdata
             {
@@ -38,11 +40,12 @@ Shader "BLB/TileOutliner"
 
             static const float2 TILE_SIZE = float2(0.5, 0.5);
             static const float MAX_DISTANCE = float(1e6);
+            static const float BG_OUTLINE_ALPHA_CAP = 0.1;
+            static const float SOLID_OUTLINE_ALPHA_CAP = 1.0;
             sampler2D _TileGridTex;
             float4 _TileGridTex_TexelSize;
             // The world position of the tile grid's origin cell
             float2 _TileGridStartPosition;
-            float _OutlineAlphaCap;
 
             v2f vert (appdata v)
             {
@@ -81,14 +84,20 @@ Shader "BLB/TileOutliner"
                 return tex2D(_TileGridTex, tileUv);
             }
 
+            // If tile is solid/slope/falseSolid. Ie not a bg tile
+            bool isTileSolid(float2 cellcoord)
+            {
+                return getTile(cellcoord).b < 0.001;
+            }
+
             bool isTileValidPath(float4 tile, float pathIndex)
             {
-                return abs(tile.g - pathIndex) < 0.001;
+                return FLOAT_EQ(tile.g, pathIndex);
             }
 
             bool isTileValidType(float4 tile, float typeValue)
             {
-                return abs(tile.r - typeValue) < 0.001;
+                return FLOAT_EQ(tile.r, typeValue);
             }
 
             void appendPoly(inout int index, inout float2 polyPoints[POLYGON_MAX_POINTS], float2 a, float2 b)
@@ -162,12 +171,12 @@ Shader "BLB/TileOutliner"
                         a = float2(-0.5, -1.5);
                         b = float2(0.5, -1.5);
                     }
-                    else if (abs(typeValue - 3.0) < 0.001)
+                    else if (FLOAT_EQ(typeValue, 3.0))
                     {
                         a = float2(-0.5, -1.5);
                         b = float2(0.5, -0.5);
                     }
-                    else if (abs(typeValue - 4.0) < 0.001)
+                    else if (FLOAT_EQ(typeValue, 4.0))
                     {
                         a = float2(-0.5, -0.5);
                         b = float2(0.5, -1.5);
@@ -234,13 +243,13 @@ Shader "BLB/TileOutliner"
                     polyPoints[i] = float2(0.0, 0.0);
 
                 // If solid tile
-                if (abs(currentTile.r - 1.0) < 0.001)
+                if (FLOAT_EQ(currentTile.r, 1.0))
                     getSdfPolygonFromSquare(pathIndex, cellcoord, polyPoints, index);
                 else
                     getSdfPolygonFromSlope(currentTile, cellcoord, polyPoints, index);
             }
 
-            float sdAtUv(float2 uv)
+            float sdAtUv(float2 uv, out float outlineAlpha)
             {
                 // Convert UV to coords on grid
 
@@ -258,11 +267,14 @@ Shader "BLB/TileOutliner"
                 float2 gridCellUv = gridPosition - cellCoord - 0.5;
 
                 float4 currentTile = getTile(cellCoord);
-
+                
                 // If there is no tile here, return a large distance so we don't draw anything
                 if (currentTile.r <= 0.01)
-                   return MAX_DISTANCE;
-
+                    return MAX_DISTANCE;
+                
+                // Get the alpha for the outline from the tile type. 1 = bg 0 = solid
+                outlineAlpha = lerp(SOLID_OUTLINE_ALPHA_CAP, BG_OUTLINE_ALPHA_CAP, currentTile.b);
+                
                 float2 polyPoints[POLYGON_MAX_POINTS];
                 int pointCount;
                 getSdfPolygon(currentTile, cellCoord, polyPoints, pointCount);
@@ -271,15 +283,14 @@ Shader "BLB/TileOutliner"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float d = sdAtUv(i.uv);
+                float outlineAlpha = 1;
+                float d = sdAtUv(i.uv, outlineAlpha);
                 // alpha cut all the positive values outside of the shape but gradient blend 0.01 units outside of the shape till the proper edge
                 float alpha = smoothstep(-0.01, 0.00, -d);
                 // Cut out the inside of the shape to only get a 0.05 pixel thickness inside
                 alpha = min(alpha, smoothstep(-0.11, -0.06, d));
                 float value = smoothstep(-0.01, 0.05, -d) + 0.7;
-                return fixed4(value, value, value, min(alpha, _OutlineAlphaCap));
-
-
+                return fixed4(value, value, value, min(alpha, outlineAlpha));
 
                 // float3 col = (d>0.0) ? float3(0.9,0.6,0.3) : float3(0.65,0.85,1.0);
 	            // col *= 1.0 - exp2(-20.0*abs(d));
